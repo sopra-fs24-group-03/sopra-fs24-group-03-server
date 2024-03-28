@@ -40,7 +40,7 @@ More Information about [Gradle Wrapper](https://docs.gradle.org/current/userguid
 
 ### Run
 
-```bash
+```bashT
 ./gradlew bootRun
 ```
 
