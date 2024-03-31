@@ -10,26 +10,31 @@ public class LobbyGetDTO {
     public Long getId() {
         return id;
     }
-    private User lobbyLeader;
-    private Set<User> lobbyusers = new HashSet<>();
+
+    private String lobbyLeaderUsername;
+
+    private Set<String> lobbyUsernames = new HashSet<>();
 
     public void setId(Long id) {
         this.id = id;
     }
 
-    public Set<User> getLobbyusers() {
-        return lobbyusers;
+
+
+
+    public Set<String> getLobbyUsernames() {
+        return lobbyUsernames;
     }
 
-    public void setLobbyusers(Set<User> lobbyusers) {
-        this.lobbyusers = lobbyusers;
+    public void setLobbyUsernames(Set<String> lobbyUsernames) {
+        this.lobbyUsernames = lobbyUsernames;
     }
 
-    public User getLobbyLeader() {
-        return lobbyLeader;
+    public String getLobbyLeaderUsername() {
+        return lobbyLeaderUsername;
     }
 
-    public void setLobbyLeader(User lobbyLeader) {
-        this.lobbyLeader = lobbyLeader;
+    public void setLobbyLeaderUsername(String lobbyLeaderUsername) {
+        this.lobbyLeaderUsername = lobbyLeaderUsername;
     }
 }

@@ -34,4 +34,19 @@ public class LobbyController {
         Lobby lobby = lobbyService.getLobbyById(id, token);
         return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
     }
+    @PutMapping("/lobby/{id}")
+    @ResponseStatus(HttpStatus.OK )
+    @ResponseBody
+    public LobbyGetDTO joinLobbyById(@PathVariable long id, @RequestHeader String token){
+        Lobby lobby = lobbyService.joinLobbyById( id, token);
+        return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
+
+    }
+    @DeleteMapping("/lobby/{id}")
+    @ResponseStatus(HttpStatus.ACCEPTED )
+    @ResponseBody
+    public void removeUserFromLobbyById(@PathVariable long id, @RequestHeader String token){
+        lobbyService.removeUserFromLobbyById(id, token);
+
+    }
 }

@@ -6,6 +6,9 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.*;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * DTOMapper
  * This class is responsible for generating classes that will automatically
@@ -46,7 +49,15 @@ public interface DTOMapper {
   @Mapping(source = "id", target = "id")
   LobbyPostDTO convertEntityToLobbyPostDTO(Lobby lobby);
   @Mapping(source = "id", target = "id")
-  @Mapping(source = "lobbyusers", target = "lobbyusers")
-  @Mapping(source = "lobbyLeader", target = "lobbyLeader")
+  @Mapping(source = "lobbyusers", target = "lobbyUsernames")
+  @Mapping(source = "lobbyLeader.username", target = "lobbyLeaderUsername")
   LobbyGetDTO convertEntityToLobbyGetDTO(Lobby lobby);
+  default Set<String> mapUsersToUsernames(Set<User> users) {
+      Set<String> usernames = new HashSet<>();
+      for (User user : users) {
+          usernames.add(user.getUsername());
+      }
+      return usernames;
+  }
+
 }

@@ -14,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Set;
+
 
 @Service
 @Transactional
@@ -34,21 +36,82 @@ public class LobbyService {
         userService.authenticateUser(token);
         User creatorUser = userRepository.findByToken(token);
 
-        Lobby newLobby =  new Lobby();
-        creatorUser.setLobby(newLobby);
-        newLobby.setLobbyLeader(creatorUser);
+        // Check if the user is not already in a lobby
+        if (creatorUser.getLobby() == null) {
+            Lobby newLobby = new Lobby();
+            creatorUser.setLobby(newLobby);
+            newLobby.setLobbyLeader(creatorUser);
 
-        newLobby =  lobbyRepository.save(newLobby);
-        lobbyRepository.flush();
-        log.debug("Created Information for User: {}", newLobby);
-        return newLobby;
+            newLobby = lobbyRepository.save(newLobby);
+            lobbyRepository.flush();
+            log.debug("Created Information for User: {}", newLobby);
+            return newLobby;
+        }
+        else {
+            // Throw an exception if the user is already in a lobby
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already in a lobby!");
+        }
     }
     public Lobby getLobbyById(long id, String token){
         userService.authenticateUser(token);
+        User user = userRepository.findByToken(token);
         Lobby lobby = lobbyRepository.findById(id);
+
         if (lobby != null){
-            return lobby;
+            if (user.getLobby() != null && user.getLobby().getId() == id) {
+                // Return the lobby if the user is associated with it
+                return lobby;
+            } else {
+                // Throw an exception if the user is not associated with the lobby
+                throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Only users that are in the specified lobby can access its information!");
+            }
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown Lobby!");
+    }
+
+    public Lobby joinLobbyById(long id, String token){
+        userService.authenticateUser(token);
+        User user = userRepository.findByToken(token);
+        Lobby lobby = lobbyRepository.findById(id);
+        if (lobby != null){
+            if (user.getLobby() == null) {
+                user.setLobby(lobby);
+                return lobby;
+            }
+            else {
+                // Throw an exception if the user is already in a lobby
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already in a lobby!");
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown Lobby!");
+    }
+    public void removeUserFromLobbyById(long id, String token){
+        userService.authenticateUser(token);
+        User user = userRepository.findByToken(token);
+        Lobby lobby = lobbyRepository.findById(id);
+
+        if (lobby != null){
+            user.setLobby(null);
+            // Check if the lobby has no users left
+            if (lobby.getLobbyusers().size() == 1) {
+                // Delete the lobby from the database
+                lobbyRepository.delete(lobby);
+                lobbyRepository.flush();
+                return;
+            }
+            // Check if the user leaving is the lobby leader
+            if (lobby.getLobbyLeader().getId().equals(user.getId())) {
+                // Assign lobby leader role to another user in the lobby
+                Set<User> lobbyUsers = lobby.getLobbyusers();
+
+                // Select the first user from the lobby users set as the new lobby leader
+                User newLeader = lobbyUsers.iterator().next();
+                lobby.setLobbyLeader(newLeader);
+
+            }
+            return;
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown Lobby!");
+
     }
 }
