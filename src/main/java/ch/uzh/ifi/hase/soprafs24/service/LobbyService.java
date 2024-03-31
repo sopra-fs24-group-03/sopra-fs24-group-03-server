@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs24.service;
 
 import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
 
+import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.LobbyRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import org.slf4j.Logger;
@@ -31,8 +32,12 @@ public class LobbyService {
 
     public Lobby createLobby(String token) {
         userService.authenticateUser(token);
+        User creatorUser = userRepository.findByToken(token);
 
         Lobby newLobby =  new Lobby();
+        creatorUser.setLobby(newLobby);
+        newLobby.setLobbyLeader(creatorUser);
+
         newLobby =  lobbyRepository.save(newLobby);
         lobbyRepository.flush();
         log.debug("Created Information for User: {}", newLobby);
@@ -44,6 +49,6 @@ public class LobbyService {
         if (lobby != null){
             return lobby;
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown User!");
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown Lobby!");
     }
 }

@@ -21,9 +21,14 @@ public class User implements Serializable {
 
   private static final long serialVersionUID = 1L;
 
+
   @Id
   @GeneratedValue
   private Long id;
+
+  @ManyToOne
+  @JoinColumn(name="lobby_id", referencedColumnName = "id")
+  private Lobby lobby;
 
   @Column(nullable = false, unique = true)
   private String username;
@@ -83,4 +88,7 @@ public class User implements Serializable {
   public void setMoney(int money) {
       this.money = money;
   }
+
+  public Lobby getLobby() {return lobby;}
+  public void setLobby(Lobby lobby) {this.lobby = lobby;}
 }
