@@ -31,7 +31,7 @@ public class User implements Serializable {
   @Column(nullable = false)
   private String password;
 
-  @Column(nullable = false, unique = true)
+  @Column(nullable = false)
   private int money = 2000;
 
   @Column(nullable = false, unique = true)
