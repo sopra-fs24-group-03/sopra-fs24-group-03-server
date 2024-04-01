@@ -51,6 +51,9 @@ public class Lobby implements Serializable {
     public void addUserToLobby(User user) {
         lobbyusers.add(user);
     }
+    public void removeUserFromLobby(User user) {
+        lobbyusers.remove(user);
+    }
     public User getLobbyLeader() {
         return lobbyLeader;
     }

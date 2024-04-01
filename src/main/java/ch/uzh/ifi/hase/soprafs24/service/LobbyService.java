@@ -41,6 +41,7 @@ public class LobbyService {
             Lobby newLobby = new Lobby();
             creatorUser.setLobby(newLobby);
             newLobby.setLobbyLeader(creatorUser);
+            newLobby.addUserToLobby(creatorUser);
 
             newLobby = lobbyRepository.save(newLobby);
             lobbyRepository.flush();
@@ -77,6 +78,11 @@ public class LobbyService {
             if (user.getLobby() == null) {
                 if (lobby.getLobbyusers().size() <= 8 ) {
                     user.setLobby(lobby);
+
+                    lobby.addUserToLobby(user);
+                    lobbyRepository.save(lobby);
+
+
                     return lobby;
                 }
                 else {// Throw an exception if the lobby is full
@@ -99,6 +105,7 @@ public class LobbyService {
             if (user.getLobby() != null && user.getLobby().getId().equals(lobby.getId())) {
                 // Remove the user from the lobby
                 user.setLobby(null);
+                lobby.removeUserFromLobby(user);
 
                 // Check if the lobby has no users left
                 if (lobby.getLobbyusers().size() == 1) {
