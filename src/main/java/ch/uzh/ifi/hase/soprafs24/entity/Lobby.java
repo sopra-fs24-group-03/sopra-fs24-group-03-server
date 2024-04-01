@@ -27,7 +27,7 @@ public class Lobby implements Serializable {
     @OneToMany(mappedBy = "lobby")
     private Set<User> lobbyusers = new HashSet<>();
 
-    @JsonIgnore //stop recrusion
+    @JsonIgnore //stop recursion
     @OneToOne
     @JoinColumn(name = "lobbyLeader_id")
     private User lobbyLeader;

@@ -42,7 +42,6 @@ public class LobbyService {
             creatorUser.setLobby(newLobby);
             newLobby.setLobbyLeader(creatorUser);
             newLobby.addUserToLobby(creatorUser);
-
             newLobby = lobbyRepository.save(newLobby);
             lobbyRepository.flush();
             log.debug("Created Information for User: {}", newLobby);
@@ -74,13 +73,14 @@ public class LobbyService {
         userService.authenticateUser(token);
         User user = userRepository.findByToken(token);
         Lobby lobby = lobbyRepository.findById(id);
+
         if (lobby != null){
             if (user.getLobby() == null) {
-                if (lobby.getLobbyusers().size() <= 8 ) {
+                if (lobby.getLobbyusers().size() < 8 ) {
                     user.setLobby(lobby);
 
                     lobby.addUserToLobby(user);
-                    lobbyRepository.save(lobby);
+
 
 
                     return lobby;
@@ -95,38 +95,33 @@ public class LobbyService {
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown Lobby!");
     }
-    public void removeUserFromLobbyById(long id, String token){
+    public void removeUserFromLobbyById(String token){
         userService.authenticateUser(token);
         User user = userRepository.findByToken(token);
-        Lobby lobby = lobbyRepository.findById(id);
+        Lobby lobby = user.getLobby();
 
         if (lobby != null){
-            // Check if the user is in the lobby
-            if (user.getLobby() != null && user.getLobby().getId().equals(lobby.getId())) {
-                // Remove the user from the lobby
-                user.setLobby(null);
-                lobby.removeUserFromLobby(user);
+            // Remove the user from the lobby
+            user.setLobby(null);
+            lobby.removeUserFromLobby(user);
 
-                // Check if the lobby has no users left
-                if (lobby.getLobbyusers().size() == 1) {
-                    // Delete the lobby from the database
-                    lobbyRepository.delete(lobby);
-                    lobbyRepository.flush();
-                    return;
-                }
-
-                // Check if the user leaving is the lobby leader
-                if (lobby.getLobbyLeader().getId().equals(user.getId())) {
-                    // Assign lobby leader role to another user in the lobby
-                    Set<User> lobbyUsers = lobby.getLobbyusers();
-                    User newLeader = lobbyUsers.iterator().next();
-                    lobby.setLobbyLeader(newLeader);
-                }
+            // Check if the lobby has no users left
+            if (lobby.getLobbyusers().isEmpty()) {
+                // Delete the lobby from the database
+                lobbyRepository.delete(lobby);
+                lobbyRepository.flush();
                 return;
-            } else {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User is not in this lobby!");
             }
+
+            // Check if the user leaving is the lobby leader
+            if (lobby.getLobbyLeader().getId().equals(user.getId())) {
+                // Assign lobby leader role to another user in the lobby
+                Set<User> lobbyUsers = lobby.getLobbyusers();
+                User newLeader = lobbyUsers.iterator().next();
+                lobby.setLobbyLeader(newLeader);
+            }
+            return;
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown Lobby!");
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not in a Lobby!");
     }
 }

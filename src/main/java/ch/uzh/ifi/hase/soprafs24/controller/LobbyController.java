@@ -3,7 +3,7 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 
 import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
 
-import ch.uzh.ifi.hase.soprafs24.rest.dto.*;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO.LobbyGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.LobbyService;
 
@@ -22,9 +22,9 @@ public class LobbyController {
     @PostMapping("/lobby")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public LobbyPostDTO createLobby(@RequestHeader String token) {
+    public LobbyGetDTO createLobby(@RequestHeader String token) {
         Lobby newLobby =lobbyService.createLobby(token);
-        return DTOMapper.INSTANCE.convertEntityToLobbyPostDTO(newLobby);
+        return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(newLobby);
 
     }
     @GetMapping("/lobby/{id}")
@@ -34,7 +34,7 @@ public class LobbyController {
         Lobby lobby = lobbyService.getLobbyById(id, token);
         return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
     }
-    //TODO somehow does NOT return updated lobby list (even though lobby is getting updated)
+
     @PutMapping("/lobby/{id}")
     @ResponseStatus(HttpStatus.OK )
     @ResponseBody
@@ -43,11 +43,12 @@ public class LobbyController {
         return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
 
     }
-    @DeleteMapping("/lobby/{id}")
+
+    @DeleteMapping("/lobby")
     @ResponseStatus(HttpStatus.ACCEPTED )
     @ResponseBody
-    public void removeUserFromLobbyById(@PathVariable long id, @RequestHeader String token){
-        lobbyService.removeUserFromLobbyById(id, token);
+    public void removeUserFromLobbyById(@RequestHeader String token){
+        lobbyService.removeUserFromLobbyById(token);
 
     }
 }

@@ -1,6 +1,6 @@
-package ch.uzh.ifi.hase.soprafs24.rest.dto;
+package ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO;
 
-import ch.uzh.ifi.hase.soprafs24.entity.User;
+
 
 import java.util.HashSet;
 import java.util.Set;

@@ -2,7 +2,12 @@ package ch.uzh.ifi.hase.soprafs24.rest.mapper;
 
 import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.*;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO.LobbyGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO.LobbyGetDTOComplete;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPostDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPostResponseDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPutDTO;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -47,7 +52,10 @@ public interface DTOMapper {
 
 
   @Mapping(source = "id", target = "id")
-  LobbyPostDTO convertEntityToLobbyPostDTO(Lobby lobby);
+  @Mapping(source = "lobbyusers", target = "lobbyusers")
+  @Mapping(source = "lobbyLeader", target = "lobbyLeader")
+  LobbyGetDTOComplete convertEntityToLobbyGetDTOComplete(Lobby lobby);
+
   @Mapping(source = "id", target = "id")
   @Mapping(source = "lobbyusers", target = "lobbyUsernames")
   @Mapping(source = "lobbyLeader.username", target = "lobbyLeaderUsername")
