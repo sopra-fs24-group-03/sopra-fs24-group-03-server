@@ -34,6 +34,7 @@ public class LobbyController {
         Lobby lobby = lobbyService.getLobbyById(id, token);
         return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
     }
+    //TODO somehow does NOT return updated lobby list (even though lobby is getting updated)
     @PutMapping("/lobby/{id}")
     @ResponseStatus(HttpStatus.OK )
     @ResponseBody
