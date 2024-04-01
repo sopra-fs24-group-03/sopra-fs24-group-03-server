@@ -45,7 +45,7 @@ public class Lobby implements Serializable {
         return lobbyusers;
     }
 
-    public void setLobbyusers(Set<User> lobbyusers) {
+    public void setLobbyUsers(Set<User> lobbyusers) {
         this.lobbyusers = lobbyusers;
     }
     public void addUserToLobby(User user) {

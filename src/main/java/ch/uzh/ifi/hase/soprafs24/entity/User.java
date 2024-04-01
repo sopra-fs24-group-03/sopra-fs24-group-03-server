@@ -91,4 +91,5 @@ public class User implements Serializable {
 
   public Lobby getLobby() {return lobby;}
   public void setLobby(Lobby lobby) {this.lobby = lobby;}
+
 }

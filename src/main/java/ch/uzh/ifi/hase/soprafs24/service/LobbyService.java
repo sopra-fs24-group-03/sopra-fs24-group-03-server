@@ -95,7 +95,7 @@ public class LobbyService {
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown Lobby!");
     }
-    public void removeUserFromLobbyById(String token){
+    public void removeUserFromLobby(String token){
         userService.authenticateUser(token);
         User user = userRepository.findByToken(token);
         Lobby lobby = user.getLobby();
@@ -122,6 +122,6 @@ public class LobbyService {
             }
             return;
         }
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not in a Lobby!");
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not in a Lobby!");
     }
 }

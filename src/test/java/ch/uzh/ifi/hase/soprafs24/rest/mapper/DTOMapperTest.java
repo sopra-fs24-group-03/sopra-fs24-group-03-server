@@ -1,12 +1,18 @@
 package ch.uzh.ifi.hase.soprafs24.rest.mapper;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO.LobbyGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPostDTO;
 import org.junit.jupiter.api.Test;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * DTOMapperTest
@@ -44,4 +50,33 @@ public class DTOMapperTest {
     assertEquals(user.getUsername(), userGetDTO.getUsername());
     assertEquals(user.getStatus(), userGetDTO.getStatus());
   }
+    @Test
+    public void testGetLobby_fromLobby_toLobbyGetDTO_success() {
+        // create Lobby
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("testUsername");
+        user.setStatus(UserStatus.ONLINE);
+        user.setMoney(2000);
+
+        Lobby lobby = new Lobby();
+        lobby.setId(1L);
+        lobby.setLobbyLeader(user);
+
+        Set<User> lobbyUsers = new HashSet<>();
+        lobbyUsers.add(user);
+
+        lobby.setLobbyUsers(lobbyUsers);
+
+        // MAP -> Create LobbyGetDTO
+        LobbyGetDTO lobbyGetDTO = DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
+
+        // check content
+        assertEquals(lobby.getId(), lobbyGetDTO.getId());
+        assertEquals(lobby.getLobbyLeader().getUsername(), lobbyGetDTO.getLobbyLeaderUsername());
+        assertEquals(lobby.getLobbyusers().size(), lobbyGetDTO.getLobbyUsernames().size());
+        assertTrue(lobbyGetDTO.getLobbyUsernames().contains(user.getUsername()));
+
+    }
+
 }

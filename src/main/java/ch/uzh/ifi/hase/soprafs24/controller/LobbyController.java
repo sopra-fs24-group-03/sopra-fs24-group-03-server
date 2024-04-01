@@ -48,7 +48,7 @@ public class LobbyController {
     @ResponseStatus(HttpStatus.ACCEPTED )
     @ResponseBody
     public void removeUserFromLobbyById(@RequestHeader String token){
-        lobbyService.removeUserFromLobbyById(token);
+        lobbyService.removeUserFromLobby(token);
 
     }
 }
