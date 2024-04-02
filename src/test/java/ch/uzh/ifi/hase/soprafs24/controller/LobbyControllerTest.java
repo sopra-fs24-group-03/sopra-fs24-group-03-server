@@ -45,7 +45,7 @@ public class LobbyControllerTest {
 
         Mockito.when(lobbyService.createLobby(Mockito.anyString())).thenReturn(lobby);
 
-        MockHttpServletRequestBuilder postRequest = post("/lobby")
+        MockHttpServletRequestBuilder postRequest = post("/lobbies")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("token", "token");
 
@@ -76,7 +76,7 @@ public class LobbyControllerTest {
         Mockito.when(lobbyService.getLobbyById(Mockito.anyLong(), Mockito.anyString())).thenReturn(lobby);
 
 
-        MockHttpServletRequestBuilder getRequest = get("/lobby/{id}", lobby.getId())
+        MockHttpServletRequestBuilder getRequest = get("/lobbies/{id}", lobby.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("token", "token");
 
@@ -95,7 +95,7 @@ public class LobbyControllerTest {
                 .thenThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
 
-        MockHttpServletRequestBuilder getRequest = get("/lobby/{id}", 1L)
+        MockHttpServletRequestBuilder getRequest = get("/lobbies/{id}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("token", "token");
 
@@ -111,7 +111,7 @@ public class LobbyControllerTest {
         Mockito.when(lobbyService.joinLobbyById(Mockito.anyLong(), Mockito.anyString())).thenReturn(lobby);
 
 
-        MockHttpServletRequestBuilder putRequest = put("/lobby/{id}", 1L)
+        MockHttpServletRequestBuilder putRequest = put("/lobbies/{id}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("token", "token");
 
@@ -127,7 +127,7 @@ public class LobbyControllerTest {
                 .thenThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST));
 
         // Perform PUT request
-        MockHttpServletRequestBuilder putRequest = put("/lobby/{id}", 1L)
+        MockHttpServletRequestBuilder putRequest = put("/lobbies/{id}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("token", "token");
 
@@ -140,7 +140,7 @@ public class LobbyControllerTest {
     public void removeUserFromLobbyByIdSuccess() throws Exception {
         Mockito.doNothing().when(lobbyService).removeUserFromLobby(Mockito.anyString());
 
-        MockHttpServletRequestBuilder deleteRequest = delete("/lobby")
+        MockHttpServletRequestBuilder deleteRequest = delete("/lobbies")
                 .header("token", "token");
 
         mockMvc.perform(deleteRequest)
@@ -153,7 +153,7 @@ public class LobbyControllerTest {
                 .when(lobbyService).removeUserFromLobby(Mockito.anyString());
 
 
-        MockHttpServletRequestBuilder deleteRequest = delete("/lobby")
+        MockHttpServletRequestBuilder deleteRequest = delete("/lobbies")
                 .header("token", "token");
 
         // Verify response

@@ -19,7 +19,7 @@ public class LobbyController {
 
     }
 
-    @PostMapping("/lobby")
+    @PostMapping("/lobbies")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public LobbyGetDTO createLobby(@RequestHeader String token) {
@@ -27,7 +27,8 @@ public class LobbyController {
         return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(newLobby);
 
     }
-    @GetMapping("/lobby/{id}")
+
+    @GetMapping("/lobbies/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public LobbyGetDTO getLobbyByID(@PathVariable long id, @RequestHeader String token){
@@ -35,7 +36,7 @@ public class LobbyController {
         return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
     }
 
-    @PutMapping("/lobby/{id}")
+    @PutMapping("/lobbies/{id}")
     @ResponseStatus(HttpStatus.OK )
     @ResponseBody
     public LobbyGetDTO joinLobbyById(@PathVariable long id, @RequestHeader String token){
@@ -44,7 +45,7 @@ public class LobbyController {
 
     }
 
-    @DeleteMapping("/lobby")
+    @DeleteMapping("/lobbies")
     @ResponseStatus(HttpStatus.ACCEPTED )
     @ResponseBody
     public void removeUserFromLobbyById(@RequestHeader String token){
