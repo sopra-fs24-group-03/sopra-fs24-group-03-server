@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
 
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs24.entity.Game;
 import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.service.LobbyService;
@@ -162,10 +163,37 @@ public class LobbyControllerTest {
     }
 
 
+    @Test
+    public void createGameWithLobbyIdSuccess() throws Exception {
+
+        Game game = new Game();
+        game.setId(1L);
+
+        Mockito.when(lobbyService.startGame(Mockito.anyString(), Mockito.anyLong())).thenReturn(game);
+
+        MockHttpServletRequestBuilder postRequest = post("/lobbies/{id}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", "token");
+
+        mockMvc.perform(postRequest)
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(game.getId()));
+
+    }
 
 
+    @Test
+    public void createGameWithLobbyIdBadRequest() throws Exception {
+        Mockito.doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST))
+                .when(lobbyService).startGame(Mockito.anyString(), Mockito.anyLong());
 
+        MockHttpServletRequestBuilder postRequest = post("/lobbies/{id}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", "token");
 
+        mockMvc.perform(postRequest)
+                .andExpect(status().isBadRequest());
+    }
 
 
 }

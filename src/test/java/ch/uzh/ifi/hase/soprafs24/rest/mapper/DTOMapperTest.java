@@ -66,7 +66,7 @@ public class DTOMapperTest {
         Set<User> lobbyUsers = new HashSet<>();
         lobbyUsers.add(user);
 
-        lobby.setLobbyUsers(lobbyUsers);
+        lobby.setLobbyusers(lobbyUsers);
 
         // MAP -> Create LobbyGetDTO
         LobbyGetDTO lobbyGetDTO = DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);

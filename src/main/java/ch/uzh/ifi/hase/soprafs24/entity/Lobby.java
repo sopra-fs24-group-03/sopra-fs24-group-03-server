@@ -3,9 +3,10 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import javax.websocket.ClientEndpoint;
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
@@ -17,11 +18,12 @@ public class Lobby implements Serializable {
 
     @Id
     @GeneratedValue
+    @Column(name = "id")
     private Long id;
 
 
-//  @OneToOne
-//  private Game game;
+    @OneToOne(mappedBy = "lobby", cascade = CascadeType.ALL)
+    private Game game;
 
     @JsonIgnore //stop recursion
     @OneToMany(mappedBy = "lobby")
@@ -39,21 +41,22 @@ public class Lobby implements Serializable {
         this.id = id;
     }
 
-
-
     public Set<User> getLobbyusers() {
         return lobbyusers;
     }
 
-    public void setLobbyUsers(Set<User> lobbyusers) {
-        this.lobbyusers = lobbyusers;
+    public void setLobbyusers(Set<User> lobbyUsers) {
+        this.lobbyusers = lobbyUsers;
     }
+
     public void addUserToLobby(User user) {
         lobbyusers.add(user);
     }
+
     public void removeUserFromLobby(User user) {
         lobbyusers.remove(user);
     }
+
     public User getLobbyLeader() {
         return lobbyLeader;
     }
@@ -62,5 +65,16 @@ public class Lobby implements Serializable {
         this.lobbyLeader = lobbyLeader;
     }
 
+    public Game getGame() {
+        return game;
+    }
+
+
+    // Used to create a new Game, assign same ID
+    public Game createGame(HashMap<String, Integer> players, long id){
+        Game game = new Game(players, this, this.id);
+        this.game = game;
+        return game;
+    }
 
 }

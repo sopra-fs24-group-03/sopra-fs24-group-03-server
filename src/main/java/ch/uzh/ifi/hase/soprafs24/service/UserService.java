@@ -34,8 +34,6 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-
 
     @Autowired
     public UserService(@Qualifier("userRepository") UserRepository userRepository) {

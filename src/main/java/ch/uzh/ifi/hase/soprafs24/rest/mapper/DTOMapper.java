@@ -1,7 +1,9 @@
 package ch.uzh.ifi.hase.soprafs24.rest.mapper;
 
+import ch.uzh.ifi.hase.soprafs24.entity.Game;
 import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GameGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO.LobbyGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO.LobbyGetDTOComplete;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserGetDTO;
@@ -30,6 +32,10 @@ public interface DTOMapper {
 
   DTOMapper INSTANCE = Mappers.getMapper(DTOMapper.class);
 
+
+
+  // User Mappings
+
   @Mapping(source = "username", target = "username")
   @Mapping(source = "password", target = "password")
   User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
@@ -51,6 +57,10 @@ public interface DTOMapper {
   User convertUserPutDTOtoEntity(UserPutDTO userPutDTO);
 
 
+
+
+  // Lobby Mappings
+
   @Mapping(source = "id", target = "id")
   @Mapping(source = "lobbyusers", target = "lobbyusers")
   @Mapping(source = "lobbyLeader", target = "lobbyLeader")
@@ -67,5 +77,13 @@ public interface DTOMapper {
       }
       return usernames;
   }
+
+
+
+  // Game Mappings
+
+  // TODO Complete Mappings once Game is done and add Tests
+  @Mapping(source = "id", target = "id")
+    GameGetDTO convertEntityToGameGetDTO(Game game);
 
 }

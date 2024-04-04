@@ -92,13 +92,11 @@ public class UserController {
   }
 
 
-
-
-    @PutMapping("/users/logout")
-    @ResponseStatus(HttpStatus.NO_CONTENT )
-    @ResponseBody
-    public void logoutUser(@RequestHeader String token){
-        userService.authenticateUser(token);
-        userService.logout(token);
-    }
+  @PutMapping("/users/logout")
+  @ResponseStatus(HttpStatus.NO_CONTENT )
+  @ResponseBody
+  public void logoutUser(@RequestHeader String token){
+      userService.authenticateUser(token);
+      userService.logout(token);
+  }
 }

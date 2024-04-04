@@ -39,6 +39,10 @@ public class User implements Serializable {
   @Column(nullable = false)
   private int money = 2000;
 
+  @Column(nullable = false)
+  private int tries = 0;
+
+
   @Column(nullable = false, unique = true)
   private String token;
 
@@ -92,4 +96,11 @@ public class User implements Serializable {
   public Lobby getLobby() {return lobby;}
   public void setLobby(Lobby lobby) {this.lobby = lobby;}
 
+  public int getTries() {
+      return tries;
+  }
+
+  public void setTries(int tries) {
+      this.tries = tries;
+  }
 }
