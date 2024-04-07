@@ -4,7 +4,7 @@
 - Joel Huber: Home view: #34,#35,#36
 - Cédric Huber: Lobby view: #30,#31,#32,#33,#37
 - Linus Lautenschlager:
-- Colin Bächtold:
+- Colin Bächtold: Adjusted template, Added startGame mapping: #66,#67,#72,#73,#78,#99,#100,#101
 - Noah Ziegler: Created Lobby: #96,#95,#91,#90,#84,#83,#82
 ### Week 08.04-14.04
 - Joel Huber:
