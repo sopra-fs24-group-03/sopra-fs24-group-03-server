@@ -30,53 +30,50 @@ import java.util.Set;
 @Mapper
 public interface DTOMapper {
 
-  DTOMapper INSTANCE = Mappers.getMapper(DTOMapper.class);
+    DTOMapper INSTANCE = Mappers.getMapper(DTOMapper.class);
+
+    @Mapping(source = "username", target = "username")
+    @Mapping(source = "password", target = "password")
+    User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
+
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "username", target = "username")
+    @Mapping(source = "money", target = "money")
+    @Mapping(source = "status", target = "status")
+    UserGetDTO convertEntityToUserGetDTO(User user);
+
+    //specifically for login/register, also maps the token
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "username", target = "username")
+    @Mapping(source = "status", target = "status")
+    @Mapping(source = "token", target = "token")
+    UserPostResponseDTO convertEntityToUserPostResponseDTO(User user);
+
+    @Mapping(source = "username", target = "username")
+    User convertUserPutDTOtoEntity(UserPutDTO userPutDTO);
 
 
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "lobbyusers", target = "lobbyusers")
+    @Mapping(source = "lobbyLeader", target = "lobbyLeader")
+    LobbyGetDTOComplete convertEntityToLobbyGetDTOComplete(Lobby lobby);
 
-  // User Mappings
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "lobbyusers", target = "lobbyUsernames")
+    @Mapping(source = "lobbyLeader", target = "lobbyLeaderUsername")
+    LobbyGetDTO convertEntityToLobbyGetDTO(Lobby lobby);
+    default Set<UserGetDTO> mapUsersToUsernames(Set<User> users) {
+        Set<UserGetDTO> userGetDtos = new HashSet<>();
+        for (User user : users) {
+            UserGetDTO userToAdd = new UserGetDTO();
+            userToAdd.setId(user.getId());
+            userToAdd.setMoney(user.getMoney());
+            userToAdd.setUsername(user.getUsername());
+            userGetDtos.add(userToAdd);
 
-  @Mapping(source = "username", target = "username")
-  @Mapping(source = "password", target = "password")
-  User convertUserPostDTOtoEntity(UserPostDTO userPostDTO);
-
-  @Mapping(source = "id", target = "id")
-  @Mapping(source = "username", target = "username")
-  @Mapping(source = "money", target = "money")
-  @Mapping(source = "status", target = "status")
-  UserGetDTO convertEntityToUserGetDTO(User user);
-
-  //specifically for login/register, also maps the token
-  @Mapping(source = "id", target = "id")
-  @Mapping(source = "username", target = "username")
-  @Mapping(source = "status", target = "status")
-  @Mapping(source = "token", target = "token")
-  UserPostResponseDTO convertEntityToUserPostResponseDTO(User user);
-
-  @Mapping(source = "username", target = "username")
-  User convertUserPutDTOtoEntity(UserPutDTO userPutDTO);
-
-
-
-
-  // Lobby Mappings
-
-  @Mapping(source = "id", target = "id")
-  @Mapping(source = "lobbyusers", target = "lobbyusers")
-  @Mapping(source = "lobbyLeader", target = "lobbyLeader")
-  LobbyGetDTOComplete convertEntityToLobbyGetDTOComplete(Lobby lobby);
-
-  @Mapping(source = "id", target = "id")
-  @Mapping(source = "lobbyusers", target = "lobbyUsernames")
-  @Mapping(source = "lobbyLeader.username", target = "lobbyLeaderUsername")
-  LobbyGetDTO convertEntityToLobbyGetDTO(Lobby lobby);
-  default Set<String> mapUsersToUsernames(Set<User> users) {
-      Set<String> usernames = new HashSet<>();
-      for (User user : users) {
-          usernames.add(user.getUsername());
-      }
-      return usernames;
-  }
+        }
+        return userGetDtos;
+    }
 
 
 
@@ -84,6 +81,6 @@ public interface DTOMapper {
 
   // TODO Complete Mappings once Game is done and add Tests
   @Mapping(source = "id", target = "id")
-    GameGetDTO convertEntityToGameGetDTO(Game game);
+  GameGetDTO convertEntityToGameGetDTO(Game game);
 
 }

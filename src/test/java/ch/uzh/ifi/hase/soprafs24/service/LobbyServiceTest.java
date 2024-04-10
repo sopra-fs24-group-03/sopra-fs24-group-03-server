@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
+import ch.uzh.ifi.hase.soprafs24.entity.Game;
 import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.LobbyRepository;
@@ -13,6 +14,8 @@ import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.HashMap;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -51,7 +54,6 @@ public class LobbyServiceTest {
         lobby.addUserToLobby(user);
 
         // Mock userRepository behavior
-        when(userRepository.findByToken(anyString())).thenReturn(user);
 
 
 
@@ -59,7 +61,9 @@ public class LobbyServiceTest {
 
     @Test
     public void testJoinLobbyById_Success() {
+
         // Call the method under test
+        when(userRepository.findByToken(anyString())).thenReturn(user);
         when(lobbyRepository.findById(anyLong())).thenReturn(lobby);
         Lobby joinedLobby = lobbyService.joinLobbyById(2L, "validToken");
 
@@ -70,6 +74,7 @@ public class LobbyServiceTest {
 
     @Test
     public void testJoinLobbyById_LobbyFull() {
+        when(userRepository.findByToken(anyString())).thenReturn(user);
         when(lobbyRepository.findById(anyLong())).thenReturn(lobby);
         // Add more users to fill the lobby
         for (int i = 0; i < 7; i++) {
@@ -89,6 +94,8 @@ public class LobbyServiceTest {
     public void testRemoveUserFromLobby_Success() {
         // Mock userRepository behavior
         when(userRepository.findByToken(anyString())).thenReturn(user);
+        when(userRepository.findByToken(anyString())).thenReturn(user);
+
 
         // Set up the user's lobby
         user.setLobby(lobby);
@@ -105,6 +112,8 @@ public class LobbyServiceTest {
     public void testRemoveUserFromLobby_NotInLobby() {
         // Mock userRepository behavior
         when(userRepository.findByToken(anyString())).thenReturn(user);
+        when(userRepository.findByToken(anyString())).thenReturn(user);
+
 
         // Call the method under test
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
@@ -115,4 +124,155 @@ public class LobbyServiceTest {
         assertEquals("User is not in a Lobby!", exception.getReason());
     }
 
+    @Test
+    public void testCreateGame_Success(){
+
+        //Setup
+        User user2 = new User();
+        User user3 = new User();
+
+        user2.setUsername("testUser2");
+        user2.setToken("token2");
+        user2.setPassword("Password");
+
+        user3.setUsername("testUser3");
+        user3.setToken("token3");
+        user3.setPassword("Password");
+
+        user2.setLobby(lobby);
+        lobby.addUserToLobby(user2);
+
+        user3.setLobby(lobby);
+        lobby.addUserToLobby(user3);
+
+        when(lobbyRepository.findById(anyLong())).thenReturn(lobby);
+
+        //method call
+        Game createdGame = lobbyService.startGame(user.getToken(), lobby.getId());
+        assertNotNull(createdGame);
+        assertEquals(lobby, createdGame.getLobby());
+    }
+
+    @Test
+    public void testCreateGame_notEnoughPlayers(){
+
+        //Setup
+        when(lobbyRepository.findById(anyLong())).thenReturn(lobby);
+
+        //method call
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                ()->lobbyService.startGame(user.getToken(), lobby.getId()));
+
+
+        // Verify that the correct exception is thrown
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("Not enough players", exception.getReason());
+    }
+
+    @Test
+    public void testCreateGame_notLeader(){
+
+        //Setup
+        User user2 = new User();
+        User user3 = new User();
+
+        user2.setUsername("testUser2");
+        user2.setToken("token2");
+        user2.setPassword("Password");
+
+        user3.setUsername("testUser3");
+        user3.setToken("token3");
+        user3.setPassword("Password");
+
+        user2.setLobby(lobby);
+        lobby.addUserToLobby(user2);
+
+        user3.setLobby(lobby);
+        lobby.addUserToLobby(user3);
+
+        when(lobbyRepository.findById(anyLong())).thenReturn(lobby);
+
+        //method call
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                ()->lobbyService.startGame(user2.getToken(), lobby.getId()));
+
+
+        // Verify that the correct exception is thrown
+        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+        assertEquals("Only the lobby leader can do this!", exception.getReason());
+    }
+
+    @Test
+    public void testCreateGame_GameAlreadyExists(){
+
+        //Setup
+        lobby.createGame(new HashMap<String, Integer>(), 2L);
+
+        User user2 = new User();
+        User user3 = new User();
+
+        user2.setUsername("testUser2");
+        user2.setToken("token2");
+        user2.setPassword("Password");
+
+        user3.setUsername("testUser3");
+        user3.setToken("token3");
+        user3.setPassword("Password");
+
+        user2.setLobby(lobby);
+        lobby.addUserToLobby(user2);
+
+        user3.setLobby(lobby);
+        lobby.addUserToLobby(user3);
+
+        when(lobbyRepository.findById(anyLong())).thenReturn(lobby);
+
+        //method call
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                ()->lobbyService.startGame(user.getToken(), lobby.getId()));
+
+
+        // Verify that the correct exception is thrown
+        assertEquals(HttpStatus.CONFLICT, exception.getStatus());
+        assertEquals("lobby already has running game!", exception.getReason());
+    }
+
+    @Test
+    public void testCreateGame_LeaderOutOfMoney(){
+
+        //Setup
+
+        User user2 = new User();
+        User user3 = new User();
+
+        user.setMoney(0);
+
+        user2.setUsername("testUser2");
+        user2.setToken("token2");
+        user2.setPassword("Password");
+
+        user3.setUsername("testUser3");
+        user3.setToken("token3");
+        user3.setPassword("Password");
+
+        user2.setLobby(lobby);
+        lobby.addUserToLobby(user2);
+
+        user3.setLobby(lobby);
+        lobby.addUserToLobby(user3);
+
+        when(lobbyRepository.findById(anyLong())).thenReturn(lobby);
+
+        //method call
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                ()->lobbyService.startGame(user.getToken(), lobby.getId()));
+
+
+        // Verify that the correct exception is thrown
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("could not start game, lobby leader has insufficient money!", exception.getReason());
+    }
 }
+
+
+

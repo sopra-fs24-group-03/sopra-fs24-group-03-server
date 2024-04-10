@@ -2,6 +2,8 @@ package ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO;
 
 
 
+import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserGetDTO;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -11,9 +13,9 @@ public class LobbyGetDTO {
         return id;
     }
 
-    private String lobbyLeaderUsername;
+    private UserGetDTO lobbyLeaderUsername;
 
-    private Set<String> lobbyUsernames = new HashSet<>();
+    private Set<UserGetDTO> lobbyUsernames = new HashSet<>();
 
     public void setId(Long id) {
         this.id = id;
@@ -22,19 +24,19 @@ public class LobbyGetDTO {
 
 
 
-    public Set<String> getLobbyUsernames() {
+    public Set<UserGetDTO> getLobbyUsernames() {
         return lobbyUsernames;
     }
 
-    public void setLobbyUsernames(Set<String> lobbyUsernames) {
+    public void setLobbyUsernames(Set<UserGetDTO> lobbyUsernames) {
         this.lobbyUsernames = lobbyUsernames;
     }
 
-    public String getLobbyLeaderUsername() {
+    public UserGetDTO getLobbyLeaderUsername() {
         return lobbyLeaderUsername;
     }
 
-    public void setLobbyLeaderUsername(String lobbyLeaderUsername) {
+    public void setLobbyLeaderUsername(UserGetDTO lobbyLeaderUsername) {
         this.lobbyLeaderUsername = lobbyLeaderUsername;
     }
 }

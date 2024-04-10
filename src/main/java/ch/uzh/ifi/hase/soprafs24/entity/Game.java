@@ -8,7 +8,9 @@ import java.util.HashMap;
 @Table(name = "GAME")
 public class Game {
 
-    public Game(){
+
+    //Required by Springboot, should not be used otherwise
+    protected Game(){
         //default constructor
     }
 

@@ -18,6 +18,8 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.web.server.ResponseStatusException;
 
 
+import java.util.HashMap;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -166,8 +168,8 @@ public class LobbyControllerTest {
     @Test
     public void createGameWithLobbyIdSuccess() throws Exception {
 
-        Game game = new Game();
-        game.setId(1L);
+        Lobby lobby = new Lobby();
+        Game game = new Game(new HashMap<String, Integer>(), lobby,  1L);
 
         Mockito.when(lobbyService.startGame(Mockito.anyString(), Mockito.anyLong())).thenReturn(game);
 

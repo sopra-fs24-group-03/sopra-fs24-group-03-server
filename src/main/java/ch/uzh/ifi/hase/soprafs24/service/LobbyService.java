@@ -59,7 +59,7 @@ public class LobbyService {
     public Lobby getLobbyById(long id, String token) {
         userService.authenticateUser(token);
         User user = userRepository.findByToken(token);
-        Lobby lobby = getLobby(id);
+        Lobby lobby = findLobby(id);
 
         if (user.getLobby() != null && user.getLobby().getId() == id) {
             // Return the lobby if the user is in it
@@ -73,12 +73,11 @@ public class LobbyService {
     public Lobby joinLobbyById(long id, String token) {
         userService.authenticateUser(token);
         User user = userRepository.findByToken(token);
-        Lobby lobby = getLobby(id);
+        Lobby lobby = findLobby(id);
 
         if (user.getLobby() == null) {
             if (lobby.getLobbyusers().size() < 8) {
                 user.setLobby(lobby);
-
                 lobby.addUserToLobby(user);
                 return lobby;
             } else {// Throw an exception if the lobby is full
@@ -123,7 +122,7 @@ public class LobbyService {
 
     //start a new Game in lobby
     public Game startGame(String token, long id) {
-        Lobby lobby = getLobby(id);
+        Lobby lobby = findLobby(id);
         authenticateLeader(token, lobby);
         HashMap<String, Integer> players = new HashMap<String, Integer>();
 
@@ -141,7 +140,7 @@ public class LobbyService {
 
             // Otherwise remove user, if user is leader throw exception, else continue starting game
             else {
-                updateUser(u);
+                updateLoss(u);
 
                 // If user is lobby leader, exception is thrown and game start is cancelled
                 if (lobby.getLobbyLeader()== u){
@@ -162,7 +161,7 @@ public class LobbyService {
 
 
     //Updates user Money
-    private void updateUser(User user){
+    private void updateLoss(User user){
         user.setTries(user.getTries() + 1);
         user.setMoney(2000);
     }
@@ -173,7 +172,7 @@ public class LobbyService {
 
         //compare provided token and leader token
         if (!Objects.equals(lobby.getLobbyLeader().getToken(), token)) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Only the lobby leader can start the game!");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Only the lobby leader can do this!");
         }
     }
 
@@ -183,7 +182,7 @@ public class LobbyService {
     }
 
     //returns requested lobby, if lobby doesn't exist throws exception
-    private Lobby getLobby(long lobbyId){
+    private Lobby findLobby(long lobbyId){
         Lobby lobby = lobbyRepository.findById(lobbyId);
         if(lobby == null){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown lobby");
