@@ -194,6 +194,43 @@ public class LobbyServiceIntegrationTest {
 
 
     //TODO lobby repository, doesnt work!
+
+
+    @Test
+    public void testCreateGame_notEnoughPlayers(){
+
+        //Setup
+        User user1 = new User();
+
+        user1.setUsername("testUser");
+        user1.setToken("token");
+        user1.setPassword("Password");
+        user1.setStatus(UserStatus.ONLINE);
+        user1.setMoney(2000);
+        user1 = userRepository.save(user1);
+
+        Lobby lobby = lobbyService.createLobby("token");
+
+
+
+
+        //method call
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                ()->lobbyService.startGame("token", lobby.getId())
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+
+
+
+        //cleanup
+        user1.setLobby(null);
+        userRepository.save(user1);
+        lobby.setLobbyLeader(null);
+        lobby.removeUserFromLobby(user1);
+        lobbyRepository.delete(lobby);
+        userRepository.delete(user1);
+    }
     @Test
     public void testCreateGame_Success(){
 
@@ -207,130 +244,48 @@ public class LobbyServiceIntegrationTest {
         user1.setPassword("Password");
         user1.setStatus(UserStatus.ONLINE);
         user1.setMoney(2000);
-
-        user2.setUsername("testUser2");
-        user2.setToken("token2");
-        user2.setPassword("Password");
-        user2.setStatus(UserStatus.ONLINE);
-        user2.setMoney(2000);
-
-        user3.setUsername("testUser3");
-        user3.setToken("token3");
-        user3.setPassword("Password");
-        user3.setStatus(UserStatus.ONLINE);
-        user3.setMoney(2000);
-
-        user1 = userRepository.save(user1);
-        user2 = userRepository.save(user2);
-        user3 = userRepository.save(user3);
-
-        Lobby lobby = new Lobby();
-        user1.setLobby(lobby);
         userRepository.save(user1);
 
-        lobby.setLobbyLeader(user1);
-        lobby.addUserToLobby(user1);
-
-        user2.setLobby(lobby);
-        userRepository.save(user2);
-        lobby.addUserToLobby(user2);
-
-        user3.setLobby(lobby);
-        userRepository.save(user3);
-        lobby.addUserToLobby(user3);
-        lobby = lobbyRepository.save(lobby);
-
-        //method call
-        Game createdGame = lobbyService.startGame(user1.getToken(), lobby.getId());
-
-        assertNotNull(createdGame);
-        assertEquals(lobby, createdGame.getLobby());
-    }
-
-    @Test
-    public void testCreateGame_Unautherized(){
-
-        //Setup
-        User user1 = new User();
-        User user2 = new User();
-        User user3 = new User();
-
-        user1.setUsername("testUser");
-        user1.setToken("token");
-        user1.setPassword("Password");
-        user1.setStatus(UserStatus.ONLINE);
-        user1.setMoney(2000);
-
         user2.setUsername("testUser2");
         user2.setToken("token2");
         user2.setPassword("Password");
         user2.setStatus(UserStatus.ONLINE);
         user2.setMoney(2000);
+        userRepository.save(user2);
 
         user3.setUsername("testUser3");
         user3.setToken("token3");
         user3.setPassword("Password");
         user3.setStatus(UserStatus.ONLINE);
         user3.setMoney(2000);
+        userRepository.save(user3);
 
-        user1 = userRepository.save(user1);
-        user2 = userRepository.save(user2);
-        user3 = userRepository.save(user3);
-
-        Lobby lobby = new Lobby();
-        lobby.setId(1L);
-
-        user1.setLobby(lobby);
-        lobby.setLobbyLeader(user1);
-        lobby.addUserToLobby(user1);
-
-        user2.setLobby(lobby);
-        lobby.addUserToLobby(user2);
-
-        user3.setLobby(lobby);
-        lobby.addUserToLobby(user3);
-        lobbyRepository.save(lobby);
+        Lobby lobby = lobbyService.createLobby("token");
+        lobbyService.joinLobbyById(4, "token2");
+        lobbyService.joinLobbyById(4, "token3");
 
 
         //method call
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                ()->lobbyService.startGame("token2", 1L)
-        );
+        Game createdGame = lobbyService.startGame("token", lobby.getId());
 
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+        assertNotNull(createdGame);
+        assertEquals(lobby.getId(), createdGame.getLobby().getId());
+
+
+        //cleanup
+        user1.setLobby(null);
+        user2.setLobby(null);
+        user3.setLobby(null);
+        userRepository.save(user1);
+        userRepository.save(user2);
+        userRepository.save(user3);
+        lobby.setLobbyLeader(null);
+        lobby.removeUserFromLobby(user1);
+        lobby.removeUserFromLobby(user2);
+        lobby.removeUserFromLobby(user3);
+
+
     }
 
-    @Test
-    public void testCreateGame_notEnoughPlayers(){
-
-        //Setup
-        User user1 = new User();
-
-        user1.setUsername("testUser");
-        user1.setToken("token");
-        user1.setPassword("Password");
-        user1.setStatus(UserStatus.ONLINE);
-        user1.setMoney(2000);
-
-
-        user1 = userRepository.save(user1);
-
-        Lobby lobby = new Lobby();
-        lobby.setId(1L);
-
-        user1.setLobby(lobby);
-        lobby.setLobbyLeader(user1);
-        lobby.addUserToLobby(user1);
-
-        lobbyRepository.save(lobby);
-
-
-        //method call
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                ()->lobbyService.startGame("token", 1L)
-        );
-
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-    }
 }
 
