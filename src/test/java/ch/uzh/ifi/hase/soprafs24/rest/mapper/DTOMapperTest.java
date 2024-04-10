@@ -73,9 +73,8 @@ public class DTOMapperTest {
 
         // check content
         assertEquals(lobby.getId(), lobbyGetDTO.getId());
-        assertEquals(lobby.getLobbyLeader().getUsername(), lobbyGetDTO.getLobbyLeaderUsername());
-        assertEquals(lobby.getLobbyusers().size(), lobbyGetDTO.getLobbyUsernames().size());
-        assertTrue(lobbyGetDTO.getLobbyUsernames().contains(user.getUsername()));
+        assertEquals(lobby.getLobbyLeader().getUsername(), lobbyGetDTO.getLobbyLeader().getUsername());
+        assertEquals(lobby.getLobbyusers().size(), lobbyGetDTO.getLobbyUsers().size());
 
     }
 

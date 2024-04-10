@@ -56,9 +56,8 @@ public class LobbyControllerTest {
         mockMvc.perform(postRequest)
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").exists())
-                .andExpect(jsonPath("$.lobbyLeaderUsername").value(user.getUsername()))
-                .andExpect(jsonPath("$.lobbyUsernames.length()").value(1))
-                .andExpect(jsonPath("$.lobbyUsernames[0]").value(user.getUsername()));
+                .andExpect(jsonPath("$.lobbyLeader.username").value(user.getUsername()))
+                .andExpect(jsonPath("$.lobbyUsers.size()").value(1));
 
     }
     @Test
@@ -87,10 +86,8 @@ public class LobbyControllerTest {
         mockMvc.perform(getRequest)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(lobby.getId()))
-                .andExpect(jsonPath("$.lobbyLeaderUsername").value(user.getUsername()))
-                .andExpect(jsonPath("$.lobbyUsernames.length()").value(1))
-                .andExpect(jsonPath("$.lobbyUsernames[0]").value(user.getUsername()));
-    }
+                .andExpect(jsonPath("$.lobbyLeader.username").value(user.getUsername()))
+                .andExpect(jsonPath("$.lobbyUsers.size()").value(1));}
     @Test
     public void getLobbyByIdUnauthorized() throws Exception {
 

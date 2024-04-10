@@ -59,8 +59,8 @@ public interface DTOMapper {
     LobbyGetDTOComplete convertEntityToLobbyGetDTOComplete(Lobby lobby);
 
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "lobbyusers", target = "lobbyUsernames")
-    @Mapping(source = "lobbyLeader", target = "lobbyLeaderUsername")
+    @Mapping(source = "lobbyusers", target = "lobbyUsers")
+    @Mapping(source = "lobbyLeader", target = "lobbyLeader")
     LobbyGetDTO convertEntityToLobbyGetDTO(Lobby lobby);
     default Set<UserGetDTO> mapUsersToUsernames(Set<User> users) {
         Set<UserGetDTO> userGetDtos = new HashSet<>();

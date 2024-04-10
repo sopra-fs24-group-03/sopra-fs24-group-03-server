@@ -13,9 +13,9 @@ public class LobbyGetDTO {
         return id;
     }
 
-    private UserGetDTO lobbyLeaderUsername;
+    private UserGetDTO lobbyLeader;
 
-    private Set<UserGetDTO> lobbyUsernames = new HashSet<>();
+    private Set<UserGetDTO> lobbyUsers  = new HashSet<>();
 
     public void setId(Long id) {
         this.id = id;
@@ -24,19 +24,19 @@ public class LobbyGetDTO {
 
 
 
-    public Set<UserGetDTO> getLobbyUsernames() {
-        return lobbyUsernames;
+    public Set<UserGetDTO> getLobbyUsers() {
+        return lobbyUsers;
     }
 
-    public void setLobbyUsernames(Set<UserGetDTO> lobbyUsernames) {
-        this.lobbyUsernames = lobbyUsernames;
+    public void setLobbyUsers(Set<UserGetDTO> lobbyUsers) {
+        this.lobbyUsers = lobbyUsers;
     }
 
-    public UserGetDTO getLobbyLeaderUsername() {
-        return lobbyLeaderUsername;
+    public UserGetDTO getLobbyLeader() {
+        return lobbyLeader;
     }
 
-    public void setLobbyLeaderUsername(UserGetDTO lobbyLeaderUsername) {
-        this.lobbyLeaderUsername = lobbyLeaderUsername;
+    public void setLobbyLeader(UserGetDTO lobbyLeader) {
+        this.lobbyLeader = lobbyLeader;
     }
 }
