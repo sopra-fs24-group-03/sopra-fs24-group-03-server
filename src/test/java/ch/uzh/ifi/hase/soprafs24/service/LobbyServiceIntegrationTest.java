@@ -244,61 +244,7 @@ public class LobbyServiceIntegrationTest {
         user1.setPassword("Password");
         user1.setStatus(UserStatus.ONLINE);
         user1.setMoney(2000);
-<<<<<<< Updated upstream
         userRepository.save(user1);
-=======
-        user1 = userRepository.save(user1);
-
-
-        user2.setUsername("testUser2");
-        user2.setToken("token2");
-        user2.setPassword("Password");
-        user2.setStatus(UserStatus.ONLINE);
-        user2.setMoney(2000);
-        user2 = userRepository.save(user2);
-
-
-        user3.setUsername("testUser3");
-        user3.setToken("token3");
-        user3.setPassword("Password");
-        user3.setStatus(UserStatus.ONLINE);
-        user3.setMoney(2000);
-        user3 = userRepository.save(user3);
-
-        Lobby lobby = new Lobby();
-        user1.setLobby(lobby);
-        lobby.setLobbyLeader(user1);
-        lobby.addUserToLobby(user1);
-
-        user2.setLobby(lobby);
-        lobby.addUserToLobby(user2);
-
-        user3.setLobby(lobby);
-        lobby.addUserToLobby(user3);
-        lobbyRepository.save(lobby);
-        lobbyRepository.flush();
-
-        //method call
-        Game createdGame = lobbyService.startGame(user1.getToken(), lobby.getId());
-
-        assertNotNull(createdGame);
-        assertEquals(lobby, createdGame.getLobby());
-    }
-
-    @Test
-    public void testCreateGame_Unautherized(){
-
-        //Setup
-        User user1 = new User();
-        User user2 = new User();
-        User user3 = new User();
-
-        user1.setUsername("testUser");
-        user1.setToken("token");
-        user1.setPassword("Password");
-        user1.setStatus(UserStatus.ONLINE);
-        user1.setMoney(2000);
->>>>>>> Stashed changes
 
         user2.setUsername("testUser2");
         user2.setToken("token2");
@@ -314,30 +260,9 @@ public class LobbyServiceIntegrationTest {
         user3.setMoney(2000);
         userRepository.save(user3);
 
-<<<<<<< Updated upstream
         Lobby lobby = lobbyService.createLobby("token");
         lobbyService.joinLobbyById(4, "token2");
         lobbyService.joinLobbyById(4, "token3");
-=======
-        user1 = userRepository.save(user1);
-        user2 = userRepository.save(user2);
-        user3 = userRepository.save(user3);
-
-        Lobby lobby = new Lobby();
-        lobbyRepository.save(lobby);
-
-        lobby.setId(1L);
-
-        user1.setLobby(lobby);
-        lobby.setLobbyLeader(user1);
-        lobby.addUserToLobby(user1);
-
-        user2.setLobby(lobby);
-        lobby.addUserToLobby(user2);
-
-        user3.setLobby(lobby);
-        lobby.addUserToLobby(user3);
->>>>>>> Stashed changes
 
 
         //method call
@@ -363,4 +288,3 @@ public class LobbyServiceIntegrationTest {
     }
 
 }
-
