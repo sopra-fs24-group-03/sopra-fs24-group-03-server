@@ -4,7 +4,9 @@ package ch.uzh.ifi.hase.soprafs24.externalapi;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
@@ -14,9 +16,17 @@ import java.util.HashMap;
 import java.util.List;
 
 
+@Service
 public class DeckOfCardsApi {
-    private final RestTemplate restTemplate = new RestTemplate();
+
+    private final RestTemplate restTemplate;
     private final String BASE_URI = "https://www.deckofcardsapi.com/api/deck";
+
+
+    //constructor for the DeckOfCardsApi, needs to be passed a RestTemplate object
+    public DeckOfCardsApi(RestTemplate restTemplate){
+        this.restTemplate = restTemplate;
+    }
 
     //POST request to create a new deck
     public String postDeck() {
@@ -53,6 +63,10 @@ public class DeckOfCardsApi {
             //extract cards from response
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(response);
+
+            if(jsonNode.get("cards") == null){
+                throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "DeckOfCards API returned a error");
+            }
             JsonNode cardNode = jsonNode.get("cards");
 
 
