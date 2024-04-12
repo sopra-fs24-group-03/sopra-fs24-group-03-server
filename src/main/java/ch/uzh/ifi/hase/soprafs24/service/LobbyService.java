@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -110,7 +111,7 @@ public class LobbyService {
             // Check if the user leaving is the lobby leader
             if (lobby.getLobbyLeader().getId().equals(user.getId())) {
                 // Assign lobby leader role to another user in the lobby
-                Set<User> lobbyUsers = lobby.getLobbyusers();
+                List<User> lobbyUsers = lobby.getLobbyusers();
                 User newLeader = lobbyUsers.iterator().next();
                 lobby.setLobbyLeader(newLeader);
             }
@@ -153,7 +154,7 @@ public class LobbyService {
         });
 
         //checks player amount
-        if(players.size() >= 3){
+        if(players.size() >= 2){
             return lobby.createGame(players, id);
         } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough players");
 

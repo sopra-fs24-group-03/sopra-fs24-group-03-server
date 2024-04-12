@@ -5,9 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import javax.websocket.ClientEndpoint;
 import java.io.Serializable;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 
 @Entity
@@ -21,13 +19,13 @@ public class Lobby implements Serializable {
     @Column(name = "id")
     private Long id;
 
-
+    @JsonIgnore //stop recursion
     @OneToOne(mappedBy = "lobby", cascade = CascadeType.ALL)
     private Game game;
 
     @JsonIgnore //stop recursion
     @OneToMany(mappedBy = "lobby")
-    private Set<User> lobbyusers = new HashSet<>();
+    private List<User> lobbyusers = new ArrayList<>();
 
     @JsonIgnore //stop recursion
     @OneToOne
@@ -41,12 +39,13 @@ public class Lobby implements Serializable {
         this.id = id;
     }
 
-    public Set<User> getLobbyusers() {
+
+    public List<User> getLobbyusers() {
         return lobbyusers;
     }
 
-    public void setLobbyusers(Set<User> lobbyUsers) {
-        this.lobbyusers = lobbyUsers;
+    public void setLobbyusers(List<User> lobbyusers) {
+        this.lobbyusers = lobbyusers;
     }
 
     public void addUserToLobby(User user) {
