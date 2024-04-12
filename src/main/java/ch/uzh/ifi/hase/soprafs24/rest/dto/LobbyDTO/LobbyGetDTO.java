@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO;
 
 
 
+import ch.uzh.ifi.hase.soprafs24.entity.Game;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserGetDTO;
 
 import java.util.HashSet;
@@ -21,8 +22,15 @@ public class LobbyGetDTO {
         this.id = id;
     }
 
+    private Game game;
 
+    public Game getGame() {
+        return game;
+    }
 
+    public void setGame(Game game) {
+        this.game = game;
+    }
 
     public Set<UserGetDTO> getLobbyUsers() {
         return lobbyUsers;

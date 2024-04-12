@@ -21,7 +21,7 @@ public class Lobby implements Serializable {
     @Column(name = "id")
     private Long id;
 
-
+    @JsonIgnore //stop recursion
     @OneToOne(mappedBy = "lobby", cascade = CascadeType.ALL)
     private Game game;
 
