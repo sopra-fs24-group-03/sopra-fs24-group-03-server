@@ -13,7 +13,9 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPutDTO;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -63,8 +65,8 @@ public interface DTOMapper {
     @Mapping(source = "lobbyLeader", target = "lobbyLeader")
     @Mapping(source = "game", target = "game")
     LobbyGetDTO convertEntityToLobbyGetDTO(Lobby lobby);
-    default Set<UserGetDTO> mapUsersToUsernames(Set<User> users) {
-        Set<UserGetDTO> userGetDtos = new HashSet<>();
+    default List<UserGetDTO> mapUsersToUsernames(Set<User> users) {
+        List<UserGetDTO> userGetDtos = new ArrayList<>();
         for (User user : users) {
             UserGetDTO userToAdd = new UserGetDTO();
             userToAdd.setId(user.getId());

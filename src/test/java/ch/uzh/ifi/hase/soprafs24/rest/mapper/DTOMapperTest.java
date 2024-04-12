@@ -8,7 +8,9 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPostDTO;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -63,7 +65,7 @@ public class DTOMapperTest {
         lobby.setId(1L);
         lobby.setLobbyLeader(user);
 
-        Set<User> lobbyUsers = new HashSet<>();
+        List<User> lobbyUsers = new ArrayList<>();
         lobbyUsers.add(user);
 
         lobby.setLobbyusers(lobbyUsers);
