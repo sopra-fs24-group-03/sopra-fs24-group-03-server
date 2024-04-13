@@ -9,12 +9,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Entity
 @Table(name = "GAME")
@@ -30,13 +28,13 @@ public class Game {
 
 
     //Game and Lobby have the same ID, this could be changed, as the lobby is saved within the game already
-    @Autowired
-    public Game(HashMap<String, Integer> players, Lobby lobby, long id, @Qualifier("userRepository") UserRepository userRepository) {
-        this.userRepository = userRepository;
+    //@Autowired
+    public Game(HashMap<String, Integer> players, Lobby lobby, long id) {
+        //this.userRepository = userRepository;
         setLobby(lobby);
         setId(id);
         // can be changed for now the first in the list (HashMap) starts
-        setPlayer(players);
+        //setPlayer(players);
         // get from Card API for each Player two cards and for Table five
 
         //TODO constructor for Game
@@ -59,8 +57,18 @@ public class Game {
     @JoinColumn(name = "lobby_id")
     private Lobby lobby;
 
-    private final UserRepository userRepository;
 
+    //TODO instantiate correctly
+    @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "order", joinColumns = @JoinColumn(name = "game_id"))
+    @Column(name = "order", nullable = false)
+    private List<String> order = new ArrayList<>();
+
+    @Column(nullable = false)
+    private String playerTurn;
+
+    @Column(nullable = false)
+    private int bet  = 0;
 
 
     public void game() {
@@ -70,23 +78,6 @@ public class Game {
     private void setUp() {
 
     }
-
-    private Player winningCondition() {
-
-    }
-
-    private Map endGame() {
-
-    }
-
-    public Map turn() {
-
-    }
-
-    public long leaveGame() {
-
-    }
-
 
     public Long getId() {
         return id;
@@ -105,13 +96,58 @@ public class Game {
     }
 
     public void setPlayers(HashMap<String, Integer> players) {
-        for (Map.Entry<String, Integer> entry : players.entrySet()) {
-            User userToPlayer = UserRepository.findByToken(entry.getKey());
-            players.add(new Player(userToPlayer.getUsername(), userToPlayer.getMoney(), userToPlayer.getToken(), //cards))
+//        for (Map.Entry<String, Integer> entry : players.entrySet()) {
+//            User userToPlayer = UserRepository.findByToken(entry.getKey());
+//            players.add(new Player(userToPlayer.getUsername(), userToPlayer.getMoney(), userToPlayer.getToken(), //cards))
+//
+//
+//        }
+    }
+
+    public Player getPlayer(String username){
+        //TODO
+    }
+
+    public GameTable getTable(){
+        //TODO
+    }
 
 
+    public List<String> getOrder() {
+        return order;
+    }
+
+    //called if player raises, reset the order where player is now first
+    public void updateOrder(){
+        int index = order.indexOf(this.playerTurn);
+        List<String> updatedOrder = new ArrayList<>();
+
+        //reorder list such that given username is first element
+        for(int i = index; i < order.size(); i++){
+            updatedOrder.add(order.get(i));
         }
+        for (int i = 0; i < index; i++) {
+            updatedOrder.add(order.get(i));
+        }
+        this.order = updatedOrder;
+    }
 
 
+    public void updatePlayerTurn(){
+        if(Objects.equals(order.get(order.size() - 1), playerTurn)) {
+            playerTurn = order.get(0);
+        } else playerTurn = order.get(order.indexOf(playerTurn) + 1);
+    }
+
+    public String getPlayerTurn() {
+        return playerTurn;
+    }
+
+    public int getBet() {
+        return bet;
+    }
+
+    public void setBet(int bet) {
+        this.bet = bet;
     }
 }

@@ -21,6 +21,11 @@ public class Player {
         setToken(token);
         setCards(cards);
     }
+
+    protected Player() {
+        //default constructor
+    }
+
     public String getUsername() {
         return username;
     }
@@ -46,25 +51,28 @@ public class Player {
     public void setCards(Map cards) { this.cards = cards; }
 
 
+    public void check(){
+
+    }
 
     public void fold() {
 
     }
 
-    public int raise() {
-
+    public int raise(int amount) {
+        return 1;
     }
 
-    public int call() {
-
+    public int call(int amount) {
+        return 1;
     }
 
     public long leaveGame() {
-
+        return 0;
     }
 
     private int checkMoney() {
-
+        return 1;
     }
 
 }

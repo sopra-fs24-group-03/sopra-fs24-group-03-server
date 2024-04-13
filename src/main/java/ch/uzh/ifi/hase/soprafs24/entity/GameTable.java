@@ -13,7 +13,7 @@ public class GameTable {
 
 
     public void updateMoney(int amount){}
-    public void updateCards(List<HashMap<String, String>> Cards){}
+    public void updateCards(){}
 
     public int getMoney() {
         return Money;
@@ -23,5 +23,7 @@ public class GameTable {
         Money = money;
     }
 
-
+    public List<HashMap<String, String>> getCardList() {
+        return cardList;
+    }
 }
