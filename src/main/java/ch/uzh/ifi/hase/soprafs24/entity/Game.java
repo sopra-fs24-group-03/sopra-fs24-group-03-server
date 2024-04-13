@@ -49,9 +49,8 @@ public class Game {
     @Column(nullable = false)
     private long playerTurnId;
 
-    @JsonIgnore
-    @OneToOne(mappedBy = "game")
-    private Table table;
+    @Transient
+    private GameTable gameTable;
 
     @Id
     private Long id;
