@@ -113,15 +113,15 @@ public class DeckOfCardsApiTest {
                         "}", MediaType.APPLICATION_JSON));
 
         //method call
-        List<HashMap<String, String>> result = api.drawCards("id", 2);
+        List<Card> result = api.drawCards("id", 2);
 
         //verification
         mockServer.verify();
-        assertEquals("6H", result.get(0).get("code"));
-        assertEquals("https://deckofcardsapi.com/static/img/6H.png", result.get(0).get("image"));
+        assertEquals("6H", result.get(0).getCode());
+        assertEquals("https://deckofcardsapi.com/static/img/6H.png", result.get(0).getImage());
 
-        assertEquals("5S", result.get(1).get("code"));
-        assertEquals("https://deckofcardsapi.com/static/img/5S.png", result.get(1).get("image"));
+        assertEquals("5S", result.get(1).getCode());
+        assertEquals("https://deckofcardsapi.com/static/img/5S.png", result.get(1).getImage());
     }
 
     @Test
