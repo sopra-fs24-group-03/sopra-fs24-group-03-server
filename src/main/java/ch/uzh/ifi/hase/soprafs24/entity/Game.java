@@ -106,10 +106,12 @@ public class Game {
 
     public Player getPlayer(String username){
         //TODO
+        return new Player();
     }
 
     public GameTable getTable(){
         //TODO
+        return new GameTable();
     }
 
 

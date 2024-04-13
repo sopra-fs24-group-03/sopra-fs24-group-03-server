@@ -34,17 +34,15 @@ public class GameService {
 
 
     //method to make moves
-    public void turn(GamePutDTO move, long id, String token) {
+    public int turn(GamePutDTO move, long id, String token) {
         String username = userRepository.findByToken(token).getUsername();
         Game game = gameRepository.findById(id);
-        authorize(username, game);
 
-        GameTable table = game.getTable();
         Player player = game.getPlayer(username);
 
 
         //call the correct method and return the amount bet, if nothing is bet return -1
-        int bet = switch (move.getMove()) {
+        return switch (move.getMove()) {
             case Fold -> {
                 player.fold();
                 //indicates no bet has been made
@@ -65,6 +63,14 @@ public class GameService {
             }
             case Call -> player.call(game.getBet());
         };
+    }
+
+
+    //updates game state (split from turn for easier testing)
+    public void updateGame(long id, int bet, String token){
+        String username = userRepository.findByToken(token).getUsername();
+        Game game = gameRepository.findById(id);
+        GameTable table = game.getTable();
 
         if(bet > 0){
             table.updateMoney(bet);
@@ -87,11 +93,23 @@ public class GameService {
         //TODO
     }
 
-    private void authorize(String username, Game game){
+    public void authorize(String token, long id){
+        String username = userRepository.findByToken(token).getUsername();
+        Game game = gameRepository.findById(id);
+
+        //Check if valid inputs
+        if(username == null){
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You can access this when logged in!");
+        }
+        if(game == null){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown game ID");
+        }
+
+        //Check if legal actions
         if(!game.getOrder().contains(username)){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "you are not in this game!");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not in this game!");
         }else if(!Objects.equals(game.getPlayerTurn(), username)){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "it is not your turn!");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "It is not your turn!");
         }
     }
 
