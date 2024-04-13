@@ -52,6 +52,14 @@ public class UserService {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown User!");
     }
 
+    public User getUserByToken(String token){
+        User user = userRepository.findByToken(token);
+        if (user != null){
+            return user;
+        }
+        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown User!");
+    }
+
     public User createUser(User newUser) {
         newUser.setToken(UUID.randomUUID().toString());
         setOnline(newUser);

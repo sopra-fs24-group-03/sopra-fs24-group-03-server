@@ -16,6 +16,8 @@ import java.util.HashMap;
 import java.util.List;
 
 
+
+
 @Service
 public class DeckOfCardsApi {
 
@@ -51,7 +53,7 @@ public class DeckOfCardsApi {
 
 
     //Draw cards from a deck, give id and amount of cards drawn
-    public List<HashMap<String, String>> drawCards(String id, int amount){
+    public List<Card> drawCards(String id, int amount){
 
         //Setup the URL
         String requestURI = String.format("%s/%s/draw/?count=%d", BASE_URI, id, amount);
@@ -70,20 +72,14 @@ public class DeckOfCardsApi {
             JsonNode cardNode = jsonNode.get("cards");
 
 
-            List<HashMap<String, String>> cardList = new ArrayList<>();
+            List<Card> cardList = new ArrayList<>();
 
             //extract card code and card image from cards and add to the cardList
             for (JsonNode card : cardNode) {
                 String code = card.get("code").asText();
                 String image = card.get("image").asText();
 
-                // Create a HashMap for code and image
-                HashMap<String, String> cardMap = new HashMap<>();
-                cardMap.put("code", code);
-                cardMap.put("image", image);
-
-                // Add the HashMap to the List
-                cardList.add(cardMap);
+                cardList.add(new Card(code, image));
             }
 
             return cardList;

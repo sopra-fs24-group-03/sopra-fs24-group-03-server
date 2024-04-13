@@ -5,7 +5,6 @@ import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
 
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.repository.LobbyRepository;
-import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,20 +24,18 @@ import java.util.Set;
 @Transactional
 public class LobbyService {
     private final LobbyRepository lobbyRepository;
-    private final UserRepository userRepository;
     private final UserService userService;
     private final Logger log = LoggerFactory.getLogger(LobbyService.class);
 
     @Autowired
-    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, @Qualifier("userRepository") UserRepository userRepository, @Qualifier("userService") UserService userService){
+    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, @Qualifier("userService") UserService userService){
         this.lobbyRepository = lobbyRepository;
-        this.userRepository = userRepository;
         this.userService = userService;
     }
 
     public Lobby createLobby(String token) {
         userService.authenticateUser(token);
-        User creatorUser = userRepository.findByToken(token);
+        User creatorUser = userService.getUserByToken(token);
 
         // Check if the user is not already in a lobby
         if (creatorUser.getLobby() == null) {
@@ -48,7 +45,7 @@ public class LobbyService {
             newLobby.addUserToLobby(creatorUser);
             newLobby = lobbyRepository.save(newLobby);
             lobbyRepository.flush();
-            log.debug("Created Information for User: {}", newLobby);
+            log.debug("Created new lobby {} for User: {}", newLobby, creatorUser);
             return newLobby;
         }
         else {
@@ -59,7 +56,7 @@ public class LobbyService {
 
     public Lobby getLobbyById(long id, String token) {
         userService.authenticateUser(token);
-        User user = userRepository.findByToken(token);
+        User user = userService.getUserByToken(token);
         Lobby lobby = findLobby(id);
 
         if (user.getLobby() != null && user.getLobby().getId() == id) {
@@ -73,7 +70,7 @@ public class LobbyService {
 
     public Lobby joinLobbyById(long id, String token) {
         userService.authenticateUser(token);
-        User user = userRepository.findByToken(token);
+        User user = userService.getUserByToken(token);
         Lobby lobby = findLobby(id);
 
         if (user.getLobby() == null) {
@@ -92,7 +89,7 @@ public class LobbyService {
 
     public void removeUserFromLobby(String token) {
         userService.authenticateUser(token);
-        User user = userRepository.findByToken(token);
+        User user = userService.getUserByToken(token);
         Lobby lobby = user.getLobby();
 
         if (lobby != null) {
@@ -122,10 +119,9 @@ public class LobbyService {
 
 
     //start a new Game in lobby
-    public Game startGame(String token, long id) {
-        Lobby lobby = findLobby(id);
+    public Game startGame(String token, long lobbyId) {
+        Lobby lobby = findLobby(lobbyId);
         authenticateLeader(token, lobby);
-        HashMap<String, Integer> players = new HashMap<String, Integer>();
 
         //throw exception if game already running
         if(lobby.getGame() != null){
@@ -133,29 +129,30 @@ public class LobbyService {
         }
 
         //Iterate over all users, check cash, then add username and money to player hashmap
-        lobby.getLobbyusers().forEach((u) -> {
+        lobby.getLobbyusers().forEach((user) -> {
             // if enough cash add user to Map
-            if(checkCash(u)){
-                players.put(u.getUsername(), u.getMoney());
-            }
+//            if(checkCash(user)){
+//                players.put(user.getUsername(), user.getMoney());
+//            }
 
             // Otherwise remove user, if user is leader throw exception, else continue starting game
-            else {
-                updateLoss(u);
+            if(!checkCash(user)) {
+                updateLoss(user);
 
                 // If user is lobby leader, exception is thrown and game start is cancelled
-                if (lobby.getLobbyLeader()== u){
+                if (lobby.getLobbyLeader()== user){
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "could not start game, lobby leader has insufficient money!");
                 }
 
                 //remove user  (might not be necessary, could also just update and continue, might change later)
-                removeUserFromLobby(u.getToken());
+                removeUserFromLobby(user.getToken());
             }
         });
+        List<User> users = lobby.getLobbyusers();
 
-        //checks player amount
-        if(players.size() >= 2){
-            return lobby.createGame(players, id);
+        //checks for enough users
+        if(users.size() >= 2){
+            return lobby.createGame(users);
         } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough players");
 
     }

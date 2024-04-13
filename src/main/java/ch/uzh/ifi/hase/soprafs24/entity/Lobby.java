@@ -1,5 +1,6 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
+import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
@@ -70,8 +71,8 @@ public class Lobby implements Serializable {
 
 
     // Used to create a new Game, assign same ID
-    public Game createGame(HashMap<String, Integer> players, long id){
-        Game game = new Game(players, this, this.id);
+    public Game createGame(List<User> users){
+        Game game = new Game(users);
         this.game = game;
         return game;
     }
