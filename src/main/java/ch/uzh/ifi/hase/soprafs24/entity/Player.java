@@ -1,21 +1,34 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import ch.uzh.ifi.hase.soprafs24.externalapi.Card;
+
+import javax.persistence.*;
+import java.util.List;
 import java.util.Map;
 
 @Entity
+@Table(name = "player")
 public class Player {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(name = "id",unique=true, nullable = false)
+    private Long id;
+    protected Player(){}
     @Column(nullable = false, unique = true)
     private String username;
     @Column(nullable = false)
     private int money;
-    @Column(nullable = false)
-    private Map cards;
+    @OneToMany(mappedBy = "player", cascade = CascadeType.ALL)
+    private List<Card> cards;
     @Column(nullable = false, unique = true)
     private String token;
 
-    public Player(String username, int money, String token, Map cards) {
+    @ManyToOne()
+    @JoinColumn(name="game_id", referencedColumnName = "id")
+    private Game game;
+
+    public Player(String username, int money, String token, List<Card> cards) {
         setUsername(username);
         setMoney(money);
         setToken(token);
@@ -42,8 +55,8 @@ public class Player {
     public void setToken(String token) {
         this.token = token;
     }
-    public Map getCards() { return cards; }
-    public void setCards(Map cards) { this.cards = cards; }
+    public List<Card> getCards() { return cards; }
+    public void setCards(List<Card> cards) { this.cards = cards; }
 
 
 
@@ -52,19 +65,19 @@ public class Player {
     }
 
     public int raise() {
-
+        return 0;
     }
 
     public int call() {
-
+        return 0;
     }
 
     public long leaveGame() {
-
+        return 0;
     }
 
     private int checkMoney() {
-
+        return 0;
     }
 
 }
