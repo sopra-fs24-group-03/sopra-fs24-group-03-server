@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
 
+import ch.uzh.ifi.hase.soprafs24.externalapi.DeckOfCardsApi;
 import ch.uzh.ifi.hase.soprafs24.repository.LobbyRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
@@ -9,15 +10,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Entity
-@Table(name = "GAME")
-@Service
-@Transactional
+@Table(name = "game")
 public class Game {
 
 
@@ -28,20 +30,17 @@ public class Game {
 
 
     //Game and Lobby have the same ID, this could be changed, as the lobby is saved within the game already
-    //@Autowired
-    public Game(HashMap<String, Integer> players, Lobby lobby, long id) {
-        //this.userRepository = userRepository;
-        setLobby(lobby);
-        setId(id);
-        // can be changed for now the first in the list (HashMap) starts
-        //setPlayer(players);
-        // get from Card API for each Player two cards and for Table five
 
-        //TODO constructor for Game
+    public Game(List<User> users) {
+        DeckOfCardsApi cardsApi = new DeckOfCardsApi(new RestTemplate());
+        String deckId = cardsApi.postDeck();
+        // create the players and give them cards
+        setPlayers(users.stream().map(user -> new Player(user.getUsername(), user.getMoney(), user.getToken(), cardsApi.drawCards(deckId, 2))).toList());
+        // TODO create a table and assign cards
     }
 
     @JsonIgnore //stop recursion
-    @OneToMany(mappedBy = "game")
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
     List<Player> players = new ArrayList<>();
 
     @Column(nullable = false)
@@ -51,24 +50,14 @@ public class Game {
     private GameTable gameTable;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Basic(optional = false)
+    @Column(unique=true, nullable = false)
     private Long id;
 
     @OneToOne
     @JoinColumn(name = "lobby_id")
     private Lobby lobby;
-
-
-    //TODO instantiate correctly
-    @ElementCollection(targetClass = String.class, fetch = FetchType.EAGER)
-    @CollectionTable(name = "order", joinColumns = @JoinColumn(name = "game_id"))
-    @Column(name = "order", nullable = false)
-    private List<String> order = new ArrayList<>();
-
-    @Column(nullable = false)
-    private String playerTurn;
-
-    @Column(nullable = false)
-    private int bet  = 0;
 
 
     public void game() {
@@ -78,6 +67,23 @@ public class Game {
     private void setUp() {
 
     }
+
+//    private Player winningCondition() {
+//
+//    }
+//
+//    private Map endGame() {
+//
+//    }
+//
+//    public Map turn() {
+//
+//    }
+
+    public long leaveGame() {
+        return 0;
+    }
+
 
     public Long getId() {
         return id;
@@ -95,61 +101,7 @@ public class Game {
         this.lobby = lobby;
     }
 
-    public void setPlayers(HashMap<String, Integer> players) {
-//        for (Map.Entry<String, Integer> entry : players.entrySet()) {
-//            User userToPlayer = UserRepository.findByToken(entry.getKey());
-//            players.add(new Player(userToPlayer.getUsername(), userToPlayer.getMoney(), userToPlayer.getToken(), //cards))
-//
-//
-//        }
-    }
-
-    public Player getPlayer(String username){
-        //TODO
-        return new Player();
-    }
-
-    public GameTable getTable(){
-        //TODO
-        return new GameTable();
-    }
-
-
-    public List<String> getOrder() {
-        return order;
-    }
-
-    //called if player raises, reset the order where player is now first
-    public void updateOrder(){
-        int index = order.indexOf(this.playerTurn);
-        List<String> updatedOrder = new ArrayList<>();
-
-        //reorder list such that given username is first element
-        for(int i = index; i < order.size(); i++){
-            updatedOrder.add(order.get(i));
-        }
-        for (int i = 0; i < index; i++) {
-            updatedOrder.add(order.get(i));
-        }
-        this.order = updatedOrder;
-    }
-
-
-    public void updatePlayerTurn(){
-        if(Objects.equals(order.get(order.size() - 1), playerTurn)) {
-            playerTurn = order.get(0);
-        } else playerTurn = order.get(order.indexOf(playerTurn) + 1);
-    }
-
-    public String getPlayerTurn() {
-        return playerTurn;
-    }
-
-    public int getBet() {
-        return bet;
-    }
-
-    public void setBet(int bet) {
-        this.bet = bet;
+    public void setPlayers(List<Player> players) {
+        this.players = players;
     }
 }
