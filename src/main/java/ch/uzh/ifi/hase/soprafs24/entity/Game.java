@@ -13,10 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Entity
 @Table(name = "game")
@@ -32,11 +29,18 @@ public class Game {
     //Game and Lobby have the same ID, this could be changed, as the lobby is saved within the game already
 
     public Game(List<User> users) {
+        // Selecting a random user to start and sets the playerTurnId
+        Random random = new Random();
+        User startingUser = users.get(random.nextInt(users.size()));
+        playerTurnId = startingUser.getId();
         DeckOfCardsApi cardsApi = new DeckOfCardsApi(new RestTemplate());
         String deckId = cardsApi.postDeck();
         // create the players and give them cards
         setPlayers(users.stream().map(user -> new Player(user.getUsername(), user.getMoney(), user.getToken(), cardsApi.drawCards(deckId, 2))).toList());
-        // TODO create a table and assign cards
+        GameTable gameTable = new GameTable();
+        setGameTable(gameTable);
+        gameTable.setCards(cardsApi.drawCards(deckId, 5));
+
     }
 
     @JsonIgnore //stop recursion
@@ -45,6 +49,7 @@ public class Game {
 
     @Column(nullable = false)
     private long playerTurnId;
+
 
     @Transient
     private GameTable gameTable;
@@ -76,9 +81,16 @@ public class Game {
 //
 //    }
 //
-//    public Map turn() {
-//
-//    }
+
+    private void setsNextPlayerTurnId() {
+        int numberOfPlayers = players.size();
+        this.playerTurnId = (this.playerTurnId + 1) % numberOfPlayers;
+    }
+
+    public void turn() {
+        // only sets the playerTurnId to the next player
+        setsNextPlayerTurnId();
+    }
 
     public long leaveGame() {
         return 0;
@@ -103,5 +115,12 @@ public class Game {
 
     public void setPlayers(List<Player> players) {
         this.players = players;
+    }
+    public GameTable getGameTable() {
+        return gameTable;
+    }
+
+    public void setGameTable(GameTable gameTable) {
+        this.gameTable = gameTable;
     }
 }
