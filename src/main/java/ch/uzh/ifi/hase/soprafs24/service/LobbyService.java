@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs24.entity.Game;
 import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
 
 import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.LobbyRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,10 +28,13 @@ public class LobbyService {
     private final UserService userService;
     private final Logger log = LoggerFactory.getLogger(LobbyService.class);
 
+    private final GameRepository gameRepository;
+
     @Autowired
-    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, @Qualifier("userService") UserService userService){
+    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, @Qualifier("userService") UserService userService, @Qualifier("gameRepository") GameRepository gameRepository){
         this.lobbyRepository = lobbyRepository;
         this.userService = userService;
+        this.gameRepository = gameRepository;
     }
 
     public Lobby createLobby(String token) {
@@ -152,7 +156,12 @@ public class LobbyService {
 
         //checks for enough users
         if(users.size() >= 2){
-            return lobby.createGame(users);
+            Game game = new Game(users);
+            lobby.setGame(game);
+            log.info("created game {}", game);
+            lobbyRepository.save(lobby);
+            lobbyRepository.flush();
+            return game;
         } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough players");
 
     }

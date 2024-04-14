@@ -13,11 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.*;
 
 @Entity
-@Table(name = "game")
-public class Game {
+@Table(name = "GAME")
+public class Game implements Serializable {
 
 
     //Required by Springboot, should not be used otherwise
@@ -32,18 +33,19 @@ public class Game {
         // Selecting a random user to start and sets the playerTurnId
         Random random = new Random();
         User startingUser = users.get(random.nextInt(users.size()));
-        playerTurnId = startingUser.getId();
+        this.playerTurnId = startingUser.getId();
+
         DeckOfCardsApi cardsApi = new DeckOfCardsApi(new RestTemplate());
         String deckId = cardsApi.postDeck();
         // create the players and give them cards
-        setPlayers(users.stream().map(user -> new Player(user.getUsername(), user.getMoney(), user.getToken(), cardsApi.drawCards(deckId, 2))).toList());
+        setPlayers(users.stream().map(user -> new Player(this, user.getUsername(), user.getMoney(), user.getToken(), cardsApi.drawCards(deckId, 2))).toList());
+        // create Table and give five cards
         GameTable gameTable = new GameTable();
-        setGameTable(gameTable);
+        //setGameTable(gameTable);
         gameTable.setCards(cardsApi.drawCards(deckId, 5));
 
     }
 
-    @JsonIgnore //stop recursion
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
     List<Player> players = new ArrayList<>();
 
@@ -51,8 +53,8 @@ public class Game {
     private long playerTurnId;
 
 
-    @Transient
-    private GameTable gameTable;
+//    @Transient
+//    private GameTable gameTable;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -60,9 +62,8 @@ public class Game {
     @Column(unique=true, nullable = false)
     private Long id;
 
-    @OneToOne
-    @JoinColumn(name = "lobby_id")
-    private Lobby lobby;
+//    @OneToOne(mappedBy = "game")
+//    private Lobby lobby;
 
 
     public void game() {
@@ -105,22 +106,22 @@ public class Game {
         this.id = id;
     }
 
-    public Lobby getLobby() {
-        return lobby;
-    }
-
-    public void setLobby(Lobby lobby) {
-        this.lobby = lobby;
-    }
+//    public Lobby getLobby() {
+//        return lobby;
+//    }
+//
+//    public void setLobby(Lobby lobby) {
+//        this.lobby = lobby;
+//    }
 
     public void setPlayers(List<Player> players) {
         this.players = players;
     }
-    public GameTable getGameTable() {
-        return gameTable;
-    }
-
-    public void setGameTable(GameTable gameTable) {
-        this.gameTable = gameTable;
-    }
+//    public GameTable getGameTable() {
+//        return gameTable;
+//    }
+//
+//    public void setGameTable(GameTable gameTable) {
+//        this.gameTable = gameTable;
+//    }
 }
