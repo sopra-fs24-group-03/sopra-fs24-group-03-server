@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
 import ch.uzh.ifi.hase.soprafs24.externalapi.Card;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.List;
@@ -23,15 +24,18 @@ public class Player {
     private List<Card> cards;
     @Column(nullable = false, unique = true)
     private String token;
-
+    @JsonIgnore
     @ManyToOne()
     @JoinColumn(name="game_id", referencedColumnName = "id")
     private Game game;
 
-    public Player(String username, int money, String token, List<Card> cards) {
+    public Player(Game game, String username, int money, String token, List<Card> cards) {
+        this.game = game;
         setUsername(username);
         setMoney(money);
         setToken(token);
+        System.out.println("Setting cards for player id " + id);
+        cards.forEach(card -> card.setPlayer(this));
         setCards(cards);
     }
     public String getUsername() {
