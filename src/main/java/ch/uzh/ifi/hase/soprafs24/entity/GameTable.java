@@ -16,17 +16,16 @@ public class GameTable implements Serializable {
     @Column
     private int Money;
 
+
     @Id
     @GeneratedValue
     @Column(name = "id")
     private Long id;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "gameTable_id")
+    @OneToMany(mappedBy="gameTable")
     private List<Card> cards = new ArrayList<>();
-    @JsonIgnore //stop recursion
-    @OneToOne
-    @JoinColumn(name="game", referencedColumnName = "id")
+
+    @OneToOne(mappedBy = "gameTable")
     private Game game;
     @Transient
     private List<Card> openCards = new ArrayList<>();

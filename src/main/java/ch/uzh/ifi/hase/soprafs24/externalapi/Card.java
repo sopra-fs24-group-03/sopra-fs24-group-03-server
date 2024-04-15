@@ -16,6 +16,7 @@ public class Card {
     @Column(name = "id",unique=true, nullable = false)
     private Long id;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "gameTable_id")
     private GameTable gameTable;
