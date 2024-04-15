@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 
 
 
+import ch.uzh.ifi.hase.soprafs24.entity.Game;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GamePutDTO;
 import ch.uzh.ifi.hase.soprafs24.service.GameService;
 
@@ -15,6 +16,15 @@ public class GameController {
 
     public GameController(GameService gameService){
         this.gameService = gameService;
+    }
+
+    @GetMapping("/games/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public Game getGameByID (@PathVariable long id, @RequestHeader String token){
+        Game game = gameService.getGameById(id, token);
+        return game;
+
     }
 
     @PutMapping("/games/{gameId}")

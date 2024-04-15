@@ -25,11 +25,28 @@ public class GameService {
     private final Logger log = LoggerFactory.getLogger(LobbyService.class);
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
+    private final UserService userService;
 
     @Autowired
-    public GameService(@Qualifier("userRepository") UserRepository userRepository, @Qualifier("gameRepository") GameRepository gameRepository){
+    public GameService(@Qualifier("userService") UserService userService,@Qualifier("userRepository") UserRepository userRepository, @Qualifier("gameRepository") GameRepository gameRepository){
         this.gameRepository = gameRepository;
         this.userRepository = userRepository;
+        this.userService = userService;
+    }
+    public Game getGameById(long id, String token){
+        userService.authenticateUser(token);
+        Game game = findGame(id);
+        return game;
+
+    }
+
+
+    private Game findGame(long gameId){
+        Game game = gameRepository.findById(gameId);
+        if(game == null){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown game");
+        }
+        return game;
     }
 
 

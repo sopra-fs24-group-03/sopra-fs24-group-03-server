@@ -25,8 +25,6 @@ public class GameTable implements Serializable {
     @OneToMany(mappedBy = "gameTable", cascade = CascadeType.ALL)
     private List<Card> cards;
 
-    @OneToOne(mappedBy = "gameTable")
-    private Game game;
     @Transient
     private List<Card> openCards = new ArrayList<>();
 
