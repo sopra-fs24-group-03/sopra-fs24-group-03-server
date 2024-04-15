@@ -69,13 +69,15 @@ public class Player {
     }
 
     // return 0 only for compiling
-    public int raise() {
+    public int raise(int bet) {
         return 0;
     }
 
-    public int call() {
+    public int call(int bet) {
         return 0;
     }
+
+    public void check() {}
 
     public long leaveGame() {
         return 0;

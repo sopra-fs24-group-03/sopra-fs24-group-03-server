@@ -34,11 +34,11 @@ public class GameService {
 
 
     //method to make moves
-    public int turn(GamePutDTO move, long id, String token) {
+    public int turn(GamePutDTO move, long game_id, String token) {
         String username = userRepository.findByToken(token).getUsername();
-        Game game = gameRepository.findById(id);
+        Game game = gameRepository.findById(game_id);
 
-        Player player = game.getPlayer(username);
+        Player player = game.getPlayerByUsername(username);
 
 
         //call the correct method and return the amount bet, if nothing is bet return -1
@@ -54,7 +54,7 @@ public class GameService {
                     game.updateOrder();
                     game.setBet(move.getAmount());
                     yield player.raise(move.getAmount());
-                } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+                } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You need to bet higher than the current highest bet!");
             }
             case Check -> {
                 player.check();
@@ -67,25 +67,25 @@ public class GameService {
 
 
     //updates game state (split from turn for easier testing)
-    public void updateGame(long id, int bet, String token){
+    public void updateGame(long game_id, int bet, String token){
         String username = userRepository.findByToken(token).getUsername();
-        Game game = gameRepository.findById(id);
-        GameTable table = game.getTable();
+        Game game = gameRepository.findById(game_id);
+        GameTable table = game.getGameTable();
 
         if(bet > 0){
             table.updateMoney(bet);
         }
 
         //check if round is finished
-        if(Objects.equals(game.getOrder().get(game.getOrder().size() - 1), username)){
+        if(Objects.equals(game.getPlayers().get(game.getPlayers().size() - 1).getUsername(), username)){
             //check if final round to end game
-            if(table.getCardList().size() == 3){
+            if(table.getCards().size() == 5){
                 endGame();
             }
             table.updateCards();
         }
 
-        game.updatePlayerTurn();
+        game.setsNextPlayerTurnIndex();
     }
 
 
@@ -105,10 +105,10 @@ public class GameService {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown game ID");
         }
 
-        //Check if legal actions
-        if(!game.getOrder().contains(username)){
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not in this game!");
-        }else if(!Objects.equals(game.getPlayerTurn(), username)){
+        //will throw correct exception if not in player list
+        Player player = game.getPlayerByUsername(username);
+
+        if(game.getPlayers().get(game.getPlayerTurnIndex()) != player){
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "It is not your turn!");
         }
     }

@@ -193,9 +193,6 @@ public class LobbyServiceIntegrationTest {
     }
 
 
-    //TODO lobby repository, doesnt work!
-
-
     @Test
     public void testCreateGame_notEnoughPlayers(){
 

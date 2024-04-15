@@ -39,6 +39,7 @@ public class Lobby implements Serializable {
     @OneToOne
     @JoinColumn(name = "lobbyLeader_id")
     private User lobbyLeader;
+
     public Long getId() {
         return id;
     }

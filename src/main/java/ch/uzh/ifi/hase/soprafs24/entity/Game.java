@@ -2,15 +2,10 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 
 
 import ch.uzh.ifi.hase.soprafs24.externalapi.DeckOfCardsApi;
-import ch.uzh.ifi.hase.soprafs24.repository.LobbyRepository;
-import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
-import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -32,15 +27,15 @@ public class Game implements Serializable {
     public Game(List<User> users) {
         // Selecting a random user to start and sets the playerTurnId
         Random random = new Random();
-        User startingUser = users.get(random.nextInt(users.size()));
-        this.playerTurnId = startingUser.getId();
+        this.playerTurnIndex = 0;
+        this.bet = 0;
 
         DeckOfCardsApi cardsApi = new DeckOfCardsApi(new RestTemplate());
         String deckId = cardsApi.postDeck();
         // create the players and give them cards
         setPlayers(users.stream().map(user -> new Player(this, user.getUsername(), user.getMoney(), user.getToken(), cardsApi.drawCards(deckId, 2))).toList());
         // create Table and give five cards
-        GameTable gameTable = new GameTable();
+        this.gameTable = new GameTable();
         //setGameTable(gameTable);
         gameTable.setCards(cardsApi.drawCards(deckId, 5));
 
@@ -50,11 +45,17 @@ public class Game implements Serializable {
     List<Player> players = new ArrayList<>();
 
     @Column(nullable = false)
-    private long playerTurnId;
+    private int playerTurnIndex;
+
+    @Column(nullable = false)
+    private int bet;
 
 
-//    @Transient
-//    private GameTable gameTable;
+    @JsonIgnore //stop recursion
+    @OneToOne
+    @JoinColumn(name = "gameTable_id")
+    private GameTable gameTable;
+
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -83,14 +84,9 @@ public class Game implements Serializable {
 //    }
 //
 
-    private void setsNextPlayerTurnId() {
+    public void setsNextPlayerTurnIndex() {
         int numberOfPlayers = players.size();
-        this.playerTurnId = (this.playerTurnId + 1) % numberOfPlayers;
-    }
-
-    public void turn() {
-        // only sets the playerTurnId to the next player
-        setsNextPlayerTurnId();
+        this.playerTurnIndex = (this.playerTurnIndex + 1) % numberOfPlayers;
     }
 
     public long leaveGame() {
@@ -114,14 +110,52 @@ public class Game implements Serializable {
 //        this.lobby = lobby;
 //    }
 
+
+    public Player getPlayerByUsername(String username){
+        for(Player player: players){
+            if(Objects.equals(player.getUsername(), username)){
+                return player;
+            }
+        }
+        //if player folded
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not part of this game!");
+    }
+
+    public void updateOrder(){
+        //find player
+        List<Player> updatedOrder = new ArrayList<>();
+
+        //reorder list such that given username is first element
+        for(int i = playerTurnIndex; i < players.size(); i++){
+            updatedOrder.add(players.get(i));
+        }
+        for (int i = 0; i < playerTurnIndex; i++) {
+            updatedOrder.add(players.get(i));
+        }
+        this.players = updatedOrder;
+    }
+
     public void setPlayers(List<Player> players) {
         this.players = players;
     }
-//    public GameTable getGameTable() {
-//        return gameTable;
-//    }
-//
-//    public void setGameTable(GameTable gameTable) {
-//        this.gameTable = gameTable;
-//    }
+
+    public int getBet() {
+        return bet;
+    }
+
+    public void setBet(int bet) {
+        this.bet = bet;
+    }
+
+    public GameTable getGameTable() {
+          return gameTable;
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+
+    public int getPlayerTurnIndex() {
+        return playerTurnIndex;
+    }
 }

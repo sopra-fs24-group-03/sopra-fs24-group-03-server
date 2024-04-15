@@ -10,7 +10,7 @@
 - Joel Huber:
 - Cédric Huber:
 - Linus Lautenschlager:
-- Colin Bächtold:
+- Colin Bächtold: External API requests, Turn method: #109, #117, #118
 - Noah Ziegler:
 ### Week 15.04-21.04
 - Joel Huber:
