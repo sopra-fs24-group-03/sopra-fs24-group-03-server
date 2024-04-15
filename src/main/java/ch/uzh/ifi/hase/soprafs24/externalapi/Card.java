@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.externalapi;
 
 import ch.uzh.ifi.hase.soprafs24.entity.Game;
+import ch.uzh.ifi.hase.soprafs24.entity.GameTable;
 import ch.uzh.ifi.hase.soprafs24.entity.Player;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -14,6 +15,10 @@ public class Card {
     @Basic(optional = false)
     @Column(name = "id",unique=true, nullable = false)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "gameTable_id")
+    private GameTable gameTable;
 
     public void setPlayer(Player player) {
         this.player = player;

@@ -82,7 +82,7 @@ public class GameService {
             if(table.getCards().size() == 5){
                 endGame();
             }
-            table.updateCards();
+            table.updateOpenCards();
         }
 
         game.setsNextPlayerTurnIndex();

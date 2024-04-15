@@ -35,9 +35,7 @@ public class Game implements Serializable {
         // create the players and give them cards
         setPlayers(users.stream().map(user -> new Player(this, user.getUsername(), user.getMoney(), user.getToken(), cardsApi.drawCards(deckId, 2))).toList());
         // create Table and give five cards
-        this.gameTable = new GameTable();
-        //setGameTable(gameTable);
-        gameTable.setCards(cardsApi.drawCards(deckId, 5));
+        this.gameTable = new GameTable(cardsApi.drawCards(deckId, 5));
 
     }
 
@@ -53,7 +51,7 @@ public class Game implements Serializable {
 
     @JsonIgnore //stop recursion
     @OneToOne
-    @JoinColumn(name = "gameTable_id")
+    @JoinColumn(name="gameTable_id", referencedColumnName = "id")
     private GameTable gameTable;
 
 

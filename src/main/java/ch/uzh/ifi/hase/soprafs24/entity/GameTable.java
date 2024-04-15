@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 
 
 import ch.uzh.ifi.hase.soprafs24.externalapi.Card;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -23,18 +24,23 @@ public class GameTable implements Serializable {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "gameTable_id")
     private List<Card> cards = new ArrayList<>();
-
+    @JsonIgnore //stop recursion
+    @OneToOne
+    @JoinColumn(name="game", referencedColumnName = "id")
+    private Game game;
+    @Transient
+    private List<Card> openCards = new ArrayList<>();
 
 
 
     public GameTable(List<Card> cards){
         this.cards = cards;
         Money = 0;
-        //no cards yet added to opencards since pre-flop bets
+        openCards.addAll(cards.subList(0, 3));
     }
+
     //default constructor
     public GameTable() {
-
     }
 
 
@@ -51,12 +57,17 @@ public class GameTable implements Serializable {
     }
 
     public List<Card> getCards() {
-        //MODIFY ONLY DISPLAY CARDS AS NEEDED
         return cards;
     }
+    public List<Card> getOpenCards() {
+        return openCards;
+    }
 
-    //TODO
-    public void updateCards(){
+    public void updateOpenCards(){
+        //only add card up until size 5 --> then size is 5 and in gameservice endgame is called
+        if (openCards.size() <= 4) {
+            openCards.add(cards.get(openCards.size()));
+        }
 
     }
 
