@@ -22,6 +22,7 @@ public class GameTable implements Serializable {
     @Column(name = "id")
     private Long id;
 
+    @JsonIgnore
     @OneToMany(mappedBy="gameTable")
     private List<Card> cards = new ArrayList<>();
 

@@ -50,7 +50,7 @@ public class Game implements Serializable {
 
 
     @JsonIgnore //stop recursion
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="gameTable_id", referencedColumnName = "id")
     private GameTable gameTable;
 

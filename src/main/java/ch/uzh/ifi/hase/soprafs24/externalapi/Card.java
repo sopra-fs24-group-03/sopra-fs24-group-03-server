@@ -18,7 +18,7 @@ public class Card {
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "gameTable_id")
+    @JoinColumn(name = "gameTable_id",  referencedColumnName = "id")
     private GameTable gameTable;
 
     public void setPlayer(Player player) {
