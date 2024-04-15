@@ -11,7 +11,7 @@
 - Cédric Huber: Polling Lobby and User/Player mapping #38,#40
 - Linus Lautenschlager:
 - Colin Bächtold: External API requests, Turn method: #109, #117, #118
-- Noah Ziegler:
+- Noah Ziegler: Setup for Table class, Cards update accordingly: #108, #119
 ### Week 15.04-21.04
 - Joel Huber:
 - Cédric Huber:
