@@ -9,7 +9,7 @@
 ### Week 08.04-14.04
 - Joel Huber: Setup for Game and Player #106,#107
 - Cédric Huber: Polling Lobby and User/Player mapping #38,#40
-- Linus Lautenschlager:
+- Linus Lautenschlager: Table & Player frontend, #42, #43
 - Colin Bächtold: External API requests, Turn method: #109, #117, #118
 - Noah Ziegler: Setup for Table class, Cards update accordingly: #108, #119
 ### Week 15.04-21.04
