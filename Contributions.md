@@ -7,8 +7,8 @@
 - Colin Bächtold: Adjusted template, Added startGame mapping: #66,#67,#72,#73,#78,#99,#100,#101
 - Noah Ziegler: Created Lobby: #96,#95,#91,#90,#84,#83,#82
 ### Week 08.04-14.04
-- Joel Huber:
-- Cédric Huber:
+- Joel Huber: Setup for Game and Player #106,#107
+- Cédric Huber: Polling Lobby and User/Player mapping #38,#40
 - Linus Lautenschlager:
 - Colin Bächtold:
 - Noah Ziegler:
