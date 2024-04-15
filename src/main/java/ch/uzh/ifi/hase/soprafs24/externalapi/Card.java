@@ -16,10 +16,14 @@ public class Card {
     @Column(name = "id",unique=true, nullable = false)
     private Long id;
 
-    @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "gameTable_id",  referencedColumnName = "id")
+    @JsonIgnore
+    @JoinColumn(name="gameTable_id", referencedColumnName = "id")
     private GameTable gameTable;
+
+    public void setGameTable(GameTable gameTable) {
+        this.gameTable = gameTable;
+    }
 
     public void setPlayer(Player player) {
         this.player = player;

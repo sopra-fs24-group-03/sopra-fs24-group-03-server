@@ -22,9 +22,8 @@ public class GameTable implements Serializable {
     @Column(name = "id")
     private Long id;
 
-    @JsonIgnore
-    @OneToMany(mappedBy="gameTable")
-    private List<Card> cards = new ArrayList<>();
+    @OneToMany(mappedBy = "gameTable", cascade = CascadeType.ALL)
+    private List<Card> cards;
 
     @OneToOne(mappedBy = "gameTable")
     private Game game;
@@ -35,6 +34,8 @@ public class GameTable implements Serializable {
 
     public GameTable(List<Card> cards){
         this.cards = cards;
+        cards.forEach(card -> card.setGameTable(this));
+        setCards(cards);
         Money = 0;
         openCards.addAll(cards.subList(0, 3));
     }
