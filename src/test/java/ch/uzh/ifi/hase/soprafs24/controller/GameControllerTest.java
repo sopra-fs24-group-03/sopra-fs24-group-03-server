@@ -39,7 +39,7 @@ public class GameControllerTest {
 
         // then
         mockMvc.perform(putRequest)
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -59,7 +59,7 @@ public class GameControllerTest {
 
         // then
         mockMvc.perform(putRequest)
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
     }
 
     @Test

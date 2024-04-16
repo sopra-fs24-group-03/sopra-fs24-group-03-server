@@ -58,28 +58,58 @@ public class GameService {
         Player player = game.getPlayerByUsername(username);
 
 
-        //call the correct method and return the amount bet, if nothing is bet return -1
+        //call the correct method and return the amount bet, if nothing is bet return 0
         return switch (move.getMove()) {
+            //TODO fold not done yet
             case Fold -> {
-                player.fold();
-                //indicates no bet has been made
-                yield -1;
+                if(move.getAmount() != 0){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Fold with an Amount");}
+                //remove player from player list, but he "remains" in game
+                game.getPlayers().remove(player);
+                //no bet was made
+                yield 0;
             }
             case Raise -> {
+                if (!checkEnoughMoney(player, move.getAmount())){
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot bet more money than you have!");
+                }
                 //if raise is legal, update the order and current bet and call raise
                 if(move.getAmount() > game.getBet()){
-                    game.updateOrder();
-                    game.setBet(move.getAmount());
-                    yield player.raise(move.getAmount());
+                    game.setBet(move.getAmount()); //set the current highest bet in game
+                    player.setMoney((player.getMoney()- move.getAmount())); //remove money from user
+                    game.updateOrder(); //"reset" betting round
+                    yield move.getAmount(); //return bet amount
                 } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You need to bet higher than the current highest bet!");
             }
             case Check -> {
-                player.check();
-                //indicates no bet has been made
-                yield -1;
+                if(move.getAmount() != 0){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Check with an Amount");}
+                //only check if there was no bet made this betting round
+                if (game.getBet() == 0){
+                    yield 0;
+                }
+                else{
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only check if there has been no bet made in this betting round");
+                }
+
             }
-            case Call -> player.call(game.getBet());
+            case Call -> {
+                if (game.getBet() == 0){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only call if a Bet was made before");}
+                if(move.getAmount() != 0){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Call with an Amount");}
+                if (game.getBet() >player.getMoney()){
+                    //if player does not have enough money to call, he goes all in and call works
+                    player.setMoney(0);
+                    yield player.getMoney();
+                }
+                else{ //if enough money, bet the current bet
+                    player.setMoney((player.getMoney()- game.getBet()));
+                    yield game.getBet();
+                }
+            }
         };
+    }
+    public boolean checkEnoughMoney(Player curPlayer, int amount){
+        if (curPlayer.getMoney()>= amount){return true;}
+        else {return false;}
+
     }
 
 
@@ -95,8 +125,10 @@ public class GameService {
 
         //check if round is finished
         if(Objects.equals(game.getPlayers().get(game.getPlayers().size() - 1).getUsername(), username)){
+            //reset betting to 0 after 1 betting round
+            game.setBet(0);
             //check if final round to end game
-            if(table.getCards().size() == 5){
+            if(table.getOpenCards().size() == 5){
                 endGame();
             }
             table.updateOpenCards();
@@ -129,5 +161,7 @@ public class GameService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "It is not your turn!");
         }
     }
+
+
 
 }

@@ -61,11 +61,11 @@ public class GameServiceTest {
         Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
         Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
         Mockito.when(move.getMove()).thenReturn(Moves.Fold);
-        Mockito.doNothing().when(player).fold();
+
 
         int bet = gameService.turn(move, 1, "token");
 
-        assertEquals(-1, bet);
+        assertEquals(0, bet);
     }
 
     @Test
@@ -78,13 +78,12 @@ public class GameServiceTest {
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
         Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
         Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        player.setMoney(2000);
         Mockito.when(game.getBet()).thenReturn(0);
         Mockito.when(move.getAmount()).thenReturn(100);
         Mockito.when(move.getMove()).thenReturn(Moves.Raise);
         Mockito.doNothing().when(game).setBet(Mockito.anyInt());
         Mockito.doNothing().when(game).updateOrder();
-        Mockito.when(player.raise(Mockito.anyInt())).thenReturn(100);
-
 
         int bet = gameService.turn(move, 1, "token");
 

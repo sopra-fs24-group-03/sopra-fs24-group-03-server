@@ -28,12 +28,14 @@ public class GameController {
     }
 
     @PutMapping("/games/{gameId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public void makeMove(@RequestBody GamePutDTO move, @RequestHeader String token, @PathVariable long gameId){
+    public Game makeMove(@RequestBody GamePutDTO move, @RequestHeader String token, @PathVariable long gameId){
         gameService.authorize(token, gameId);
         int bet = gameService.turn(move, gameId, token);
         gameService.updateGame(gameId, bet, token);
+        Game game = gameService.getGameById(gameId, token);
+        return game;
     }
 
 }

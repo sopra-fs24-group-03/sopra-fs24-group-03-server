@@ -4,7 +4,6 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 import ch.uzh.ifi.hase.soprafs24.entity.Game;
 import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
 
-import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GameGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO.LobbyGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.LobbyService;
@@ -33,9 +32,9 @@ public class LobbyController {
     @PostMapping("/lobbies/{id}")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public GameGetDTO createGame(@RequestHeader String token, @PathVariable long id){
+    public Game createGame(@RequestHeader String token, @PathVariable long id){
         Game game = lobbyService.startGame(token, id);
-        return DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
+        return game;
     }
 
     @GetMapping("/lobbies/{id}")

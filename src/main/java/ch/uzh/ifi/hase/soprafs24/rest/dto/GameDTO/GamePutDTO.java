@@ -15,7 +15,7 @@ public class GamePutDTO {
     }
 
     public int getAmount() {
-        return amount = -1;
+        return amount;
     }
 
     public void setAmount(int amount) {

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
 import java.util.List;
-import java.util.Map;
 
 @Entity
 @Table(name = "player")
@@ -62,22 +61,6 @@ public class Player {
     public List<Card> getCards() { return cards; }
     public void setCards(List<Card> cards) { this.cards = cards; }
 
-
-
-    public void fold() {
-
-    }
-
-    // return 0 only for compiling
-    public int raise(int bet) {
-        return 0;
-    }
-
-    public int call(int bet) {
-        return 0;
-    }
-
-    public void check() {}
 
     public long leaveGame() {
         return 0;
