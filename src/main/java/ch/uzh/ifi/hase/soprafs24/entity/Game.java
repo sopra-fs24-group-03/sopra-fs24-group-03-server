@@ -54,6 +54,10 @@ public class Game implements Serializable {
     @JoinColumn(name="gameTable_id", referencedColumnName = "id")
     private GameTable gameTable;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="raisePlayer_id", referencedColumnName = "id")
+    private Player raisePlayer;
+
 
 
     @Id
@@ -120,19 +124,6 @@ public class Game implements Serializable {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not part of this game!");
     }
 
-    public void updateOrder(){
-        //find player
-        List<Player> updatedOrder = new ArrayList<>();
-
-        //reorder list such that given username is first element
-        for(int i = playerTurnIndex; i < players.size(); i++){
-            updatedOrder.add(players.get(i));
-        }
-        for (int i = 0; i < playerTurnIndex; i++) {
-            updatedOrder.add(players.get(i));
-        }
-        this.players = updatedOrder;
-    }
 
     public void setPlayers(List<Player> players) {
         this.players = players;
@@ -156,5 +147,13 @@ public class Game implements Serializable {
 
     public int getPlayerTurnIndex() {
         return playerTurnIndex;
+    }
+
+    public Player getRaisePlayer() {
+        return raisePlayer;
+    }
+
+    public void setRaisePlayer(Player raisePlayer) {
+        this.raisePlayer = raisePlayer;
     }
 }

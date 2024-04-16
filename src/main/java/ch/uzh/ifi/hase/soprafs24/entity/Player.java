@@ -23,6 +23,11 @@ public class Player {
     private List<Card> cards;
     @Column(nullable = false, unique = true)
     private String token;
+
+    @Column
+    private int lastRaiseAmount;
+
+
     @JsonIgnore
     @ManyToOne()
     @JoinColumn(name="game_id", referencedColumnName = "id")
@@ -36,6 +41,7 @@ public class Player {
         System.out.println("Setting cards for player id " + id);
         cards.forEach(card -> card.setPlayer(this));
         setCards(cards);
+        lastRaiseAmount = 0;
     }
     public String getUsername() {
         return username;
@@ -70,4 +76,11 @@ public class Player {
         return 0;
     }
 
+    public int getLastRaiseAmount() {
+        return lastRaiseAmount;
+    }
+
+    public void setLastRaiseAmount(int lastRaiseAmount) {
+        this.lastRaiseAmount = lastRaiseAmount;
+    }
 }

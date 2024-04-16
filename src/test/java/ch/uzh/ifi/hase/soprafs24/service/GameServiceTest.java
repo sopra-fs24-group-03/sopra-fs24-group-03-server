@@ -83,7 +83,7 @@ public class GameServiceTest {
         Mockito.when(move.getAmount()).thenReturn(100);
         Mockito.when(move.getMove()).thenReturn(Moves.Raise);
         Mockito.doNothing().when(game).setBet(Mockito.anyInt());
-        Mockito.doNothing().when(game).updateOrder();
+        //TODO Mockito.doNothing().when(game).updateOrder();
 
         int bet = gameService.turn(move, 1, "token");
 
