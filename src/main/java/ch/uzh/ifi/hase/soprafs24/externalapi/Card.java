@@ -52,4 +52,25 @@ public class Card {
         this.code = code;
         this.image = image;
     }
+
+    //returns a numeric value of the card
+    public static int getValue(Card card) {
+        char cardValue = card.getCode().charAt(0); //get the cards value
+        return switch (cardValue) {
+            case '2' -> 2;
+            case '3' -> 3;
+            case '4' -> 4;
+            case '5' -> 5;
+            case '6' -> 6;
+            case '7' -> 7;
+            case '8' -> 8;
+            case '9' -> 9;
+            case '0' -> 10; //0 represents then in the card codes
+            case 'J' -> 11;
+            case 'Q' -> 12;
+            case 'K' -> 13;
+            case 'A' -> 14;
+            default -> -1; // Invalid card, no error should be raised just an indication it is invalid
+        };
+    }
 }
