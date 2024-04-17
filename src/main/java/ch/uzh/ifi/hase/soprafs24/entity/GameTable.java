@@ -1,7 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
 
-import ch.uzh.ifi.hase.soprafs24.externalapi.Card;
+import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 
 import javax.persistence.*;
 import java.io.Serializable;

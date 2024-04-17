@@ -1,4 +1,4 @@
-package ch.uzh.ifi.hase.soprafs24.externalapi;
+package ch.uzh.ifi.hase.soprafs24.helpers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -9,7 +9,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.client.support.RestGatewaySupport;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;

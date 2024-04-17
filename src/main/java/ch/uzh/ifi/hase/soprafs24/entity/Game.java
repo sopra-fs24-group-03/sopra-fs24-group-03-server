@@ -1,8 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
 
-import ch.uzh.ifi.hase.soprafs24.externalapi.DeckOfCardsApi;
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import ch.uzh.ifi.hase.soprafs24.helpers.DeckOfCardsApi;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;

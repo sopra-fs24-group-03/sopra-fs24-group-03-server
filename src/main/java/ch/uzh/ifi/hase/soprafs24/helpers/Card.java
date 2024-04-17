@@ -1,6 +1,5 @@
-package ch.uzh.ifi.hase.soprafs24.externalapi;
+package ch.uzh.ifi.hase.soprafs24.helpers;
 
-import ch.uzh.ifi.hase.soprafs24.entity.Game;
 import ch.uzh.ifi.hase.soprafs24.entity.GameTable;
 import ch.uzh.ifi.hase.soprafs24.entity.Player;
 import com.fasterxml.jackson.annotation.JsonIgnore;

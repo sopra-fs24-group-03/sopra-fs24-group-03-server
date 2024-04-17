@@ -1,6 +1,6 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
-import ch.uzh.ifi.hase.soprafs24.externalapi.Card;
+import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;

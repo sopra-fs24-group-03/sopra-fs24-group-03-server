@@ -1,11 +1,11 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
 
-import ch.uzh.ifi.hase.soprafs24.constant.Hand;
 import ch.uzh.ifi.hase.soprafs24.entity.Game;
 import ch.uzh.ifi.hase.soprafs24.entity.GameTable;
 import ch.uzh.ifi.hase.soprafs24.entity.Player;
-import ch.uzh.ifi.hase.soprafs24.externalapi.Card;
+import ch.uzh.ifi.hase.soprafs24.helpers.Card;
+import ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand;
 import ch.uzh.ifi.hase.soprafs24.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GamePutDTO;
@@ -21,8 +21,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static ch.uzh.ifi.hase.soprafs24.externalapi.Card.getValue;
-import static ch.uzh.ifi.hase.soprafs24.service.PlayerHand.*;
+import static ch.uzh.ifi.hase.soprafs24.helpers.Card.getValue;
+import static ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand.*;
 
 
 @Service
@@ -219,6 +219,14 @@ public class GameService {
                 continue;
             }
             PlayerHand curHand = evaluateHand(player, table);
+
+            curHand.getCards().sort(new Comparator<Card>() {
+                @Override
+                public int compare(Card c1, Card c2) {
+                    return -Integer.compare(getValue(c1), getValue(c2));
+                }
+            });
+
             if(winner == null || handRank(curHand.getHand()) > handRank(winner.getHand())){
                 winner = curHand;
             }
@@ -250,6 +258,12 @@ public class GameService {
 
         //royal flush
         playerHand = royalFlush(cards, player);
+        if(playerHand != null){
+            return playerHand;
+        }
+
+        //straight flush
+        playerHand = straightFlush(cards, player);
         if(playerHand != null){
             return playerHand;
         }

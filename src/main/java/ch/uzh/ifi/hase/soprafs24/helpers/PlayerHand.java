@@ -1,13 +1,12 @@
-package ch.uzh.ifi.hase.soprafs24.service;
+package ch.uzh.ifi.hase.soprafs24.helpers;
 
 import ch.uzh.ifi.hase.soprafs24.constant.Hand;
 import ch.uzh.ifi.hase.soprafs24.entity.Player;
-import ch.uzh.ifi.hase.soprafs24.externalapi.Card;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static ch.uzh.ifi.hase.soprafs24.externalapi.Card.getValue;
+import static ch.uzh.ifi.hase.soprafs24.helpers.Card.getValue;
 
 public class PlayerHand {
     private Player player;
@@ -46,10 +45,64 @@ public class PlayerHand {
         return null;
     }
 
+    //TODO doesn't work with pair correctly
     public static PlayerHand straightFlush(List<Card> cards, Player player){
-        return null;
         //Any five cards of successive values in the same suit that’s not a royal flush is a straight flush. A royal flush or a straight flush with
         //cards of higher ranking are the only hands that can beat a straight flush.
+        int length = cards.size();
+        List<Card> hand = new ArrayList<Card>();
+
+        // Check for regular straights
+        for (int i = 0; i <= length - 5; i++) {
+            boolean isStraight = true;
+            hand.clear();
+            for (int j = i; j < length - 1; j++) {
+                hand.add(cards.get(j));
+
+                //cards must be apart by one
+                if (getValue(cards.get(j)) != getValue(cards.get(j + 1)) + 1) {
+                    //if cards are the same a straight is still possible
+                    if (getValue(cards.get(j)) != getValue(cards.get(j + 1))){
+                        isStraight = false;
+                        break;
+                    }
+                }
+                if(cards.get(j).getCode().charAt(1) != cards.get(j +1).getCode().charAt(1)){
+                    isStraight = false;
+                    break;
+                }
+            }
+            if (isStraight) {
+                PlayerHand result = new PlayerHand();
+                result.setHand(Hand.STRAIGHT_FLUSH);
+                result.setCards(cards);
+                result.setPlayer(player);
+                return result;
+            }
+        }
+
+        // Special case for Ace-low straight (A-2-3-4-5)
+        if (getValue(cards.get(length - 1)) == 14 && getValue(cards.get(0)) == 2) {
+            hand.clear();
+            hand.add(cards.get(length-1));
+            // Check if the sequence A-2-3-4-5 exists
+            for (int i = 0; i < length; i++) {
+                if (getValue(cards.get(length - 1 - i)) != getValue(cards.get(length - i - 2)) -1 && cards.get(length - 1 - i).getCode().charAt(1) == cards.get(length - 2 - i).getCode().charAt(1)) {
+                    hand.add(cards.get(length - 1 - i));
+                }
+            }
+            if(hand.size() == 5){
+                PlayerHand result = new PlayerHand();
+                result.setHand(Hand.STRAIGHT_FLUSH);
+                result.setCards(cards);
+                result.setPlayer(player);
+                return result;
+            }
+        }
+
+        //Player does not have a straight
+        return null;
+
     }
 
     public static PlayerHand fourCards(List<Card> cards, Player player){
@@ -93,6 +146,8 @@ public class PlayerHand {
         return null;
     }
 
+
+    //TODO doesn't work with pair correctly
     public static PlayerHand straight(List<Card> cards, Player player) {
         //Five cards of consecutive numerical value composed of more than one suit. An ace can normally
         // rank as low (below a 2) or high (above a king) but not at the same time in one hand.
@@ -148,27 +203,106 @@ public class PlayerHand {
         return null;
     }
 
+
+    //TODO not sure
     public static PlayerHand twoPair(List<Card> cards, Player player){
         //Two different sets of two cards of matching rank. The highest-ranked left available card completes the hand.
-        return null;
+        List<Card> hand = new ArrayList<>();
+
+        // Iterate through the list of cards
+        for (int i = 0; i < cards.size() - 1; i++) {
+            // Check if the current card and the next card have the same value
+            if (getValue(cards.get(i)) == getValue(cards.get(i + 1))) {
+                // If they have the same value, add them to the hand list
+                hand.add(cards.get(i));
+                hand.add(cards.get(i + 1));
+                // Iterate through the remaining cards to find the second pair
+                for (int j = i + 2; j < cards.size() - 1; j++) {
+                    // Check if the current card and the next card have the same value
+                    if (getValue(cards.get(j)) == getValue(cards.get(j + 1))) {
+                        // If they have the same value, add them to the hand list
+                        hand.add(cards.get(j));
+                        hand.add(cards.get(j + 1));
+                        // Add the highest-ranked left available card to the hand
+                        for (Card card : cards) {
+                            // Skip the cards that are already in the hand
+                            if (!hand.contains(card)) {
+                                hand.add(card);
+                                break;
+                            }
+                        }
+                        // If the hand is complete, exit the loop
+                        if (hand.size() == 5) {
+                            break;
+                        }
+                    }
+                }
+                // If the hand is complete, exit the loop
+                if (hand.size() == 5) {
+                    break;
+                }
+            }
+        }
+
+        // If no two pairs are found, return null
+        if (hand.size() != 5) {
+            return null;
+        }
+
+        // Return the player hand
+        PlayerHand result = new PlayerHand();
+        result.setHand(Hand.TWO_PAIR);
+        result.setPlayer(player);
+        result.setCards(hand);
+        return result;
     }
 
-    public static PlayerHand pair(List<Card> cards, Player player){
+    public static PlayerHand pair(List<Card> cards, Player player) {
         //A pair of cards of the same rank in different suits. The remainder of the hand is formed from the three highest-ranked cards available.
-        return null;
+        List<Card> hand = new ArrayList<>();
+
+        // Iterate through the list of cards
+        for (int i = 0; i < cards.size() - 1; i++) {
+            // Check if the current card and the next card have the same value
+            if (getValue(cards.get(i)) == getValue(cards.get(i + 1))) {
+                // If they have the same value, add them to the hand list
+                hand.add(cards.get(i));
+                hand.add(cards.get(i + 1));
+                break; // Exit the loop after finding the pair
+            }
+        }
+
+        // If no pair is found, return null
+        if (hand.size() != 2) {
+            return null;
+        }
+
+        // Add the three highest-ranked cards available to the hand
+        for (int i = 0; i < cards.size(); i++) {
+            // Skip the cards that are already in the hand
+            if (!hand.contains(cards.get(i))) {
+                hand.add(cards.get(i));
+            }
+            // Stop adding cards once the hand size reaches 5
+            if (hand.size() == 5) {
+                break;
+            }
+        }
+        // Return the player hand
+        PlayerHand result = new PlayerHand();
+        result.setHand(Hand.ONE_PAIR);
+        result.setPlayer(player);
+        result.setCards(hand);
+        return result;
     }
-
-
 
 
 
     public static PlayerHand highCard(List<Card> cards, Player player) {
-        List<Card> hand = new ArrayList<Card>();
-        hand.add(cards.get(cards.size()-1));
         PlayerHand result = new PlayerHand();
         result.setHand(Hand.HIGH_CARD);
         result.setPlayer(player);
-        result.setCards(hand);
+        result.setCards(cards.subList(0,4));
         return result;
     }
 
@@ -190,8 +324,4 @@ public class PlayerHand {
             case ROYAL_FLUSH -> 10;
         };
     }
-
-
-
-
 }
