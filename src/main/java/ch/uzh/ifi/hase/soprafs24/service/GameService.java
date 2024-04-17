@@ -200,19 +200,30 @@ public class GameService {
         return (foldedPlayersCount == (players.size() -1));
     }
     //finds the winning player
-    //TODO update the users money
-    public void endGame(long game_id) {
+    //TODO update the users money + destroy game class
+    public void endGame(long game_id){
         System.out.println("END GAME XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    }
+
+
+    public void winningCondition(long game_id) {
         Game game = gameRepository.findById(game_id);
         GameTable table = game.getGameTable();
         PlayerHand winner = null;
 
         //find the best hand
         for(Player player : game.getPlayers()){
+
+            //ignore folded players
+            if(player.isFolded()){
+                continue;
+            }
             PlayerHand curHand = evaluateHand(player, table);
             if(winner == null || handRank(curHand.getHand()) > handRank(winner.getHand())){
                 winner = curHand;
             }
+
+            //TODO if two player have same hand (check further)
             else if(handRank(curHand.getHand()) == handRank(winner.getHand())){
                 if(getValue(curHand.getCards().get(0)) > getValue(winner.getCards().get(0))){
                     winner = curHand;
@@ -235,17 +246,52 @@ public class GameService {
             }
         });
 
-        PlayerHand playerHand;
+        PlayerHand playerHand = null;
 
+        //royal flush
+        playerHand = royalFlush(cards, player);
+        if(playerHand != null){
+            return playerHand;
+        }
+
+        //four-of-a-king
+        playerHand = fourCards(cards, player);
+        if(playerHand != null){
+            return playerHand;
+        }
+
+        //full house
+        playerHand = fullHouse(cards, player);
+        if(playerHand != null){
+            return playerHand;
+        }
 
         //flush
-        playerHand = straight(cards, player);
+        playerHand = flush(cards, player);
         if(playerHand != null){
             return playerHand;
         }
 
         //straight
-        playerHand = flush(cards, player);
+        playerHand = straight(cards, player);
+        if(playerHand != null){
+            return playerHand;
+        }
+
+        //three-of-a-kind
+        playerHand = threeOfKind(cards, player);
+        if(playerHand != null){
+            return playerHand;
+        }
+
+        //two pair
+        playerHand = twoPair(cards, player);
+        if(playerHand != null){
+            return playerHand;
+        }
+
+        //pair
+        playerHand = pair(cards, player);
         if(playerHand != null){
             return playerHand;
         }
