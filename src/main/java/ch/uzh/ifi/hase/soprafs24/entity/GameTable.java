@@ -68,6 +68,7 @@ public class GameTable implements Serializable {
         else if (openCards.size() == 3 || openCards.size() == 4) {
             openCards.add(cards.get(openCards.size()));
         }
+        //if called with already 5 cards open function just does nothing
 
     }
 

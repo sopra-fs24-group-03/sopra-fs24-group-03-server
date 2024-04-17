@@ -89,7 +89,12 @@ public class Game implements Serializable {
 
     public void setsNextPlayerTurnIndex() {
         int numberOfPlayers = players.size();
-        this.playerTurnIndex = (this.playerTurnIndex + 1) % numberOfPlayers;
+        for (int i = 0; i<numberOfPlayers; i++) {
+            this.playerTurnIndex = (this.playerTurnIndex + 1) % numberOfPlayers;
+            if(!players.get(playerTurnIndex).isFolded()){
+                break;
+            }
+        }
     }
 
     public long leaveGame() {

@@ -65,15 +65,13 @@ public class GameService {
 
 
         //call the correct method and return the amount bet, if nothing is bet return 0
-        return switch (move.getMove()) {
+        int amount =  switch (move.getMove()) {
             //TODO fold not done yet
             case Fold -> {
                 if(move.getAmount() != 0){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Fold with an Amount");}
-                //remove player from player list, but he "remains" in game
-                game.getPlayers().remove(player);
+                //set folded attribute to true, but he "remains" in game
+                player.setFolded(true);
                 //no bet was made
-
-                game.setsNextPlayerTurnIndex();
                 yield 0;
             }
             case Raise -> {
@@ -89,7 +87,6 @@ public class GameService {
                     //set the raise player so that it can be check in update game mehtod
                     game.setRaisePlayer(player);
 
-                    game.setsNextPlayerTurnIndex();
                     yield move.getAmount(); //return bet amount
                 } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You need to bet higher than the current highest bet!");
             }
@@ -97,7 +94,6 @@ public class GameService {
                 if(move.getAmount() != 0){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Check with an Amount");}
                 //only check if there was no bet made this betting round
                 if (game.getBet() == 0){
-                    game.setsNextPlayerTurnIndex();
                     yield 0;
                 }
                 else{
@@ -109,20 +105,21 @@ public class GameService {
                 if (game.getBet() == 0){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only call if a Bet was made before");}
                 if(move.getAmount() != 0){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Call with an Amount");}
                 if (game.getBet() >player.getMoney()){
-                    //if player does not have enough money to call, he goes all in and call works
-                    player.setMoney(0);
-                    game.setsNextPlayerTurnIndex();
-                    yield player.getMoney();
+                    //All in call not implemented yet
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only call if a Bet was made before");
                 }
                 else{ //if enough money, bet the current bet
                     int loss = game.getBet() - player.getLastRaiseAmount();
                     player.setMoney(player.getMoney()- loss); //p1 raises 100, p2 raises to 200, p1 calls --> only subtract (200-100 = 100) --> in total also 200
-                    game.setsNextPlayerTurnIndex();
                     yield loss;
                 }
             }
 
         };
+        game.setsNextPlayerTurnIndex();
+
+        return amount;
+
 
     }
     public boolean checkEnoughMoney(Player curPlayer, int amount){
@@ -143,9 +140,17 @@ public class GameService {
             table.updateMoney(bet);
         }
 
+        //check if all players except 1 folded
+        if(playersfolded(game)){
+            endGame(game_id);
+            return;
+
+        }
+
         //check if current betting round is finished
         if((game.getRaisePlayer() != null && Objects.equals(game.getRaisePlayer().getUsername(), nextPlayerUsername))){
             //reset betting to 0 after 1 betting round
+
             game.setBet(0);
             for (Player player : game.getPlayers()) {
                 player.setLastRaiseAmount(0);}
@@ -153,6 +158,7 @@ public class GameService {
             //check if final round to end game
             if (table.getOpenCards().size() == 5) {
                 endGame(game_id);
+                return;
             }
             table.updateOpenCards();
         }
@@ -182,9 +188,21 @@ public class GameService {
     }
 
 
+    public boolean playersfolded(Game game){
+        List<Player> players = game.getPlayers();
+        int foldedPlayersCount = 0; // Initialize counter for folded players
+
+        for (Player player : players) {
+            if (player.isFolded()) { // Assuming there is a method isFolded() to check if the player has folded
+                foldedPlayersCount++; // Increment counter if player has folded
+            }
+        }
+        return (foldedPlayersCount == (players.size() -1));
+    }
     //finds the winning player
     //TODO update the users money
     public void endGame(long game_id) {
+        System.out.println("END GAME XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
         Game game = gameRepository.findById(game_id);
         GameTable table = game.getGameTable();
         PlayerHand winner = null;

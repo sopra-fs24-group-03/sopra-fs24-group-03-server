@@ -26,6 +26,8 @@ public class Player {
 
     @Column
     private int lastRaiseAmount;
+    @Column
+    private boolean folded;
 
 
     @JsonIgnore
@@ -82,5 +84,13 @@ public class Player {
 
     public void setLastRaiseAmount(int lastRaiseAmount) {
         this.lastRaiseAmount = lastRaiseAmount;
+    }
+
+    public boolean isFolded() {
+        return folded;
+    }
+
+    public void setFolded(boolean folded) {
+        this.folded = folded;
     }
 }
