@@ -106,7 +106,7 @@ public class GameService {
                 if(move.getAmount() != 0){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Call with an Amount");}
                 if (game.getBet() >player.getMoney()){
                     //All in call not implemented yet
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only call if a Bet was made before");
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only call if you have enough money");
                 }
                 else{ //if enough money, bet the current bet
                     int loss = game.getBet() - player.getLastRaiseAmount();
@@ -117,7 +117,6 @@ public class GameService {
 
         };
         game.setsNextPlayerTurnIndex();
-
         return amount;
 
 
@@ -142,7 +141,6 @@ public class GameService {
 
         //check if all players except 1 folded
         if(playersfolded(game)){
-            endGame(game_id);
             return;
 
         }
@@ -157,7 +155,7 @@ public class GameService {
 
             //check if final round to end game
             if (table.getOpenCards().size() == 5) {
-                endGame(game_id);
+                winningCondition(game_id); //then game ends, call winning condition
                 return;
             }
             table.updateOpenCards();
@@ -193,12 +191,14 @@ public class GameService {
         int foldedPlayersCount = 0; // Initialize counter for folded players
 
         for (Player player : players) {
-            if (player.isFolded()) { // Assuming there is a method isFolded() to check if the player has folded
-                foldedPlayersCount++; // Increment counter if player has folded
+            if (player.isFolded()) {
+                foldedPlayersCount++;
             }
         }
         return (foldedPlayersCount == (players.size() -1));
     }
+
+
     //finds the winning player
     //TODO update the users money + destroy game class
     public void endGame(long game_id){
@@ -238,6 +238,9 @@ public class GameService {
                 }
             }
         }
+
+        //TODO In the end winning condition should call end game so that game is destroyed, players sent back to lobby
+        endGame((game_id));
     }
 
 

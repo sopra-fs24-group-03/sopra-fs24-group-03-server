@@ -183,7 +183,7 @@ public class LobbyService {
 
     //checks for Cash, return bool
     private boolean checkCash(User user){
-        return user.getMoney() >= 2000;
+        return user.getMoney() >= 100;
     }
 
     //returns requested lobby, if lobby doesn't exist throws exception

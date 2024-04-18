@@ -106,8 +106,43 @@ public class PlayerHand {
     }
 
     public static PlayerHand fourCards(List<Card> cards, Player player){
-        return null;
         //Four of the same card in the four suits. The five-card hand is completed by the highest card among the others on the table or in your hand.
+        List<Card> hand = new ArrayList<>();
+
+        // Iterate through the list of cards to find four of a kind
+        for (int i = 0; i < cards.size() - 3; i++) {
+            // Check if the current card and the next three cards have the same value
+            if (getValue(cards.get(i)) == getValue(cards.get(i + 1)) &&
+                    getValue(cards.get(i)) == getValue(cards.get(i + 2)) &&
+                    getValue(cards.get(i)) == getValue(cards.get(i + 3))) {
+                // If they have the same value, add them to the hand list
+                hand.add(cards.get(i));
+                hand.add(cards.get(i + 1));
+                hand.add(cards.get(i + 2));
+                hand.add(cards.get(i + 3));
+                break; // Exit the loop after finding four of a kind
+            }
+        }
+
+        // If no four of a kind is found, return null
+        if (hand.size() != 4) {
+            return null;
+        }
+
+        // Add the highest-ranked card available to the hand that is not part of the four of a kind
+        for (Card card : cards) {
+            if (!hand.contains(card)) {
+                hand.add(card);
+                break; // Only one additional card is needed to complete the hand
+            }
+        }
+
+        // Return the player hand
+        PlayerHand result = new PlayerHand();
+        result.setHand(Hand.FOUR_OF_A_KIND);
+        result.setPlayer(player);
+        result.setCards(hand);
+        return result;
     }
 
     public static PlayerHand fullHouse(List<Card> cards, Player player){
@@ -200,54 +235,82 @@ public class PlayerHand {
 
     public static PlayerHand threeOfKind(List<Card> cards, Player player){
         //A poker hand containing three cards of the same rank in three different suits. The two highest available cards besides the three of a kind complete the hand.
-        return null;
-    }
-
-
-    //TODO not sure
-    public static PlayerHand twoPair(List<Card> cards, Player player){
-        //Two different sets of two cards of matching rank. The highest-ranked left available card completes the hand.
         List<Card> hand = new ArrayList<>();
 
-        // Iterate through the list of cards
-        for (int i = 0; i < cards.size() - 1; i++) {
-            // Check if the current card and the next card have the same value
-            if (getValue(cards.get(i)) == getValue(cards.get(i + 1))) {
+        // Iterate through the list of cards to find three of a kind
+        for (int i = 0; i < cards.size() - 2; i++) {
+            // Check if the current card and the next two cards have the same value
+            if (getValue(cards.get(i)) == getValue(cards.get(i + 1)) && getValue(cards.get(i)) == getValue(cards.get(i + 2))) {
                 // If they have the same value, add them to the hand list
                 hand.add(cards.get(i));
                 hand.add(cards.get(i + 1));
-                // Iterate through the remaining cards to find the second pair
-                for (int j = i + 2; j < cards.size() - 1; j++) {
-                    // Check if the current card and the next card have the same value
-                    if (getValue(cards.get(j)) == getValue(cards.get(j + 1))) {
-                        // If they have the same value, add them to the hand list
-                        hand.add(cards.get(j));
-                        hand.add(cards.get(j + 1));
-                        // Add the highest-ranked left available card to the hand
-                        for (Card card : cards) {
-                            // Skip the cards that are already in the hand
-                            if (!hand.contains(card)) {
-                                hand.add(card);
-                                break;
-                            }
-                        }
-                        // If the hand is complete, exit the loop
-                        if (hand.size() == 5) {
-                            break;
-                        }
-                    }
-                }
-                // If the hand is complete, exit the loop
+                hand.add(cards.get(i + 2));
+                break; // Exit the loop after finding three of a kind
+            }
+        }
+
+        // If no three of a kind is found, return null
+        if (hand.size() != 3) {
+            return null;
+        }
+
+        // Add the two highest-ranked cards available to the hand
+        for (Card card : cards) {
+            // Skip the cards that are already in the hand
+            if (!hand.contains(card)) {
+                hand.add(card);
+                // Stop adding cards once the hand size reaches 5
                 if (hand.size() == 5) {
                     break;
                 }
             }
         }
 
-        // If no two pairs are found, return null
-        if (hand.size() != 5) {
+        // Return the player hand
+        PlayerHand result = new PlayerHand();
+        result.setHand(Hand.THREE_OF_A_KIND);
+        result.setPlayer(player);
+        result.setCards(hand);
+        return result;
+    }
+
+
+    public static PlayerHand twoPair(List<Card> cards, Player player){
+        //Two different sets of two cards of matching rank. The highest-ranked left available card completes the hand.
+        List<Card> hand = new ArrayList<>();
+
+        // Iterate through the list of cards to find two pairs
+        for (int i = 0; i < cards.size() - 1; i++) {
+            if (getValue(cards.get(i)) == getValue(cards.get(i + 1)) && !hand.contains(cards.get(i))) {
+                // Check if we already have one pair and the current pair is different
+                if (hand.size() == 2 && getValue(hand.get(0)) != getValue(cards.get(i)) && getValue(hand.get(1)) != getValue(cards.get(i))) {
+                    hand.add(cards.get(i));
+                    hand.add(cards.get(i + 1));
+                    break; // Exit the loop after finding the second pair
+                } else if (hand.isEmpty()) {
+                    hand.add(cards.get(i));
+                    hand.add(cards.get(i + 1));
+                }
+            }
+        }
+
+        // If not two pairs found, return null
+        if (hand.size() != 4) {
             return null;
         }
+
+        // Add the highest-ranked card available to the hand that is not part of the pairs
+        for (int i = 0; i < cards.size(); i++) {
+            // Skip the cards that are already in the hand
+            if (!hand.contains(cards.get(i))) {
+                hand.add(cards.get(i));
+            }
+            // Stop adding cards once the hand size reaches 5
+            if (hand.size() == 5) {
+                break;
+            }
+        }
+
 
         // Return the player hand
         PlayerHand result = new PlayerHand();
