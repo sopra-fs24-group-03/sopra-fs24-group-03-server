@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
 
+import ch.uzh.ifi.hase.soprafs24.constant.Moves;
 import ch.uzh.ifi.hase.soprafs24.entity.Game;
 import ch.uzh.ifi.hase.soprafs24.entity.GameTable;
 import ch.uzh.ifi.hase.soprafs24.entity.Player;
@@ -80,8 +81,10 @@ public class GameService {
                 //if raise is legal, update the order and current bet and call raise
                 if(move.getAmount() > game.getBet()){
                     game.setBet(move.getAmount()); //set the current highest bet in game
+                    int moneyLost = move.getAmount()- player.getLastRaiseAmount();
+                    player.setMoney((player.getMoney()- moneyLost)); //remove money from user
+
                     player.setLastRaiseAmount(move.getAmount()); //save the last raised amount for call
-                    player.setMoney((player.getMoney()- move.getAmount())); //remove money from user
 
                     //set the raise player so that it can be check in update game mehtod
                     game.setRaisePlayer(player);
@@ -189,6 +192,36 @@ public class GameService {
             }
         }
         return (foldedPlayersCount == (players.size() -1));
+    }
+    public void initializeBlinds(Game game) {
+        List<Player> players = game.getPlayers();
+
+        // Set blinds
+        int smallBlind = 25;
+        int bigBlind = 50;
+
+        // Assume players are in order and rotate as per game rounds
+        Player smallBlindPlayer = players.get(0);
+        Player bigBlindPlayer = players.get(1);
+
+        GamePutDTO gamePutDTOsmall = new GamePutDTO();
+        gamePutDTOsmall.setMove(Moves.Raise);
+        gamePutDTOsmall.setAmount(smallBlind);
+
+        authorize(smallBlindPlayer.getToken(), game.getId());
+        turn(gamePutDTOsmall, game.getId(),smallBlindPlayer.getToken());
+        updateGame(game.getId(), smallBlind);
+
+        GamePutDTO gamePutDTObig = new GamePutDTO();
+        gamePutDTOsmall.setMove(Moves.Raise);
+        gamePutDTOsmall.setAmount(bigBlind);
+
+        authorize(bigBlindPlayer.getToken(), game.getId());
+        turn(gamePutDTObig, game.getId(),bigBlindPlayer.getToken());
+        updateGame(game.getId(), bigBlind);
+
+
+
     }
 
 

@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 
 
 import ch.uzh.ifi.hase.soprafs24.helpers.DeckOfCardsApi;
+import ch.uzh.ifi.hase.soprafs24.service.GameService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
