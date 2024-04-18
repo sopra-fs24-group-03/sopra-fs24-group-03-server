@@ -1,10 +1,9 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO;
 
 
-import ch.uzh.ifi.hase.soprafs24.entity.GameTable;
-import ch.uzh.ifi.hase.soprafs24.entity.Player;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPrivateGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPublicGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.TableDTO.TablePublicGetDTO;
 
 import java.util.List;
 
@@ -15,7 +14,7 @@ public class GameGetDTO {
     private List<PlayerPublicGetDTO> players;
     private PlayerPrivateGetDTO ownPlayer;
     // we should not send the whole gameTable we have to countrol, that the right amount of cards is sent to the frontend
-    private GameTable gameTable;
+    private TablePublicGetDTO gameTable;
 
 
     // cards of player
@@ -53,10 +52,10 @@ public class GameGetDTO {
     public void setOwnPlayer(PlayerPrivateGetDTO ownPlayer) {
         this.ownPlayer = ownPlayer;
     }
-    public void setGameTable(GameTable gameTable) {
+    public void setGameTable(TablePublicGetDTO gameTable) {
         this.gameTable = gameTable;
     }
-    public GameTable getGameTable() {
+    public TablePublicGetDTO getGameTable() {
         return gameTable;
     }
 }

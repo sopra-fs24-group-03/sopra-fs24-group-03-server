@@ -32,9 +32,8 @@ public class LobbyController {
     @PostMapping("/lobbies/{id}")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public Game createGame(@RequestHeader String token, @PathVariable long id){
+    public void createGame(@RequestHeader String token, @PathVariable long id){
         Game game = lobbyService.startGame(token, id);
-        return game;
     }
 
     @GetMapping("/lobbies/{id}")
