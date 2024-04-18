@@ -42,6 +42,7 @@ public class GameService {
     }
     public Game getGameById(long id, String token){
         userService.authenticateUser(token);
+        //TODO only player IN said game/lobby can get game
         return findGame(id);
 
     }
@@ -66,7 +67,6 @@ public class GameService {
 
         //call the correct method and return the amount bet, if nothing is bet return 0
         int amount =  switch (move.getMove()) {
-            //TODO fold not done yet
             case Fold -> {
                 if(move.getAmount() != 0){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Fold with an Amount");}
                 //set folded attribute to true, but he "remains" in game
@@ -193,6 +193,7 @@ public class GameService {
         }
         return (foldedPlayersCount == (players.size() -1));
     }
+    //TODO Big blind person canNOT play rn after blinding :(
     public void initializeBlinds(Game game) {
         List<Player> players = game.getPlayers();
 
@@ -208,13 +209,14 @@ public class GameService {
         gamePutDTOsmall.setMove(Moves.Raise);
         gamePutDTOsmall.setAmount(smallBlind);
 
+
         authorize(smallBlindPlayer.getToken(), game.getId());
         turn(gamePutDTOsmall, game.getId(),smallBlindPlayer.getToken());
         updateGame(game.getId(), smallBlind);
 
         GamePutDTO gamePutDTObig = new GamePutDTO();
-        gamePutDTOsmall.setMove(Moves.Raise);
-        gamePutDTOsmall.setAmount(bigBlind);
+        gamePutDTObig.setMove(Moves.Raise);
+        gamePutDTObig.setAmount(bigBlind);
 
         authorize(bigBlindPlayer.getToken(), game.getId());
         turn(gamePutDTObig, game.getId(),bigBlindPlayer.getToken());

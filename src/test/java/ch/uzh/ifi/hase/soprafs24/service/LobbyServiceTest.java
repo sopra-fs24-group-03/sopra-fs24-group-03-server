@@ -26,6 +26,8 @@ public class LobbyServiceTest {
 
     @Mock
     private UserService userService;
+    @Mock
+    private GameService gameService;
 
     @Mock
     private UserRepository userRepository;

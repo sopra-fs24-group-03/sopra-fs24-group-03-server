@@ -24,14 +24,16 @@ import java.util.Set;
 @Transactional
 public class LobbyService {
     private final LobbyRepository lobbyRepository;
+    private final GameService gameService;
     private final UserService userService;
     private final Logger log = LoggerFactory.getLogger(LobbyService.class);
 
 
 
     @Autowired
-    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, @Qualifier("userService") UserService userService){
+    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, @Qualifier("userService") UserService userService, @Qualifier("gameService") GameService gameService){
         this.lobbyRepository = lobbyRepository;
+        this.gameService = gameService;
         this.userService = userService;
     }
 
@@ -156,9 +158,12 @@ public class LobbyService {
         if(users.size() >= 2){
             Game game = new Game(users);
             lobby.setGame(game);
+            game.setId(lobby.getId());
+
             log.info("created game {}", game);
             lobbyRepository.save(lobby);
             lobbyRepository.flush();
+            gameService.initializeBlinds(game);
             return game;
         } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough players");
 
