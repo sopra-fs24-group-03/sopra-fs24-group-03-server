@@ -28,7 +28,7 @@ public class GameControllerTest {
         //setup
         Mockito.doNothing().when(gameService).authorize(Mockito.anyString(), Mockito.anyLong());
         Mockito.when(gameService.turn(Mockito.any(), Mockito.anyLong(), Mockito.anyString())).thenReturn(0);
-        Mockito.doNothing().when(gameService).updateGame(Mockito.anyLong(), Mockito.anyInt(), Mockito.anyString());
+        Mockito.doNothing().when(gameService).updateGame(Mockito.anyLong(), Mockito.anyInt());
 
         //when
         MockHttpServletRequestBuilder putRequest = put("/games/{gameId}", 1L)
@@ -47,7 +47,7 @@ public class GameControllerTest {
         //setup
         Mockito.doNothing().when(gameService).authorize(Mockito.anyString(), Mockito.anyLong());
         Mockito.when(gameService.turn(Mockito.any(), Mockito.anyLong(), Mockito.anyString())).thenReturn(0);
-        Mockito.doNothing().when(gameService).updateGame(Mockito.anyLong(), Mockito.anyInt(), Mockito.anyString());
+        Mockito.doNothing().when(gameService).updateGame(Mockito.anyLong(), Mockito.anyInt());
 
 
         //when
@@ -67,7 +67,7 @@ public class GameControllerTest {
         //setup
         Mockito.doThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED)).when(gameService).authorize(Mockito.anyString(), Mockito.anyLong());
         Mockito.when(gameService.turn(Mockito.any(), Mockito.anyLong(), Mockito.anyString())).thenReturn(0);
-        Mockito.doNothing().when(gameService).updateGame(Mockito.anyLong(), Mockito.anyInt(), Mockito.anyString());
+        Mockito.doNothing().when(gameService).updateGame(Mockito.anyLong(), Mockito.anyInt());
 
         //when
         MockHttpServletRequestBuilder putRequest = put("/games/{gameId}", 1L)
@@ -86,7 +86,7 @@ public class GameControllerTest {
         //setup
         Mockito.doNothing().when(gameService).authorize(Mockito.anyString(), Mockito.anyLong());
         Mockito.doThrow(new ResponseStatusException(HttpStatus.BAD_REQUEST)).when(gameService).turn(Mockito.any(), Mockito.anyLong(), Mockito.anyString());
-        Mockito.doNothing().when(gameService).updateGame(Mockito.anyLong(), Mockito.anyInt(), Mockito.anyString());
+        Mockito.doNothing().when(gameService).updateGame(Mockito.anyLong(), Mockito.anyInt());
 
         //when
         MockHttpServletRequestBuilder putRequest = put("/games/{gameId}", 1L)
@@ -106,7 +106,7 @@ public class GameControllerTest {
         //setup
         Mockito.doNothing().when(gameService).authorize(Mockito.anyString(), Mockito.anyLong());
         Mockito.when(gameService.turn(Mockito.any(), Mockito.anyLong(), Mockito.anyString())).thenReturn(0);
-        Mockito.doNothing().when(gameService).updateGame(Mockito.anyLong(), Mockito.anyInt(), Mockito.anyString());
+        Mockito.doNothing().when(gameService).updateGame(Mockito.anyLong(), Mockito.anyInt());
 
         //when
         MockHttpServletRequestBuilder putRequest = put("/games/{gameId}", 1L)

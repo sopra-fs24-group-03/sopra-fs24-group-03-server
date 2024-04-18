@@ -41,8 +41,7 @@ public class GameService {
     }
     public Game getGameById(long id, String token){
         userService.authenticateUser(token);
-        Game game = findGame(id);
-        return game;
+        return findGame(id);
 
     }
 
@@ -75,7 +74,7 @@ public class GameService {
                 yield 0;
             }
             case Raise -> {
-                if (!checkEnoughMoney(player, move.getAmount())){
+                if(player.getMoney()<move.getAmount()) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot bet more money than you have!");
                 }
                 //if raise is legal, update the order and current bet and call raise
@@ -121,16 +120,10 @@ public class GameService {
 
 
     }
-    public boolean checkEnoughMoney(Player curPlayer, int amount){
-        if (curPlayer.getMoney()>= amount){return true;}
-        else {return false;}
-
-    }
 
 
     //updates game state (split from turn for easier testing)
-    public void updateGame(long game_id, int bet, String token){
-        String username = userRepository.findByToken(token).getUsername();
+    public void updateGame(long game_id, int bet){
         Game game = gameRepository.findById(game_id);
         GameTable table = game.getGameTable();
         String nextPlayerUsername = game.getPlayers().get(game.getPlayerTurnIndex()).getUsername();

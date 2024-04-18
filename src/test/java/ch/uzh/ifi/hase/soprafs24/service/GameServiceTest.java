@@ -90,6 +90,7 @@ public class GameServiceTest {
         assertEquals(100, bet);
     }
 
+    //TODO no assert?!
     @Test
     public void turn_raiseFail(){
         User user = new User();
@@ -112,6 +113,7 @@ public class GameServiceTest {
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
     }
 
+    //TODO no assert?!
     @Test
     public void updateGame_success(){
         User user = new User();
@@ -129,9 +131,10 @@ public class GameServiceTest {
         Mockito.when(game.getGameTable()).thenReturn(table);
         Mockito.doNothing().when(game).setsNextPlayerTurnIndex();
 
-        gameService.updateGame(1, 0, "token");
+        gameService.updateGame(1, 0);
     }
 
+    //TODO no assert?!
     @Test
     public void updateGame_success_withBet(){
         User user = new User();
@@ -149,7 +152,7 @@ public class GameServiceTest {
         Mockito.when(game.getGameTable()).thenReturn(table);
         Mockito.doNothing().when(table).updateMoney(Mockito.anyInt());
 
-        gameService.updateGame(1, 10, "token");
+        gameService.updateGame(1, 10);
     }
 
 

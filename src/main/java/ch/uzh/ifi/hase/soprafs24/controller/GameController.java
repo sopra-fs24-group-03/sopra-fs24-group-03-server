@@ -33,7 +33,7 @@ public class GameController {
     public Game makeMove(@RequestBody GamePutDTO move, @RequestHeader String token, @PathVariable long gameId){
         gameService.authorize(token, gameId);
         int bet = gameService.turn(move, gameId, token);
-        gameService.updateGame(gameId, bet, token);
+        gameService.updateGame(gameId, bet);
         Game game = gameService.getGameById(gameId, token);
         return game;
     }
