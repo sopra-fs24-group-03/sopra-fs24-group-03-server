@@ -9,6 +9,7 @@ import java.util.List;
 @Entity
 @Table(name = "player")
 public class Player {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
@@ -92,5 +93,12 @@ public class Player {
 
     public void setFolded(boolean folded) {
         this.folded = folded;
+    }
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

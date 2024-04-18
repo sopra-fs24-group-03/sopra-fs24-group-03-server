@@ -1,5 +1,13 @@
 package ch.uzh.ifi.hase.soprafs24.controller;
 
+import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
+import ch.uzh.ifi.hase.soprafs24.entity.Game;
+import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
+import ch.uzh.ifi.hase.soprafs24.entity.Player;
+import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.helpers.Card;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPrivateGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.GameService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -12,7 +20,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.server.ResponseStatusException;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(GameController.class)
@@ -33,7 +46,7 @@ public class GameControllerTest {
         //when
         MockHttpServletRequestBuilder putRequest = put("/games/{gameId}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"move\": \"Raise\", \"amount\": 100}" )
+                .content("{\"move\": \"Raise\", \"amount\": 100}")
                 .header("token", "token");
 
 
@@ -53,7 +66,7 @@ public class GameControllerTest {
         //when
         MockHttpServletRequestBuilder putRequest = put("/games/{gameId}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"move\": \"Check\"}" )
+                .content("{\"move\": \"Check\"}")
                 .header("token", "token");
 
 
@@ -72,7 +85,7 @@ public class GameControllerTest {
         //when
         MockHttpServletRequestBuilder putRequest = put("/games/{gameId}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"move\": \"Raise\", \"amount\": 100}" )
+                .content("{\"move\": \"Raise\", \"amount\": 100}")
                 .header("token", "token");
 
 
@@ -91,7 +104,7 @@ public class GameControllerTest {
         //when
         MockHttpServletRequestBuilder putRequest = put("/games/{gameId}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"move\": \"Raise\", \"amount\": 100}" )
+                .content("{\"move\": \"Raise\", \"amount\": 100}")
                 .header("token", "token");
 
 
@@ -111,7 +124,7 @@ public class GameControllerTest {
         //when
         MockHttpServletRequestBuilder putRequest = put("/games/{gameId}", 1L)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"move\": \"UnknownMove\", \"amount\": 100}" )
+                .content("{\"move\": \"UnknownMove\", \"amount\": 100}")
                 .header("token", "token");
 
 
@@ -119,5 +132,78 @@ public class GameControllerTest {
         mockMvc.perform(putRequest)
                 .andExpect(status().isBadRequest());
     }
+    // test not finished
+    //.andExpect(jsonPath("$.ownPlayer.id").value(0)); not working
+    @Test
+    public void getGameByIdSuccess() throws Exception {
 
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("testUsername");
+        user.setStatus(UserStatus.ONLINE);
+        user.setMoney(2000);
+
+        User user1 = new User();
+        user1.setId(2L);
+        user1.setUsername("testUsername1");
+        user1.setStatus(UserStatus.ONLINE);
+        user1.setMoney(2000);
+
+        List<User> users = new ArrayList<>();
+        users.add(user);
+        users.add(user1);
+
+        Game game = new Game(users);
+        game.setId(1L);
+        String token = "validToken";
+
+        Card card1 = new Card("1", "2");
+        Card card2 = new Card("3", "4");
+        List<Card> cards = new ArrayList<>();
+        cards.add(card1);
+        cards.add(card2);
+
+        Player player1 = new Player(game, "PlayerTwo", 2000, "validToken2", cards);
+        player1.setId(2L);
+
+
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+        PlayerPrivateGetDTO privatePlayerDTO = new PlayerPrivateGetDTO();
+        privatePlayerDTO.setUsername("PlayerOne");
+
+
+        Mockito.when(gameService.getGameById(game.getId(), token)).thenReturn(game);
+        Mockito.when(gameService.getPlayerByToken(players, token)).thenReturn(player1);
+
+
+        MockHttpServletRequestBuilder getRequest = get("/games/{id}", game.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", "validToken");
+
+        // Verify response
+        mockMvc.perform(getRequest)
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.players[0].username").value("testUsername"))
+                .andExpect(jsonPath("$.money").value(0));
+
+
+    }
+
+    @Test
+    public void getGameByIdUnauthorized() throws Exception {
+
+        Mockito.when(gameService.getGameById(Mockito.anyLong(), Mockito.anyString()))
+                .thenThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+
+        MockHttpServletRequestBuilder getRequest = get("/games/{id}", 1L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", "validToken");
+
+
+        mockMvc.perform(getRequest)
+                .andExpect(status().isUnauthorized());
+
+    }
 }

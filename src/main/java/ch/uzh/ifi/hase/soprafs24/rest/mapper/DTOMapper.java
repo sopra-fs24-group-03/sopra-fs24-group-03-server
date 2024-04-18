@@ -2,8 +2,11 @@ package ch.uzh.ifi.hase.soprafs24.rest.mapper;
 
 import ch.uzh.ifi.hase.soprafs24.entity.Game;
 import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
+import ch.uzh.ifi.hase.soprafs24.entity.Player;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GameGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPrivateGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPublicGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO.LobbyGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO.LobbyGetDTOComplete;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserGetDTO;
@@ -14,7 +17,6 @@ import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -65,6 +67,7 @@ public interface DTOMapper {
     @Mapping(source = "lobbyLeader", target = "lobbyLeader")
     @Mapping(source = "game", target = "game")
     LobbyGetDTO convertEntityToLobbyGetDTO(Lobby lobby);
+
     default List<UserGetDTO> mapUsersToUsernames(Set<User> users) {
         List<UserGetDTO> userGetDtos = new ArrayList<>();
         for (User user : users) {
@@ -79,11 +82,24 @@ public interface DTOMapper {
     }
 
 
+    // Game Mappings
 
-  // Game Mappings
+    // TODO Complete Mappings once Game is done and add Tests
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "gameTable", target = "gameTable")
+    GameGetDTO convertEntityToGameGetDTO(Game game);
 
-  // TODO Complete Mappings once Game is done and add Tests
-  @Mapping(source = "id", target = "id")
-  GameGetDTO convertEntityToGameGetDTO(Game game);
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "money", target = "money")
+    @Mapping(source = "username", target = "username")
+    @Mapping(source = "folded", target = "folded")
+    PlayerPublicGetDTO convertEntityToPlayerPublicDTO(Player player);
+
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "money", target = "money")
+    @Mapping(source = "username", target = "username")
+    @Mapping(source = "cards", target = "cards")
+    @Mapping(source = "folded", target = "folded")
+    PlayerPrivateGetDTO convertEntityToPlayerPrivateDTO(Player player);
 
 }

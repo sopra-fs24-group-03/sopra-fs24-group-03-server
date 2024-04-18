@@ -47,6 +47,14 @@ public class GameService {
 
     }
 
+    public Player getPlayerByToken(List<Player> players, String token) {
+        for (Player player: players) {
+            if (player.getToken().equals(token)) {
+                return player;
+            }
+        }
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not in this game");
+    }
 
     private Game findGame(long gameId){
         Game game = gameRepository.findById(gameId);
