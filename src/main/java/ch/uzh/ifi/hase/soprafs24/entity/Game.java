@@ -1,6 +1,8 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
 
+import ch.uzh.ifi.hase.soprafs24.constant.Hand;
+import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 import ch.uzh.ifi.hase.soprafs24.helpers.DeckOfCardsApi;
 import ch.uzh.ifi.hase.soprafs24.service.GameService;
 import org.springframework.http.HttpStatus;
@@ -26,9 +28,10 @@ public class Game implements Serializable {
 
     public Game(List<User> users) {
         // Selecting a random user to start and sets the playerTurnId
-        Random random = new Random();
+        //Random random = new Random();
         this.playerTurnIndex = 0;
         this.bet = 0;
+        this.gameFinished = false;
 
         DeckOfCardsApi cardsApi = new DeckOfCardsApi(new RestTemplate());
         String deckId = cardsApi.postDeck();
@@ -48,7 +51,17 @@ public class Game implements Serializable {
     @Column(nullable = false)
     private int bet;
 
+    @Column
+    private Hand handName = null;
 
+
+    @Column
+    private Boolean gameFinished;
+
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "game_id")
+    private List<Card> handCards = null;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="gameTable_id", referencedColumnName = "id")
@@ -58,32 +71,13 @@ public class Game implements Serializable {
     @JoinColumn(name="raisePlayer_id", referencedColumnName = "id")
     private Player raisePlayer;
 
-
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="winner_id", referencedColumnName = "id")
+    private Player winner;
 
     @Id
     @Column(unique=true, nullable = false)
     private Long id;
-
-//    @OneToOne(mappedBy = "game")
-//    private Lobby lobby;
-
-
-    public void game() {
-
-    }
-
-    private void setUp() {
-
-    }
-
-//    private Player winningCondition() {
-//
-//    }
-//
-//    private Map endGame() {
-//
-//    }
-//
 
     public void setsNextPlayerTurnIndex() {
         int numberOfPlayers = players.size();
@@ -95,11 +89,6 @@ public class Game implements Serializable {
         }
     }
 
-    public long leaveGame() {
-        return 0;
-    }
-
-
     public Long getId() {
         return id;
     }
@@ -107,14 +96,6 @@ public class Game implements Serializable {
     public void setId(Long id) {
         this.id = id;
     }
-
-//    public Lobby getLobby() {
-//        return lobby;
-//    }
-//
-//    public void setLobby(Lobby lobby) {
-//        this.lobby = lobby;
-//    }
 
 
     public Player getPlayerByUsername(String username){
@@ -158,5 +139,37 @@ public class Game implements Serializable {
 
     public void setRaisePlayer(Player raisePlayer) {
         this.raisePlayer = raisePlayer;
+    }
+
+    public Hand getHandName() {
+        return handName;
+    }
+
+    public void setHandName(Hand handName) {
+        this.handName = handName;
+    }
+
+    public List<Card> getHandCards() {
+        return handCards;
+    }
+
+    public void setHandCards(List<Card> handCards) {
+        this.handCards = handCards;
+    }
+
+    public Boolean getGameFinished() {
+        return gameFinished;
+    }
+
+    public void setGameFinished(Boolean gameFinished) {
+        this.gameFinished = gameFinished;
+    }
+
+    public Player getWinner() {
+        return winner;
+    }
+
+    public void setWinner(Player winner) {
+        this.winner = winner;
     }
 }

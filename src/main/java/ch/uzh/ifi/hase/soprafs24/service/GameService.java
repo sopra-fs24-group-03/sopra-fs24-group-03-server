@@ -1,10 +1,12 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
 
+import ch.uzh.ifi.hase.soprafs24.constant.Hand;
 import ch.uzh.ifi.hase.soprafs24.constant.Moves;
 import ch.uzh.ifi.hase.soprafs24.entity.Game;
 import ch.uzh.ifi.hase.soprafs24.entity.GameTable;
 import ch.uzh.ifi.hase.soprafs24.entity.Player;
+import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 import ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand;
 import ch.uzh.ifi.hase.soprafs24.repository.GameRepository;
@@ -33,6 +35,7 @@ public class GameService {
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+
 
     @Autowired
     public GameService(@Qualifier("userService") UserService userService,@Qualifier("userRepository") UserRepository userRepository, @Qualifier("gameRepository") GameRepository gameRepository){
@@ -201,6 +204,7 @@ public class GameService {
         }
         return (foldedPlayersCount == (players.size() -1));
     }
+
     //TODO Big blind person canNOT play rn after blinding :(
     public void initializeBlinds(Game game) {
         List<Player> players = game.getPlayers();
@@ -230,15 +234,37 @@ public class GameService {
         turn(gamePutDTObig, game.getId(),bigBlindPlayer.getToken());
         updateGame(game.getId(), bigBlind);
 
+    }
 
-
+    private void deleteGame(Game game, int time){
+        //TODO delete Game after time seconds
     }
 
 
-    //finds the winning player
-    //TODO update the users money + destroy game class
-    public void endGame(long game_id){
-        System.out.println("END GAME XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");
+    //TODO destroy game class, add attributes to game to signal it's finished + players hand
+    public void endGame(long game_id, PlayerHand winner){
+        Game game = gameRepository.findById(game_id);
+        GameTable table = game.getGameTable();
+        User user;
+
+        //update user money
+        for(Player player: game.getPlayers()){
+            user = userRepository.findByUsername(player.getUsername());
+            if(player == winner.getPlayer()){
+                user.setMoney(player.getMoney() + table.getMoney());  //winner gets unused money back plus money on table
+            }
+            else{
+                user.setMoney(player.getMoney()); //looser only gets unused money back
+            }
+        }
+
+        //set winning player, name and cards of winning hand and then flag game as finished
+        game.setHandCards(winner.getCards());
+        game.setHandName(winner.getHand());
+        game.setWinner(winner.getPlayer());
+        game.setGameFinished(Boolean.TRUE);
+
+        deleteGame(game, 60); //delete game after 1 minute
     }
 
 
@@ -274,9 +300,7 @@ public class GameService {
                 }
             }
         }
-
-        //TODO In the end winning condition should call end game so that game is destroyed, players sent back to lobby
-        endGame((game_id));
+        endGame(game_id, winner);
     }
 
 
@@ -293,65 +317,30 @@ public class GameService {
             }
         });
 
+
+        Hand[] hands = {Hand.ROYAL_FLUSH, Hand.STRAIGHT_FLUSH, Hand.FOUR_OF_A_KIND, Hand.FULL_HOUSE, Hand.FLUSH,
+                Hand.STRAIGHT, Hand.THREE_OF_A_KIND, Hand.TWO_PAIR, Hand.ONE_PAIR};
+
         PlayerHand playerHand = null;
 
-        //royal flush
-        playerHand = royalFlush(cards, player);
-        if(playerHand != null){
-            return playerHand;
+        //Iterate over the hands list and call the correct method
+        for (Hand hand : hands) {
+            playerHand = switch (hand) {
+                case ROYAL_FLUSH -> royalFlush(cards, player);
+                case STRAIGHT_FLUSH -> straightFlush(cards, player);
+                case FOUR_OF_A_KIND -> fourCards(cards, player);
+                case FULL_HOUSE -> fullHouse(cards, player);
+                case FLUSH -> flush(cards, player);
+                case STRAIGHT -> straight(cards, player);
+                case THREE_OF_A_KIND -> threeOfKind(cards, player);
+                case TWO_PAIR -> twoPair(cards, player);
+                case ONE_PAIR -> pair(cards, player);
+                default -> playerHand;
+            };
+            if (playerHand != null) {
+                return playerHand;
+            }
         }
-
-        //straight flush
-        playerHand = straightFlush(cards, player);
-        if(playerHand != null){
-            return playerHand;
-        }
-
-        //four-of-a-king
-        playerHand = fourCards(cards, player);
-        if(playerHand != null){
-            return playerHand;
-        }
-
-        //full house
-        playerHand = fullHouse(cards, player);
-        if(playerHand != null){
-            return playerHand;
-        }
-
-        //flush
-        playerHand = flush(cards, player);
-        if(playerHand != null){
-            return playerHand;
-        }
-
-        //straight
-        playerHand = straight(cards, player);
-        if(playerHand != null){
-            return playerHand;
-        }
-
-        //three-of-a-kind
-        playerHand = threeOfKind(cards, player);
-        if(playerHand != null){
-            return playerHand;
-        }
-
-        //two pair
-        playerHand = twoPair(cards, player);
-        if(playerHand != null){
-            return playerHand;
-        }
-
-        //pair
-        playerHand = pair(cards, player);
-        if(playerHand != null){
-            return playerHand;
-        }
-
-        //high card
         return highCard(cards, player);
-
     }
-
 }
