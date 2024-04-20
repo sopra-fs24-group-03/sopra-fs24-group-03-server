@@ -133,6 +133,10 @@ public class Game implements Serializable {
         return playerTurnIndex;
     }
 
+    public void setPlayerTurnIndex(int playerTurnIndex) {
+        this.playerTurnIndex = playerTurnIndex;
+    }
+
     public Player getRaisePlayer() {
         return raisePlayer;
     }

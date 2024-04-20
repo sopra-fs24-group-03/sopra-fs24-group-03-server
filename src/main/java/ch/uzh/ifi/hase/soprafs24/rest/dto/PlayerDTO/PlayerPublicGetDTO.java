@@ -7,6 +7,7 @@ public class PlayerPublicGetDTO {
     private int money;
     private String username;
     private boolean folded;
+    private boolean turn;
 
     public long getId() {
         return id;
@@ -36,6 +37,14 @@ public class PlayerPublicGetDTO {
 
     public void setFolded(boolean folded) {
         this.folded = folded;
+    }
+
+    public boolean isTurn() {
+        return turn;
+    }
+
+    public void setTurn(boolean turn) {
+        this.turn = turn;
     }
 }
 

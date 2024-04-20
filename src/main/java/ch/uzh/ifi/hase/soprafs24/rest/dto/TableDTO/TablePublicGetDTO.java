@@ -10,7 +10,7 @@ public class TablePublicGetDTO {
 
     private Long id;
 
-    private List<Card> openCards = new ArrayList<>();
+    private List<String> openCardsImage = new ArrayList<>();
 
     public int getMoney() {
         return money;
@@ -28,12 +28,14 @@ public class TablePublicGetDTO {
         this.id = id;
     }
 
-    public List<Card> getOpenCards() {
-        return openCards;
+    public List<String> getOpenCardsImage() {
+        return openCardsImage;
     }
 
-    public void setOpenCards(List<Card> openCards) {
-        this.openCards = openCards;
+    public void setOpenCardsImage(List<Card> openCardsImage) {
+        for(Card card : openCardsImage) {
+            this.openCardsImage.add(card.getImage());
+        }
     }
 
 

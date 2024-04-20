@@ -1,14 +1,12 @@
 package ch.uzh.ifi.hase.soprafs24.rest.mapper;
 
-import ch.uzh.ifi.hase.soprafs24.entity.Game;
-import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
-import ch.uzh.ifi.hase.soprafs24.entity.Player;
-import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.*;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GameGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPrivateGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPublicGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO.LobbyGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO.LobbyGetDTOComplete;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.TableDTO.TablePublicGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPostResponseDTO;
@@ -16,6 +14,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPutDTO;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
+import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -83,10 +82,11 @@ public interface DTOMapper {
 
 
     // Game Mappings
-    // gametable muss doch nicht mehr gemapped werden?
     // TODO Complete Mappings once Game is done and add Tests
     @Mapping(source = "id", target = "id")
     @Mapping(source = "gameFinished", target = "gameFinished")
+    @Mapping(source = "players", target = "players")
+    @Mapping(source = "gameTable", target = "gameTable")
     GameGetDTO convertEntityToGameGetDTO(Game game);
 
     @Mapping(source = "id", target = "id")
@@ -98,8 +98,13 @@ public interface DTOMapper {
     @Mapping(source = "id", target = "id")
     @Mapping(source = "money", target = "money")
     @Mapping(source = "username", target = "username")
-    @Mapping(source = "cards", target = "cards")
     @Mapping(source = "folded", target = "folded")
+    @Mapping(source = "cards", target = "cardsImage")
     PlayerPrivateGetDTO convertEntityToPlayerPrivateDTO(Player player);
+
+    @Mapping(source = "openCards", target = "openCardsImage")
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "money", target = "money")
+    TablePublicGetDTO converEntityToTablePublicGetDTO(GameTable gameTable);
 
 }
