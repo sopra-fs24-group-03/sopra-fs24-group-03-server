@@ -88,21 +88,38 @@ public class GameServiceTest {
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
         Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
         Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
-        player.setMoney(2000);
         Mockito.when(game.getBet()).thenReturn(0);
+        Mockito.when(player.getMoney()).thenReturn(2000);
         Mockito.when(move.getAmount()).thenReturn(100);
         Mockito.when(move.getMove()).thenReturn(Moves.Raise);
         Mockito.doNothing().when(game).setBet(Mockito.anyInt());
-        //TODO Mockito.doNothing().when(game).updateOrder();
 
         int bet = gameService.turn(move, 1, "token");
-
         assertEquals(100, bet);
     }
-
-    //TODO no assert?!
     @Test
-    public void turn_raiseFail(){
+    public void turn_raiseFailNotEnoughMoney(){
+        User user = new User();
+
+        user.setUsername("username");
+
+
+        Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
+        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        Mockito.when(player.getMoney()).thenReturn(50);
+        Mockito.when(move.getAmount()).thenReturn(100);
+        Mockito.when(move.getMove()).thenReturn(Moves.Raise);
+
+        ResponseStatusException e = assertThrows(ResponseStatusException.class,
+                ()-> gameService.turn(move, 1, "token")
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    }
+
+    @Test
+    public void turn_raiseToLittleRaise(){
         User user = new User();
 
         user.setUsername("username");
@@ -122,48 +139,151 @@ public class GameServiceTest {
 
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
     }
-
-    //TODO no assert?!
     @Test
-    public void updateGame_success(){
+    public void turn_checkSuccess(){
         User user = new User();
-        List<Player> players = new ArrayList<Player>();
-        List<Card> cards = new ArrayList<Card>();
-
-        players.add(player);
         user.setUsername("username");
 
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
         Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(game.getPlayers()).thenReturn(players);
-        Mockito.when(player.getUsername()).thenReturn("username");
-        Mockito.when(table.getCards()).thenReturn(cards);
-        Mockito.when(game.getGameTable()).thenReturn(table);
-        Mockito.doNothing().when(game).setsNextPlayerTurnIndex();
+        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        Mockito.when(game.getBet()).thenReturn(0);
+        Mockito.when(move.getAmount()).thenReturn(0);
+        Mockito.when(move.getMove()).thenReturn(Moves.Check);
 
-        gameService.updateGame(1, 0);
+        int bet = gameService.turn(move, 1, "token");
+        assertEquals(0, bet);
     }
-
-    //TODO no assert?!
     @Test
-    public void updateGame_success_withBet(){
+    public void turn_checkFail(){
         User user = new User();
-        List<Player> players = new ArrayList<Player>();
-        List<Card> cards = new ArrayList<Card>();
-
-        players.add(player);
         user.setUsername("username");
 
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
         Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(game.getPlayers()).thenReturn(players);
-        Mockito.when(player.getUsername()).thenReturn("username");
-        Mockito.when(table.getCards()).thenReturn(cards);
-        Mockito.when(game.getGameTable()).thenReturn(table);
-        Mockito.doNothing().when(table).updateMoney(Mockito.anyInt());
+        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        Mockito.when(game.getBet()).thenReturn(100);
+        Mockito.when(move.getAmount()).thenReturn(0);
+        Mockito.when(move.getMove()).thenReturn(Moves.Check);
 
-        gameService.updateGame(1, 10);
+        ResponseStatusException e = assertThrows(ResponseStatusException.class,
+                ()-> gameService.turn(move, 1, "token")
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
     }
+    @Test
+    public void turn_callSuccess(){
+        User user = new User();
+
+        user.setUsername("username");
+
+        Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
+        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        Mockito.when(game.getBet()).thenReturn(100);
+        Mockito.when(player.getMoney()).thenReturn(2000);
+        Mockito.when(move.getAmount()).thenReturn(0);
+        Mockito.when(player.getLastRaiseAmount()).thenReturn(0);
+        Mockito.when(move.getMove()).thenReturn(Moves.Call);
+
+        int bet = gameService.turn(move, 1, "token");
+        assertEquals(100, bet);
+    }
+    @Test
+    public void turn_callFail(){
+        User user = new User();
+
+        user.setUsername("username");
+
+        Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
+        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        Mockito.when(game.getBet()).thenReturn(0);
+        Mockito.when(move.getMove()).thenReturn(Moves.Call);
+
+        ResponseStatusException e = assertThrows(ResponseStatusException.class,
+                ()-> gameService.turn(move, 1, "token")
+        );
+
+        assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
+    }
+    @Test
+    public void authorize_Success(){
+        User user = new User();
+        user.setUsername("username");
+        Player player = mock(Player.class);
+        List<Player> players = new ArrayList<>();
+        players.add(player);
+
+        Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
+        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        Mockito.when(game.getPlayers()).thenReturn(players);
+        Mockito.when(game.getPlayerTurnIndex()).thenReturn(0);
+
+        //throws no error
+        gameService.authorize("token", 1);
+
+    }
+    @Test
+    public void authorize_Unauthorized(){
+        User user = new User();
+        user.setUsername("username");
+        Player player = mock(Player.class);
+        Player anotherPlayer = mock(Player.class);
+        List<Player> players = new ArrayList<>();
+        players.add(player);
+        players.add(anotherPlayer);
+
+        Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
+        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        Mockito.when(game.getPlayers()).thenReturn(players);
+        Mockito.when(game.getPlayerTurnIndex()).thenReturn(1);
+
+        //throws  error
+        ResponseStatusException e = assertThrows(ResponseStatusException.class,
+                ()->  gameService.authorize("token", 1)
+        );
+
+        assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
+
+
+    }
+
+
+
+    @Test
+    public void updateGame_UpdatesTableMoney() {
+        long gameId = 1L;
+        int betAmount = 100;
+        Game game = mock(Game.class);
+        GameTable table = mock(GameTable.class);
+
+        Player currentPlayer = mock(Player.class);
+        List<Player> players = new ArrayList<>();
+        players.add(currentPlayer);
+
+        Mockito.when(gameRepository.findById(gameId)).thenReturn(game);
+        Mockito. when(game.getGameTable()).thenReturn(table);
+        Mockito. when(game.getPlayers()).thenReturn(players);
+        Mockito.when(game.getPlayerTurnIndex()).thenReturn(0);
+        Mockito.when(currentPlayer.getUsername()).thenReturn("username");
+        Mockito.when(gameService.playersfolded(game)).thenReturn(false);
+
+
+        // Explicitly block winningCondition from being called
+        Mockito.doNothing().when(gameService).winningCondition(Mockito.anyLong());
+
+        gameService.updateGame(gameId, betAmount);
+
+        Mockito.verify(table, Mockito.times(1)).updateMoney(betAmount); // Check if table.updateMoney was called with the correct amount
+    }
+
+
+
+
 
 
     @Test

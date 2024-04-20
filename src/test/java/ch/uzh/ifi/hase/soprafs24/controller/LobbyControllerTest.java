@@ -166,8 +166,12 @@ public class LobbyControllerTest {
     @Test
     public void createGameWithLobbyIdSuccess() throws Exception {
 
+        User user1 = new User();
+        ArrayList<User> Userlist = new ArrayList<User>();
+        Userlist.add(user1);
+
         Lobby lobby = new Lobby();
-        Game game = new Game(new ArrayList<User>());
+        Game game = new Game(Userlist);
 
         Mockito.when(lobbyService.startGame(Mockito.anyString(), Mockito.anyLong())).thenReturn(game);
 

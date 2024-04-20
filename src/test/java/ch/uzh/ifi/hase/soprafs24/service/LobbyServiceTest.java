@@ -206,8 +206,11 @@ public class LobbyServiceTest {
     @Test
     public void testCreateGame_GameAlreadyExists(){
 
+        User user1 = new User();
+        ArrayList<User> Userlist = new ArrayList<User>();
+        Userlist.add(user1);
         //Setup
-        lobby.createGame(new ArrayList<User>());
+        lobby.createGame(Userlist);
 
         User user2 = new User();
         User user3 = new User();
