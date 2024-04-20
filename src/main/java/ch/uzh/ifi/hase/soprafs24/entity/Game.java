@@ -39,6 +39,7 @@ public class Game implements Serializable {
         setPlayers(users.stream().map(user -> new Player(this, user.getUsername(), user.getMoney(), user.getToken(), cardsApi.drawCards(deckId, 2))).toList());
         // create Table and give five cards
         this.gameTable = new GameTable(cardsApi.drawCards(deckId, 5));
+        this.smallBlindPlayer = players.get(0);
 
     }
 
@@ -70,6 +71,9 @@ public class Game implements Serializable {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="raisePlayer_id", referencedColumnName = "id")
     private Player raisePlayer;
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name="smallBlindPlayer_id", referencedColumnName = "id")
+    private Player smallBlindPlayer;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name="winner_id", referencedColumnName = "id")
@@ -175,5 +179,13 @@ public class Game implements Serializable {
 
     public void setWinner(Player winner) {
         this.winner = winner;
+    }
+
+    public Player getSmallBlindPlayer() {
+        return smallBlindPlayer;
+    }
+
+    public void setSmallBlindPlayer(Player smallBlindPlayer) {
+        this.smallBlindPlayer = smallBlindPlayer;
     }
 }

@@ -129,7 +129,7 @@ public class GameService {
                 if (game.getBet() == 0){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only call if a Bet was made before");}
                 if(move.getAmount() != 0){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Call with an Amount");}
                 if (game.getBet() >player.getMoney()){
-                    //All in call not implemented yet
+                    //TODO All in call not implemented yet
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only call if you have enough money");
                 }
                 else{ //if enough money, bet the current bet
@@ -178,6 +178,7 @@ public class GameService {
                 return;
             }
             table.updateOpenCards();
+            setIndexToSBPlayer(game);
         }
 
 
@@ -246,6 +247,19 @@ public class GameService {
         turn(gamePutDTObig, game.getId(),bigBlindPlayer.getToken());
         updateGame(game.getId(), bigBlind);
 
+    }
+    public void setIndexToSBPlayer(Game game){
+        List<Player> players = game.getPlayers();
+
+        Player smallBlindPlayer = game.getSmallBlindPlayer();
+
+        for (int i = 0; i < players.size(); i++) {
+            if (players.get(i).equals(smallBlindPlayer)) {
+                game.setPlayerTurnIndex(i);
+                if(smallBlindPlayer.isFolded()){game.setsNextPlayerTurnIndex();}
+                break;
+            }
+        }
     }
 
     public void deleteGame(Game game, int time){
