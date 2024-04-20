@@ -155,6 +155,7 @@ public class GameControllerTest {
 
         Game game = new Game(users);
         game.setId(1L);
+        game.setPlayerTurnIndex(0);
         String token = "validToken";
 
         Card card1 = new Card("1", "2");
@@ -163,18 +164,22 @@ public class GameControllerTest {
         cards.add(card1);
         cards.add(card2);
 
-        Player player1 = new Player(game, "PlayerTwo", 2000, "validToken2", cards);
+        Player player1 = new Player(game, "PlayerOne", 2000, "validToken1", cards);
         player1.setId(2L);
+
+        Player player2 = new Player(game, "PlayerTwo", 2000, "validToken2", cards);
+        player1.setId(3L);
 
 
         List<Player> players = new ArrayList<>();
         players.add(player1);
-        PlayerPrivateGetDTO privatePlayerDTO = new PlayerPrivateGetDTO();
-        privatePlayerDTO.setUsername("PlayerOne");
+        players.add(player2);
+        game.setPlayers(players);
 
 
         Mockito.when(gameService.getGameById(game.getId(), token)).thenReturn(game);
         Mockito.when(gameService.getPlayerByToken(players, token)).thenReturn(player1);
+        //Mockito.when(game.getPlayers()).thenReturn(players);
 
 
         MockHttpServletRequestBuilder getRequest = get("/games/{id}", game.getId())
@@ -185,8 +190,8 @@ public class GameControllerTest {
         mockMvc.perform(getRequest)
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.players[0].username").value("testUsername"))
-                .andExpect(jsonPath("$.money").value(0));
+                .andExpect(jsonPath("$.players[0].username").value("PlayerOne"))
+                .andExpect(jsonPath("$.moneyInPot").value(0));
 
 
     }

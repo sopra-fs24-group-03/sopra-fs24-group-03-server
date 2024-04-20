@@ -10,11 +10,15 @@ import java.util.List;
 // TODO add necessary Game Attributes
 public class GameGetDTO {
     private long id;
-    private int money;
+    // pot ???
+    private int moneyInPot;
     private List<PlayerPublicGetDTO> players;
     private PlayerPrivateGetDTO ownPlayer;
     // we should not send the whole gameTable we have to countrol, that the right amount of cards is sent to the frontend
     private TablePublicGetDTO gameTable;
+
+
+    private boolean gameFinished;
 
 
     // cards of player
@@ -29,12 +33,12 @@ public class GameGetDTO {
         this.id = id;
     }
 
-    public int getMoney() {
-        return money;
+    public int getMoneyInPot() {
+        return moneyInPot;
     }
 
-    public void setMoney(int money) {
-        this.money = money;
+    public void setMoneyInPot(int moneyInPot) {
+        this.moneyInPot = moneyInPot;
     }
 
     public List<PlayerPublicGetDTO> getPlayers() {
@@ -57,5 +61,13 @@ public class GameGetDTO {
     }
     public TablePublicGetDTO getGameTable() {
         return gameTable;
+    }
+
+    public boolean isGameFinished() {
+        return gameFinished;
+    }
+
+    public void setGameFinished(boolean gameFinished) {
+        this.gameFinished = gameFinished;
     }
 }
