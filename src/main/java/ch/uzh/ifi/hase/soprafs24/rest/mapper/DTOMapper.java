@@ -83,10 +83,10 @@ public interface DTOMapper {
 
 
     // Game Mappings
-
+    // gametable muss doch nicht mehr gemapped werden?
     // TODO Complete Mappings once Game is done and add Tests
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "gameTable", target = "gameTable")
+    @Mapping(source = "gameFinished", target = "gameFinished")
     GameGetDTO convertEntityToGameGetDTO(Game game);
 
     @Mapping(source = "id", target = "id")

@@ -9,7 +9,9 @@ import ch.uzh.ifi.hase.soprafs24.entity.Player;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 import ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand;
+import ch.uzh.ifi.hase.soprafs24.helpers.ScheduledGameDelete;
 import ch.uzh.ifi.hase.soprafs24.repository.GameRepository;
+import ch.uzh.ifi.hase.soprafs24.repository.LobbyRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GamePutDTO;
 import org.slf4j.Logger;
@@ -35,13 +37,15 @@ public class GameService {
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final LobbyRepository lobbyRepository;
 
 
     @Autowired
-    public GameService(@Qualifier("userService") UserService userService,@Qualifier("userRepository") UserRepository userRepository, @Qualifier("gameRepository") GameRepository gameRepository){
+    public GameService(@Qualifier("userService") UserService userService,@Qualifier("userRepository") UserRepository userRepository, @Qualifier("gameRepository") GameRepository gameRepository, @Qualifier("lobbyRepository") LobbyRepository lobbyRepository){
         this.gameRepository = gameRepository;
         this.userRepository = userRepository;
         this.userService = userService;
+        this.lobbyRepository = lobbyRepository;
     }
     public Game getGameById(long id, String token){
         userService.authenticateUser(token);
@@ -66,6 +70,7 @@ public class GameService {
         }
         return game;
     }
+
 
 
     //method to make moves
@@ -236,8 +241,9 @@ public class GameService {
 
     }
 
-    private void deleteGame(Game game, int time){
-        //TODO delete Game after time seconds
+    public void deleteGame(Game game, int time){
+        ScheduledGameDelete scheduledGameDelete = new ScheduledGameDelete(gameRepository, lobbyRepository);
+        scheduledGameDelete.scheduleGameDeletion(game, time);
     }
 
 

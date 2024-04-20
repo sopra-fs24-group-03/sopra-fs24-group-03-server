@@ -78,6 +78,9 @@ public class Lobby implements Serializable {
     }
     public void setGame(Game game){this.game = game;}
 
+    public void setGameToNull() {
+        this.game = null;
+    }
 
     // Used to create a new Game, assign same ID
     public Game createGame(List<User> users){

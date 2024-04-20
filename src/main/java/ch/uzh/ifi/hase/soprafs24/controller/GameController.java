@@ -2,7 +2,10 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 
 
 import ch.uzh.ifi.hase.soprafs24.entity.Game;
+import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs24.entity.Player;
+import ch.uzh.ifi.hase.soprafs24.helpers.ScheduledGameDelete;
+import ch.uzh.ifi.hase.soprafs24.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GameGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GamePutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPrivateGetDTO;
@@ -45,16 +48,22 @@ public class GameController {
 
     }
 
-
     @PutMapping("/games/{gameId}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public Game makeMove(@RequestBody GamePutDTO move, @RequestHeader String token, @PathVariable long gameId) {
+    public void makeMove(@RequestBody GamePutDTO move, @RequestHeader String token, @PathVariable long gameId) {
         gameService.authorize(token, gameId);
         int bet = gameService.turn(move, gameId, token);
         gameService.updateGame(gameId, bet);
-        Game game = gameService.getGameById(gameId, token);
-        return game;
+    }
 
+
+    // just to test in postman not necessary must be deleted for M3
+    @DeleteMapping("/games/{gameId}")
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public void deleteGame(@RequestHeader String token, @PathVariable long gameId) {
+        Game game = gameService.getGameById(gameId, token);
+        gameService.deleteGame(game, 20);
     }
 }
