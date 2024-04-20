@@ -349,12 +349,5 @@ public class GameService {
         }
         return highCard(cards, player);
     }
-
-//    public List<String> convertCardToImage (List<Card> cards) {
-//        List<String> cardImages = new ArrayList<>();
-//        for(Card card : cards) {
-//            cardImages.add(card.getImage());
-//        }
-//        return cardImages;
-//    }
+    
 }

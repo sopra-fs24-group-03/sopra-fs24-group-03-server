@@ -63,30 +63,6 @@ public class GameController {
         gameToReturn.setOwnPlayer(privatePlayer);
 
         return gameToReturn;
-//        Game game = gameService.getGameById(id, token);
-//        List<Player> players = new ArrayList<>();
-//        players = game.getPlayers();
-//        Player ownPlayer = gameService.getPlayerByToken(players, token);
-//        PlayerPrivateGetDTO privatePlayer = DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(ownPlayer);
-//        privatePlayer.setCardsImage(gameService.convertCardToImage(ownPlayer.getCards()));
-//        privatePlayer.setCardsImage(gameService.convertCardToImage(.getCards()));
-//        List<PlayerPublicGetDTO> gamePlayers = new ArrayList<>();
-//        int iteration = 0;
-//        for (Player player : players) {
-//            PlayerPublicGetDTO playerPublicGetDTO = DTOMapper.INSTANCE.convertEntityToPlayerPublicDTO(player);
-//            if (iteration == game.getPlayerTurnIndex()) {
-//                playerPublicGetDTO.setTurn(true);
-//            }
-//            else {
-//                playerPublicGetDTO.setTurn(false);
-//            }
-//            playerPublicGetDTO.a
-//            iteration++;
-//        }
-//        GameGetDTO gameToReturn = DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
-//        gameToReturn.setPlayers(gamePlayers);
-//        gameToReturn.setOwnPlayer(privatePlayer);
-//        return gameToReturn;
 
     }
 
