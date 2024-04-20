@@ -162,18 +162,17 @@ public class PlayerHand {
             hand.clear();
             hand.add(cards.get(i));
             char suit = cards.get(i).getCode().charAt(1);
-            for(int j = i+1; j <= length; j++){
+            for(int j = i+1; j < length; j++){
                 if(suit == cards.get(j).getCode().charAt(1)){
                     hand.add(cards.get(j));
                 }
-                else break;
             }
 
             //if the amount of cards with equal suit if greater than five return them
             if(hand.size() >= 5){
                 PlayerHand result = new PlayerHand();
                 result.setHand(Hand.FLUSH);
-                result.setCards(cards);
+                result.setCards(hand.subList(0,5));
                 result.setPlayer(player);
                 return result;
             }
@@ -365,7 +364,7 @@ public class PlayerHand {
         PlayerHand result = new PlayerHand();
         result.setHand(Hand.HIGH_CARD);
         result.setPlayer(player);
-        result.setCards(cards.subList(0,4));
+        result.setCards(cards.subList(0,5));
         return result;
     }
 

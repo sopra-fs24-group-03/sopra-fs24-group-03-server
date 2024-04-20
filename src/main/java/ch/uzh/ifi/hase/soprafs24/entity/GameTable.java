@@ -69,7 +69,6 @@ public class GameTable implements Serializable {
             openCards.add(cards.get(openCards.size()));
         }
         //if called with already 5 cards open function just does nothing
-
     }
 
     public void setCards(List<Card> cards) {
