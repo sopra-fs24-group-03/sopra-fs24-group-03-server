@@ -38,6 +38,7 @@ public class Player {
 
     public Player(Game game, String username, int money, String token, List<Card> cards) {
         this.game = game;
+        this.folded = false;
         setUsername(username);
         setMoney(money);
         setToken(token);
