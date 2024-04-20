@@ -49,9 +49,15 @@ public class GameService {
     }
     public Game getGameById(long id, String token){
         userService.authenticateUser(token);
-        //TODO only player IN said game/lobby can get game
-        return findGame(id);
+        Game game = findGame(id);
+        List<Player> players = game.getPlayers();
+        for (Player player: players) {
+            if (player.getToken().equals(token)) {
+                return game;
+            }
 
+        }
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not in this game");
     }
 
     public Player getPlayerByToken(List<Player> players, String token) {
@@ -153,6 +159,7 @@ public class GameService {
 
         //check if all players except 1 folded
         if(playersfolded(game)){
+            winningCondition(game_id); //then game ends, call winning condition
             return;
 
         }

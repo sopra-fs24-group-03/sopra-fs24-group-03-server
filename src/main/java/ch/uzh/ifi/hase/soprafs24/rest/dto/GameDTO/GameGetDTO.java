@@ -11,7 +11,7 @@ import java.util.List;
 public class GameGetDTO {
     private long id;
     // pot ???
-    private int moneyInPot;
+    private int currentBet;
     private List<PlayerPublicGetDTO> players;
     private PlayerPrivateGetDTO ownPlayer;
     // we should not send the whole gameTable we have to countrol, that the right amount of cards is sent to the frontend
@@ -33,12 +33,12 @@ public class GameGetDTO {
         this.id = id;
     }
 
-    public int getMoneyInPot() {
-        return moneyInPot;
+    public int getCurrentBet() {
+        return currentBet;
     }
 
-    public void setMoneyInPot(int moneyInPot) {
-        this.moneyInPot = moneyInPot;
+    public void setCurrentBet(int currentBet) {
+        this.currentBet = currentBet;
     }
 
     public List<PlayerPublicGetDTO> getPlayers() {
