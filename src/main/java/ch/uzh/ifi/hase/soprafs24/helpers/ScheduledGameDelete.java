@@ -1,8 +1,6 @@
 package ch.uzh.ifi.hase.soprafs24.helpers;
 
-import ch.uzh.ifi.hase.soprafs24.entity.Game;
-import ch.uzh.ifi.hase.soprafs24.entity.GameTable;
-import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
+import ch.uzh.ifi.hase.soprafs24.entity.*;
 import ch.uzh.ifi.hase.soprafs24.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.LobbyRepository;
 import ch.uzh.ifi.hase.soprafs24.service.GameService;
@@ -12,6 +10,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Lob;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -38,9 +38,21 @@ public class ScheduledGameDelete {
         }
         return lobby;
     }
+
+    private void updateUserMoney(Lobby lobby, Game game) {
+        for(Player player : game.getPlayers()) {
+            for(User user : lobby.getLobbyusers()) {
+                if(user.getId() == player.getId()) {
+                    user.setMoney(player.getMoney());
+                }
+            }
+        }
+
+    }
     public void deleteGame(Game game) {
         Lobby lobby = findLobby(game.getId());
         lobby.setGameToNull();
+        updateUserMoney(lobby, game);
         lobbyRepository.save(lobby);
         gameRepository.delete(game);
         gameRepository.flush();
