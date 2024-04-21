@@ -42,7 +42,7 @@ public class ScheduledGameDelete {
     private void updateUserMoney(Lobby lobby, Game game) {
         for(Player player : game.getPlayers()) {
             for(User user : lobby.getLobbyusers()) {
-                if(user.getId() == player.getId()) {
+                if(user.getToken() == player.getToken()) {
                     user.setMoney(player.getMoney());
                 }
             }
