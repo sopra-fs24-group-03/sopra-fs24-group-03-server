@@ -13,7 +13,11 @@ import ch.uzh.ifi.hase.soprafs24.helpers.ScheduledGameDelete;
 import ch.uzh.ifi.hase.soprafs24.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.LobbyRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GameGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GamePutDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPrivateGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPublicGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,17 +45,18 @@ public class GameService {
 
 
     @Autowired
-    public GameService(@Qualifier("userService") UserService userService,@Qualifier("userRepository") UserRepository userRepository, @Qualifier("gameRepository") GameRepository gameRepository, @Qualifier("lobbyRepository") LobbyRepository lobbyRepository){
+    public GameService(@Qualifier("userService") UserService userService, @Qualifier("userRepository") UserRepository userRepository, @Qualifier("gameRepository") GameRepository gameRepository, @Qualifier("lobbyRepository") LobbyRepository lobbyRepository) {
         this.gameRepository = gameRepository;
         this.userRepository = userRepository;
         this.userService = userService;
         this.lobbyRepository = lobbyRepository;
     }
-    public Game getGameById(long id, String token){
+
+    public Game getGameById(long id, String token) {
         userService.authenticateUser(token);
         Game game = findGame(id);
         List<Player> players = game.getPlayers();
-        for (Player player: players) {
+        for (Player player : players) {
             if (player.getToken().equals(token)) {
                 return game;
             }
@@ -61,7 +66,7 @@ public class GameService {
     }
 
     public Player getPlayerByToken(List<Player> players, String token) {
-        for (Player player: players) {
+        for (Player player : players) {
             if (player.getToken().equals(token)) {
                 return player;
             }
@@ -69,14 +74,13 @@ public class GameService {
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not in this game");
     }
 
-    private Game findGame(long gameId){
+    private Game findGame(long gameId) {
         Game game = gameRepository.findById(gameId);
-        if(game == null){
+        if (game == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown game");
         }
         return game;
     }
-
 
 
     //method to make moves
@@ -88,23 +92,25 @@ public class GameService {
 
 
         //call the correct method and return the amount bet, if nothing is bet return 0
-        int amount =  switch (move.getMove()) {
+        int amount = switch (move.getMove()) {
             case Fold -> {
-                if(move.getAmount() != 0){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Fold with an Amount");}
+                if (move.getAmount() != 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Fold with an Amount");
+                }
                 //set folded attribute to true, but he "remains" in game
                 player.setFolded(true);
                 //no bet was made
                 yield 0;
             }
             case Raise -> {
-                if(player.getMoney()<move.getAmount()) {
+                if (player.getMoney() < move.getAmount()) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot bet more money than you have!");
                 }
                 //if raise is legal, update the order and current bet and call raise
-                if(move.getAmount() > game.getBet()){
+                if (move.getAmount() > game.getBet()) {
                     game.setBet(move.getAmount()); //set the current highest bet in game
-                    int moneyLost = move.getAmount()- player.getLastRaiseAmount();
-                    player.setMoney((player.getMoney()- moneyLost)); //remove money from user
+                    int moneyLost = move.getAmount() - player.getLastRaiseAmount();
+                    player.setMoney((player.getMoney() - moneyLost)); //remove money from user
 
                     player.setLastRaiseAmount(move.getAmount()); //save the last raised amount for call
 
@@ -112,29 +118,37 @@ public class GameService {
                     game.setRaisePlayer(player);
 
                     yield move.getAmount(); //return bet amount
-                } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You need to bet higher than the current highest bet!");
+                }
+                else
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You need to bet higher than the current highest bet!");
             }
             case Check -> {
-                if(move.getAmount() != 0){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Check with an Amount");}
+                if (move.getAmount() != 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Check with an Amount");
+                }
                 //only check if there was no bet made this betting round
-                if (game.getBet() == 0){
+                if (game.getBet() == 0) {
                     yield 0;
                 }
-                else{
+                else {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only check if there has been no bet made in this betting round");
                 }
 
             }
             case Call -> {
-                if (game.getBet() == 0){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only call if a Bet was made before");}
-                if(move.getAmount() != 0){throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Call with an Amount");}
-                if (game.getBet() >player.getMoney()){
+                if (game.getBet() == 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only call if a Bet was made before");
+                }
+                if (move.getAmount() != 0) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Call with an Amount");
+                }
+                if (game.getBet() > player.getMoney()) {
                     //TODO All in call not implemented yet
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only call if you have enough money");
                 }
-                else{ //if enough money, bet the current bet
+                else { //if enough money, bet the current bet
                     int loss = game.getBet() - player.getLastRaiseAmount();
-                    player.setMoney(player.getMoney()- loss); //p1 raises 100, p2 raises to 200, p1 calls --> only subtract (200-100 = 100) --> in total also 200
+                    player.setMoney(player.getMoney() - loss); //p1 raises 100, p2 raises to 200, p1 calls --> only subtract (200-100 = 100) --> in total also 200
                     yield loss;
                 }
             }
@@ -148,29 +162,30 @@ public class GameService {
 
 
     //updates game state (split from turn for easier testing)
-    public void updateGame(long game_id, int bet){
+    public void updateGame(long game_id, int bet) {
         Game game = gameRepository.findById(game_id);
         GameTable table = game.getGameTable();
         String nextPlayerUsername = game.getPlayers().get(game.getPlayerTurnIndex()).getUsername();
 
-        if(bet > 0){
+        if (bet > 0) {
             table.updateMoney(bet);
         }
 
         //check if all players except 1 folded
-        if(playersfolded(game)){
+        if (playersfolded(game)) {
             winningCondition(game_id); //then game ends, call winning condition
             return;
 
         }
 
         //check if current betting round is finished
-        if((game.getRaisePlayer() != null && Objects.equals(game.getRaisePlayer().getUsername(), nextPlayerUsername))){
+        if ((game.getRaisePlayer() != null && Objects.equals(game.getRaisePlayer().getUsername(), nextPlayerUsername))) {
             //reset betting to 0 after 1 betting round
 
             game.setBet(0);
             for (Player player : game.getPlayers()) {
-                player.setLastRaiseAmount(0);}
+                player.setLastRaiseAmount(0);
+            }
 
             //check if final round to end game
             if (table.getOpenCards().size() == 5) {
@@ -190,23 +205,23 @@ public class GameService {
         Game game = gameRepository.findById(id);
 
         //Check if valid inputs
-        if(username == null){
+        if (username == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You can access this when logged in!");
         }
-        if(game == null){
+        if (game == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown game ID");
         }
 
         //will throw correct exception if not in player list
         Player player = game.getPlayerByUsername(username);
 
-        if(game.getPlayers().get(game.getPlayerTurnIndex()) != player){
+        if (game.getPlayers().get(game.getPlayerTurnIndex()) != player) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "It is not your turn!");
         }
     }
 
 
-    public boolean playersfolded(Game game){
+    public boolean playersfolded(Game game) {
         List<Player> players = game.getPlayers();
         int foldedPlayersCount = 0; // Initialize counter for folded players
 
@@ -215,7 +230,7 @@ public class GameService {
                 foldedPlayersCount++;
             }
         }
-        return (foldedPlayersCount == (players.size() -1));
+        return (foldedPlayersCount == (players.size() - 1));
     }
 
     //TODO Big blind person canNOT play rn after blinding :(
@@ -236,7 +251,7 @@ public class GameService {
 
 
         authorize(smallBlindPlayer.getToken(), game.getId());
-        turn(gamePutDTOsmall, game.getId(),smallBlindPlayer.getToken());
+        turn(gamePutDTOsmall, game.getId(), smallBlindPlayer.getToken());
         updateGame(game.getId(), smallBlind);
 
         GamePutDTO gamePutDTObig = new GamePutDTO();
@@ -244,11 +259,12 @@ public class GameService {
         gamePutDTObig.setAmount(bigBlind);
 
         authorize(bigBlindPlayer.getToken(), game.getId());
-        turn(gamePutDTObig, game.getId(),bigBlindPlayer.getToken());
+        turn(gamePutDTObig, game.getId(), bigBlindPlayer.getToken());
         updateGame(game.getId(), bigBlind);
 
     }
-    public void setIndexToSBPlayer(Game game){
+
+    public void setIndexToSBPlayer(Game game) {
         List<Player> players = game.getPlayers();
 
         Player smallBlindPlayer = game.getSmallBlindPlayer();
@@ -256,31 +272,33 @@ public class GameService {
         for (int i = 0; i < players.size(); i++) {
             if (players.get(i).equals(smallBlindPlayer)) {
                 game.setPlayerTurnIndex(i);
-                if(smallBlindPlayer.isFolded()){game.setsNextPlayerTurnIndex();}
+                if (smallBlindPlayer.isFolded()) {
+                    game.setsNextPlayerTurnIndex();
+                }
                 break;
             }
         }
     }
 
-    public void deleteGame(Game game, int time){
+    public void deleteGame(Game game, int time) {
         ScheduledGameDelete scheduledGameDelete = new ScheduledGameDelete(gameRepository, lobbyRepository);
         scheduledGameDelete.scheduleGameDeletion(game, time);
     }
 
 
     //TODO destroy game class, add attributes to game to signal it's finished + players hand
-    public void endGame(long game_id, PlayerHand winner){
+    public void endGame(long game_id, PlayerHand winner) {
         Game game = gameRepository.findById(game_id);
         GameTable table = game.getGameTable();
         User user;
 
         //update user money
-        for(Player player: game.getPlayers()){
+        for (Player player : game.getPlayers()) {
             user = userRepository.findByUsername(player.getUsername());
-            if(player == winner.getPlayer()){
+            if (player == winner.getPlayer()) {
                 user.setMoney(player.getMoney() + table.getMoney());  //winner gets unused money back plus money on table
             }
-            else{
+            else {
                 user.setMoney(player.getMoney()); //looser only gets unused money back
             }
         }
@@ -301,10 +319,10 @@ public class GameService {
         PlayerHand winner = null;
 
         //find the best hand
-        for(Player player : game.getPlayers()){
+        for (Player player : game.getPlayers()) {
 
             //ignore folded players
-            if(player.isFolded()){
+            if (player.isFolded()) {
                 continue;
             }
             PlayerHand curHand = evaluateHand(player, table);
@@ -316,13 +334,13 @@ public class GameService {
                 }
             });
 
-            if(winner == null || handRank(curHand.getHand()) > handRank(winner.getHand())){
+            if (winner == null || handRank(curHand.getHand()) > handRank(winner.getHand())) {
                 winner = curHand;
             }
 
             //TODO if two player have same hand (check further)
-            else if(handRank(curHand.getHand()) == handRank(winner.getHand())){
-                if(getValue(curHand.getCards().get(0)) > getValue(winner.getCards().get(0))){
+            else if (handRank(curHand.getHand()) == handRank(winner.getHand())) {
+                if (getValue(curHand.getCards().get(0)) > getValue(winner.getCards().get(0))) {
                     winner = curHand;
                 }
             }
@@ -370,5 +388,42 @@ public class GameService {
         }
         return highCard(cards, player);
     }
-    
+
+    public List<PlayerPublicGetDTO> settingPlayerInGameGetDTO(Game game, List<Player> players, PlayerPrivateGetDTO privatePlayer) {
+        int iteration = 0;
+        List<PlayerPublicGetDTO> playersInGame = new ArrayList<>();
+        for (Player player : players) {
+            PlayerPublicGetDTO playerPublicGetDTO = DTOMapper.INSTANCE.convertEntityToPlayerPublicDTO(player);
+            if (iteration == game.getPlayerTurnIndex()) {
+                playerPublicGetDTO.setTurn(true);
+                if (player.getId() == privatePlayer.getId()) {
+                    privatePlayer.setTurn(true);
+                }
+            }
+            else {
+                playerPublicGetDTO.setTurn(false);
+            }
+            playersInGame.add(playerPublicGetDTO);
+            iteration++;
+        }
+        return playersInGame;
+    }
+
+    public void addFinishedGamePlayers(GameGetDTO gameToReturn, Game game, List<Player> players) {
+
+    List<PlayerPrivateGetDTO> notFoldedPlayers = new ArrayList<>();
+        if(game.getGameFinished() == true) {
+        gameToReturn.setWinner(DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(game.getWinner()));
+        for(Player player : players) {
+            if(!player.isFolded()) {
+                notFoldedPlayers.add(DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(player));
+            }
+        }
+        gameToReturn.setNotFoldedPlayers(notFoldedPlayers);
+    }
+        else {
+        gameToReturn.setWinner(null);
+        gameToReturn.setNotFoldedPlayers(notFoldedPlayers);
+    }
+        }
 }

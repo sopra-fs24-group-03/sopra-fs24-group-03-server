@@ -17,6 +17,7 @@ import ch.uzh.ifi.hase.soprafs24.service.GameService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,27 +42,9 @@ public class GameController {
         players = game.getPlayers();
         Player ownPlayer = gameService.getPlayerByToken(players, token);
         PlayerPrivateGetDTO privatePlayer = DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(ownPlayer);
-
-
-        int iteration = 0;
-        List<PlayerPublicGetDTO> playersInGame = new ArrayList<>();
-        for (Player player : players) {
-            PlayerPublicGetDTO playerPublicGetDTO = DTOMapper.INSTANCE.convertEntityToPlayerPublicDTO(player);
-            if (iteration == game.getPlayerTurnIndex()) {
-                playerPublicGetDTO.setTurn(true);
-                if(player.getId() == privatePlayer.getId()) {
-                    privatePlayer.setTurn(true);
-                }
-            }
-            else {
-                playerPublicGetDTO.setTurn(false);
-            }
-            playersInGame.add(playerPublicGetDTO);
-            iteration++;
-        }
-        gameToReturn.setPlayers(playersInGame);
+        gameService.addFinishedGamePlayers(gameToReturn, game, players);
+        gameToReturn.setPlayers(gameService.settingPlayerInGameGetDTO(game, players, privatePlayer));
         gameToReturn.setOwnPlayer(privatePlayer);
-
         return gameToReturn;
 
     }

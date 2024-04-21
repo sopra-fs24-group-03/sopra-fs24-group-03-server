@@ -20,6 +20,9 @@ public class GameGetDTO {
 
     private boolean gameFinished;
 
+    private PlayerPrivateGetDTO winner;
+    private List<PlayerPrivateGetDTO> notFoldedPlayers;
+
 
     // cards of player
     // something that
@@ -69,5 +72,21 @@ public class GameGetDTO {
 
     public void setGameFinished(boolean gameFinished) {
         this.gameFinished = gameFinished;
+    }
+
+    public PlayerPrivateGetDTO getWinner() {
+        return winner;
+    }
+
+    public void setWinner(PlayerPrivateGetDTO winner) {
+        this.winner = winner;
+    }
+
+    public List<PlayerPrivateGetDTO> getNotFoldedPlayers() {
+        return notFoldedPlayers;
+    }
+
+    public void setNotFoldedPlayers(List<PlayerPrivateGetDTO> notFoldedPlayers) {
+        this.notFoldedPlayers = notFoldedPlayers;
     }
 }
