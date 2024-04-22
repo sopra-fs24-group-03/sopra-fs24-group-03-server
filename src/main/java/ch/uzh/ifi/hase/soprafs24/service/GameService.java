@@ -181,6 +181,8 @@ public class GameService {
             return;
 
         }
+        //TODO BIG BLIND CAN PLAY AGAIN AFTER 1st round and ONLY after 1st round && 1st betting round
+        //if(table.getCards().size() == 0 && bet == 25){}
 
         //check if current betting round is finished
         if ((game.getRaisePlayer() != null && Objects.equals(game.getRaisePlayer().getUsername(), nextPlayerUsername))) {
