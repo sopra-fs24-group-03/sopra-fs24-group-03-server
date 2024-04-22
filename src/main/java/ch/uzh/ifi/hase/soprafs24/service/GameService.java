@@ -99,6 +99,9 @@ public class GameService {
                 }
                 //set folded attribute to true, but he "remains" in game
                 player.setFolded(true);
+                if (game.getRaisePlayer() == player){
+                    game.setRaisePlayer(null);
+                }
                 //no bet was made
                 yield 0;
             }
@@ -149,6 +152,7 @@ public class GameService {
                 else { //if enough money, bet the current bet
                     int loss = game.getBet() - player.getLastRaiseAmount();
                     player.setMoney(player.getMoney() - loss); //p1 raises 100, p2 raises to 200, p1 calls --> only subtract (200-100 = 100) --> in total also 200
+                    player.setLastRaiseAmount(player.getLastRaiseAmount()+ loss);
                     yield loss;
                 }
             }
@@ -194,6 +198,11 @@ public class GameService {
             }
             table.updateOpenCards();
             setIndexToSBPlayer(game);
+            //Sets the "Raiseplayer" to smallblind/ first person which hasent folded --> If noone raises so that the game still ends
+            game.setRaisePlayer(setRaisePlayerCorrect(game));
+        }
+        if(game.getRaisePlayer() == null){
+            game.setRaisePlayer(game.getPlayers().get(game.getPlayerTurnIndex()));
         }
 
 
@@ -279,6 +288,28 @@ public class GameService {
             }
         }
     }
+    public Player setRaisePlayerCorrect(Game game) {
+        List<Player> players = game.getPlayers();
+        Player smallBlindPlayer = game.getSmallBlindPlayer();
+
+        if (!smallBlindPlayer.isFolded()) {
+            return smallBlindPlayer;
+        }
+
+        int numberOfPlayers = players.size();
+        int startIdx = players.indexOf(smallBlindPlayer);
+
+        for (int i = 0; i < numberOfPlayers; i++) {
+            int playerTurnIndex = (startIdx + i + 1) % numberOfPlayers;
+            Player currentPlayer = players.get(playerTurnIndex);
+
+            if (!currentPlayer.isFolded()) {
+                return currentPlayer;
+            }
+        }
+        return null;
+    }
+
 
     public void deleteGame(Game game, int time) {
         ScheduledGameDelete scheduledGameDelete = new ScheduledGameDelete(gameRepository, lobbyRepository);
