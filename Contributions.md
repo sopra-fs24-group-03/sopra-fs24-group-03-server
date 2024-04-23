@@ -13,7 +13,7 @@
 - Colin Bächtold: External API requests, Turn method: #109, #117, #118
 - Noah Ziegler: Setup for Table class, Cards update accordingly: #108, #119
 ### Week 15.04-21.04
-- Joel Huber:
+- Joel Huber: Api endpoint get game, destroy game class: #167, #162
 - Cédric Huber: polling in game, Table mapping #41, #46
 - Linus Lautenschlager: Player actions in frontend, display enemies in frontend #44,#45, #47, #50, #52,#53, #58, #60
 - Colin Bächtold: Added endgame method to update user money and implemented winning condition check, started implementing methods for checking hands: #154, #155, #156 
