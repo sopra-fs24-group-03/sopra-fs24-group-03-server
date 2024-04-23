@@ -342,7 +342,7 @@ public class GameService {
         game.setWinner(winner.getPlayer());
         game.setGameFinished(Boolean.TRUE);
 
-        deleteGame(game, 60); //delete game after 1 minute
+        deleteGame(game, 1); //delete game after 1 minute
     }
 
 

@@ -39,20 +39,9 @@ public class ScheduledGameDelete {
         return lobby;
     }
 
-    private void updateUserMoney(Lobby lobby, Game game) {
-        for(Player player : game.getPlayers()) {
-            for(User user : lobby.getLobbyusers()) {
-                if(user.getToken() == player.getToken()) {
-                    user.setMoney(player.getMoney());
-                }
-            }
-        }
-
-    }
     public void deleteGame(Game game) {
         Lobby lobby = findLobby(game.getId());
         lobby.setGameToNull();
-        updateUserMoney(lobby, game);
         lobbyRepository.save(lobby);
         gameRepository.delete(game);
         gameRepository.flush();
