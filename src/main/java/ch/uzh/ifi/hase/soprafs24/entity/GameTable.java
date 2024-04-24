@@ -28,8 +28,7 @@ public class GameTable implements Serializable {
     private List<Card> openCards = new ArrayList<>();
 
 
-
-    public GameTable(List<Card> cards){
+    public GameTable(List<Card> cards) {
         this.cards = cards;
         cards.forEach(card -> card.setGameTable(this));
         setCards(cards);
@@ -41,7 +40,7 @@ public class GameTable implements Serializable {
     }
 
 
-    public void updateMoney(int amount){
+    public void updateMoney(int amount) {
         Money += amount;
     }
 
@@ -56,11 +55,12 @@ public class GameTable implements Serializable {
     public List<Card> getCards() {
         return cards;
     }
+
     public List<Card> getOpenCards() {
         return openCards;
     }
 
-    public void updateOpenCards(){
+    public void updateOpenCards() {
         //only add card up until size 5 --> then size is 5 and in gameservice endgame is called
         if (openCards.isEmpty()) {
             openCards.addAll(cards.subList(0, 3));

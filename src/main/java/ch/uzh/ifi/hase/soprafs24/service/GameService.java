@@ -18,8 +18,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GamePutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPrivateGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPublicGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -37,7 +36,6 @@ import static ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand.*;
 @Service
 @Transactional
 public class GameService {
-    private final Logger log = LoggerFactory.getLogger(LobbyService.class);
     private final GameRepository gameRepository;
     private final UserRepository userRepository;
     private final UserService userService;
@@ -99,7 +97,7 @@ public class GameService {
                 }
                 //set folded attribute to true, but he "remains" in game
                 player.setFolded(true);
-                if (game.getRaisePlayer() == player){
+                if (game.getRaisePlayer() == player) {
                     game.setRaisePlayer(null);
                 }
                 //no bet was made
@@ -152,7 +150,7 @@ public class GameService {
                 else { //if enough money, bet the current bet
                     int loss = game.getBet() - player.getLastRaiseAmount();
                     player.setMoney(player.getMoney() - loss); //p1 raises 100, p2 raises to 200, p1 calls --> only subtract (200-100 = 100) --> in total also 200
-                    player.setLastRaiseAmount(player.getLastRaiseAmount()+ loss);
+                    player.setLastRaiseAmount(player.getLastRaiseAmount() + loss);
                     yield loss;
                 }
             }
@@ -203,7 +201,7 @@ public class GameService {
             //Sets the "Raiseplayer" to smallblind/ first person which hasent folded --> If noone raises so that the game still ends
             game.setRaisePlayer(setRaisePlayerCorrect(game));
         }
-        if(game.getRaisePlayer() == null){
+        if (game.getRaisePlayer() == null) {
             game.setRaisePlayer(game.getPlayers().get(game.getPlayerTurnIndex()));
         }
 
@@ -244,7 +242,6 @@ public class GameService {
         return (foldedPlayersCount == (players.size() - 1));
     }
 
-    //TODO Big blind person canNOT play rn after blinding :(
     public void initializeBlinds(Game game) {
         List<Player> players = game.getPlayers();
 
@@ -290,6 +287,7 @@ public class GameService {
             }
         }
     }
+
     public Player setRaisePlayerCorrect(Game game) {
         List<Player> players = game.getPlayers();
         Player smallBlindPlayer = game.getSmallBlindPlayer();
@@ -319,7 +317,6 @@ public class GameService {
     }
 
 
-    //TODO destroy game class, add attributes to game to signal it's finished + players hand
     public void endGame(long game_id, PlayerHand winner) {
         Game game = gameRepository.findById(game_id);
         GameTable table = game.getGameTable();
@@ -342,7 +339,7 @@ public class GameService {
         game.setWinner(winner.getPlayer());
         game.setGameFinished(Boolean.TRUE);
 
-        deleteGame(game, 1); //delete game after 1 minute
+        deleteGame(game, 10);
     }
 
 
@@ -444,19 +441,19 @@ public class GameService {
 
     public void addFinishedGamePlayers(GameGetDTO gameToReturn, Game game, List<Player> players) {
 
-    List<PlayerPrivateGetDTO> notFoldedPlayers = new ArrayList<>();
-        if(game.getGameFinished() == true) {
-        gameToReturn.setWinner(DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(game.getWinner()));
-        for(Player player : players) {
-            if(!player.isFolded()) {
-                notFoldedPlayers.add(DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(player));
+        List<PlayerPrivateGetDTO> notFoldedPlayers = new ArrayList<>();
+        if (game.getGameFinished() == true) {
+            gameToReturn.setWinner(DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(game.getWinner()));
+            for (Player player : players) {
+                if (!player.isFolded()) {
+                    notFoldedPlayers.add(DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(player));
+                }
             }
+            gameToReturn.setNotFoldedPlayers(notFoldedPlayers);
         }
-        gameToReturn.setNotFoldedPlayers(notFoldedPlayers);
-    }
         else {
-        gameToReturn.setWinner(null);
-        gameToReturn.setNotFoldedPlayers(notFoldedPlayers);
-    }
+            gameToReturn.setWinner(null);
+            gameToReturn.setNotFoldedPlayers(notFoldedPlayers);
         }
+    }
 }

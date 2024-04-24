@@ -12,12 +12,12 @@ public class Card {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "id",unique=true, nullable = false)
+    @Column(name = "id", unique = true, nullable = false)
     private Long id;
 
     @ManyToOne
     @JsonIgnore
-    @JoinColumn(name="gameTable_id", referencedColumnName = "id")
+    @JoinColumn(name = "gameTable_id", referencedColumnName = "id")
     private GameTable gameTable;
 
     public void setGameTable(GameTable gameTable) {
@@ -30,10 +30,12 @@ public class Card {
 
     @ManyToOne
     @JsonIgnore
-    @JoinColumn(name="player_id", referencedColumnName = "id")
+    @JoinColumn(name = "player_id", referencedColumnName = "id")
     private Player player;
 
-    protected Card() {}
+    protected Card() {
+    }
+
     public String getCode() {
         return code;
     }
@@ -47,6 +49,7 @@ public class Card {
 
     @Column(nullable = false)
     private String image;
+
     public Card(String code, String image) {
         this.code = code;
         this.image = image;

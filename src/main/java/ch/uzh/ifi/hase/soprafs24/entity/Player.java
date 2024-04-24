@@ -13,9 +13,12 @@ public class Player {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Basic(optional = false)
-    @Column(name = "id",unique=true, nullable = false)
+    @Column(name = "id", unique = true, nullable = false)
     private Long id;
-    protected Player(){}
+
+    protected Player() {
+    }
+
     @Column(nullable = false, unique = true)
     private String username;
     @Column(nullable = false)
@@ -33,7 +36,7 @@ public class Player {
 
     @JsonIgnore
     @ManyToOne()
-    @JoinColumn(name="game_id", referencedColumnName = "id")
+    @JoinColumn(name = "game_id", referencedColumnName = "id")
     private Game game;
 
     public Player(Game game, String username, int money, String token, List<Card> cards) {
@@ -47,6 +50,7 @@ public class Player {
         setCards(cards);
         lastRaiseAmount = 0;
     }
+
     public String getUsername() {
         return username;
     }
@@ -54,6 +58,7 @@ public class Player {
     public void setUsername(String username) {
         this.username = username;
     }
+
     public int getMoney() {
         return money;
     }
@@ -61,6 +66,7 @@ public class Player {
     public void setMoney(int money) {
         this.money = money;
     }
+
     public String getToken() {
         return token;
     }
@@ -68,8 +74,14 @@ public class Player {
     public void setToken(String token) {
         this.token = token;
     }
-    public List<Card> getCards() { return cards; }
-    public void setCards(List<Card> cards) { this.cards = cards; }
+
+    public List<Card> getCards() {
+        return cards;
+    }
+
+    public void setCards(List<Card> cards) {
+        this.cards = cards;
+    }
 
 
     public long leaveGame() {
@@ -95,6 +107,7 @@ public class Player {
     public void setFolded(boolean folded) {
         this.folded = folded;
     }
+
     public Long getId() {
         return id;
     }

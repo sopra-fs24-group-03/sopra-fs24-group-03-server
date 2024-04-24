@@ -4,7 +4,6 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 import ch.uzh.ifi.hase.soprafs24.constant.Hand;
 import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 import ch.uzh.ifi.hase.soprafs24.helpers.DeckOfCardsApi;
-import ch.uzh.ifi.hase.soprafs24.service.GameService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
@@ -24,11 +23,8 @@ public class Game implements Serializable {
     }
 
 
-    //Game and Lobby have the same ID, this could be changed, as the lobby is saved within the game already
-
     public Game(List<User> users) {
-        // Selecting a random user to start and sets the playerTurnId
-        //Random random = new Random();
+
         this.playerTurnIndex = 0;
         this.bet = 0;
         this.gameFinished = false;
@@ -65,29 +61,29 @@ public class Game implements Serializable {
     private List<Card> handCards = null;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="gameTable_id", referencedColumnName = "id")
+    @JoinColumn(name = "gameTable_id", referencedColumnName = "id")
     private GameTable gameTable;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="raisePlayer_id", referencedColumnName = "id")
+    @JoinColumn(name = "raisePlayer_id", referencedColumnName = "id")
     private Player raisePlayer;
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="smallBlindPlayer_id", referencedColumnName = "id")
+    @JoinColumn(name = "smallBlindPlayer_id", referencedColumnName = "id")
     private Player smallBlindPlayer;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="winner_id", referencedColumnName = "id")
+    @JoinColumn(name = "winner_id", referencedColumnName = "id")
     private Player winner;
 
     @Id
-    @Column(unique=true, nullable = false)
+    @Column(unique = true, nullable = false)
     private Long id;
 
     public void setsNextPlayerTurnIndex() {
         int numberOfPlayers = players.size();
-        for (int i = 0; i<numberOfPlayers; i++) {
+        for (int i = 0; i < numberOfPlayers; i++) {
             this.playerTurnIndex = (this.playerTurnIndex + 1) % numberOfPlayers;
-            if(!players.get(playerTurnIndex).isFolded()){
+            if (!players.get(playerTurnIndex).isFolded()) {
                 break;
             }
         }
@@ -102,9 +98,9 @@ public class Game implements Serializable {
     }
 
 
-    public Player getPlayerByUsername(String username){
-        for(Player player: players){
-            if(Objects.equals(player.getUsername(), username)){
+    public Player getPlayerByUsername(String username) {
+        for (Player player : players) {
+            if (Objects.equals(player.getUsername(), username)) {
                 return player;
             }
         }
@@ -126,7 +122,7 @@ public class Game implements Serializable {
     }
 
     public GameTable getGameTable() {
-          return gameTable;
+        return gameTable;
     }
 
     public List<Player> getPlayers() {

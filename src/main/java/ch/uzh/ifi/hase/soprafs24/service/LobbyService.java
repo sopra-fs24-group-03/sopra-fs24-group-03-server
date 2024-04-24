@@ -14,10 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 
 @Service
@@ -29,9 +27,8 @@ public class LobbyService {
     private final Logger log = LoggerFactory.getLogger(LobbyService.class);
 
 
-
     @Autowired
-    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, @Qualifier("userService") UserService userService, @Qualifier("gameService") GameService gameService){
+    public LobbyService(@Qualifier("lobbyRepository") LobbyRepository lobbyRepository, @Qualifier("userService") UserService userService, @Qualifier("gameService") GameService gameService) {
         this.lobbyRepository = lobbyRepository;
         this.gameService = gameService;
         this.userService = userService;
@@ -66,7 +63,8 @@ public class LobbyService {
         if (user.getLobby() != null && user.getLobby().getId() == id) {
             // Return the lobby if the user is in it
             return lobby;
-        } else {
+        }
+        else {
             // Throw an exception if the user is not in the lobby
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Only users that are in the specified lobby can access its information!");
         }
@@ -82,10 +80,12 @@ public class LobbyService {
                 user.setLobby(lobby);
                 lobby.addUserToLobby(user);
                 return lobby;
-            } else {// Throw an exception if the lobby is full
+            }
+            else {// Throw an exception if the lobby is full
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lobby is full!");
             }
-        } else {
+        }
+        else {
             // Throw an exception if the user is already in a lobby
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already in a lobby!");
         }
@@ -128,23 +128,20 @@ public class LobbyService {
         authenticateLeader(token, lobby);
 
         //throw exception if game already running
-        if(lobby.getGame() != null){
+        if (lobby.getGame() != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "lobby already has running game!");
         }
 
         //Iterate over all users, check cash, then add username and money to player hashmap
         lobby.getLobbyusers().forEach((user) -> {
-            // if enough cash add user to Map
-//            if(checkCash(user)){
-//                players.put(user.getUsername(), user.getMoney());
-//            }
+
 
             // Otherwise remove user, if user is leader throw exception, else continue starting game
-            if(!checkCash(user)) {
+            if (!checkCash(user)) {
                 updateLoss(user);
 
                 // If user is lobby leader, exception is thrown and game start is cancelled
-                if (lobby.getLobbyLeader()== user){
+                if (lobby.getLobbyLeader() == user) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "could not start game, lobby leader has insufficient money!");
                 }
 
@@ -155,7 +152,7 @@ public class LobbyService {
         List<User> users = lobby.getLobbyusers();
 
         //checks for enough users
-        if(users.size() >= 2){
+        if (users.size() >= 2) {
             Game game = new Game(users);
             lobby.setGame(game);
             game.setId(lobby.getId());
@@ -165,13 +162,14 @@ public class LobbyService {
             lobbyRepository.flush();
             gameService.initializeBlinds(game);
             return game;
-        } else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough players");
+        }
+        else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough players");
 
     }
 
 
     //Updates user Money
-    private void updateLoss(User user){
+    private void updateLoss(User user) {
         user.setTries(user.getTries() + 1);
         user.setMoney(2000);
     }
@@ -187,14 +185,14 @@ public class LobbyService {
     }
 
     //checks for Cash, return bool
-    private boolean checkCash(User user){
+    private boolean checkCash(User user) {
         return user.getMoney() >= 100;
     }
 
     //returns requested lobby, if lobby doesn't exist throws exception
-    private Lobby findLobby(long lobbyId){
+    private Lobby findLobby(long lobbyId) {
         Lobby lobby = lobbyRepository.findById(lobbyId);
-        if(lobby == null){
+        if (lobby == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown lobby");
         }
         return lobby;

@@ -24,7 +24,7 @@ public class LobbyController {
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
     public LobbyGetDTO createLobby(@RequestHeader String token) {
-        Lobby newLobby =lobbyService.createLobby(token);
+        Lobby newLobby = lobbyService.createLobby(token);
         return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(newLobby);
 
     }
@@ -32,31 +32,31 @@ public class LobbyController {
     @PostMapping("/lobbies/{id}")
     @ResponseStatus(HttpStatus.CREATED)
     @ResponseBody
-    public void createGame(@RequestHeader String token, @PathVariable long id){
+    public void createGame(@RequestHeader String token, @PathVariable long id) {
         Game game = lobbyService.startGame(token, id);
     }
 
     @GetMapping("/lobbies/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public LobbyGetDTO getLobbyByID(@PathVariable long id, @RequestHeader String token){
+    public LobbyGetDTO getLobbyByID(@PathVariable long id, @RequestHeader String token) {
         Lobby lobby = lobbyService.getLobbyById(id, token);
         return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
     }
 
     @PutMapping("/lobbies/{id}")
-    @ResponseStatus(HttpStatus.OK )
+    @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public LobbyGetDTO joinLobbyById(@PathVariable long id, @RequestHeader String token){
-        Lobby lobby = lobbyService.joinLobbyById( id, token);
+    public LobbyGetDTO joinLobbyById(@PathVariable long id, @RequestHeader String token) {
+        Lobby lobby = lobbyService.joinLobbyById(id, token);
         return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
 
     }
 
     @DeleteMapping("/lobbies")
-    @ResponseStatus(HttpStatus.ACCEPTED )
+    @ResponseStatus(HttpStatus.ACCEPTED)
     @ResponseBody
-    public void removeUserFromLobbyById(@RequestHeader String token){
+    public void removeUserFromLobbyById(@RequestHeader String token) {
         lobbyService.removeUserFromLobby(token);
 
     }
