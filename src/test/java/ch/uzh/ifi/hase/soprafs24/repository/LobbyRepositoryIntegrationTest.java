@@ -1,6 +1,8 @@
 package ch.uzh.ifi.hase.soprafs24.repository;
 
 import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -10,6 +12,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
 @DataJpaTest
 public class LobbyRepositoryIntegrationTest {
     @Autowired
@@ -18,11 +21,17 @@ public class LobbyRepositoryIntegrationTest {
     @Autowired
     private LobbyRepository lobbyRepository;
 
+
+
+    @AfterEach
+    public void cleanUp() {
+        lobbyRepository.deleteAll();
+    }
+
     @Test
     public void findById_success() {
         // Given
         Lobby lobby = new Lobby();
-
 
         entityManager.persist(lobby);
         entityManager.flush();

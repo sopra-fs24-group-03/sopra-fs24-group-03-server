@@ -130,21 +130,16 @@ public class LobbyServiceTest {
 
         //Setup
         User user2 = new User();
-        User user3 = new User();
+
 
         user2.setUsername("testUser2");
         user2.setToken("token2");
         user2.setPassword("Password");
 
-        user3.setUsername("testUser3");
-        user3.setToken("token3");
-        user3.setPassword("Password");
+
 
         user2.setLobby(lobby);
         lobby.addUserToLobby(user2);
-
-        user3.setLobby(lobby);
-        lobby.addUserToLobby(user3);
 
         when(lobbyRepository.findById(anyLong())).thenReturn(lobby);
 
@@ -175,21 +170,16 @@ public class LobbyServiceTest {
 
         //Setup
         User user2 = new User();
-        User user3 = new User();
+
 
         user2.setUsername("testUser2");
         user2.setToken("token2");
         user2.setPassword("Password");
 
-        user3.setUsername("testUser3");
-        user3.setToken("token3");
-        user3.setPassword("Password");
 
         user2.setLobby(lobby);
         lobby.addUserToLobby(user2);
 
-        user3.setLobby(lobby);
-        lobby.addUserToLobby(user3);
 
         when(lobbyRepository.findById(anyLong())).thenReturn(lobby);
 
@@ -213,21 +203,16 @@ public class LobbyServiceTest {
         lobby.createGame(Userlist);
 
         User user2 = new User();
-        User user3 = new User();
+
 
         user2.setUsername("testUser2");
         user2.setToken("token2");
         user2.setPassword("Password");
 
-        user3.setUsername("testUser3");
-        user3.setToken("token3");
-        user3.setPassword("Password");
 
         user2.setLobby(lobby);
         lobby.addUserToLobby(user2);
 
-        user3.setLobby(lobby);
-        lobby.addUserToLobby(user3);
 
         when(lobbyRepository.findById(anyLong())).thenReturn(lobby);
 

@@ -48,6 +48,7 @@ public class LobbyServiceIntegrationTest {
 
     @Test
     public void testCreateLobby_Success() {
+        //Setup
         User user = new User();
         user.setUsername("testUser");
         user.setToken("validToken");
@@ -55,6 +56,7 @@ public class LobbyServiceIntegrationTest {
         user.setStatus(UserStatus.ONLINE);
         user.setMoney(2000);
         userRepository.save(user);
+
         // Call the method under test
         Lobby createdLobby = lobbyService.createLobby("validToken");
 
@@ -73,8 +75,6 @@ public class LobbyServiceIntegrationTest {
         createdLobby.removeUserFromLobby(user);
         lobbyRepository.delete(createdLobby);
         userRepository.delete(user);
-
-
     }
 
     @Test
