@@ -448,6 +448,11 @@ public class GameService {
                 if (!player.isFolded()) {
                     notFoldedPlayers.add(DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(player));
                 }
+                else {
+                    PlayerPrivateGetDTO playerWithoutCards = DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(player);
+                    playerWithoutCards.deleteCardsImage();
+                    notFoldedPlayers.add(playerWithoutCards);
+                }
             }
             gameToReturn.setNotFoldedPlayers(notFoldedPlayers);
         }
@@ -457,3 +462,4 @@ public class GameService {
         }
     }
 }
+

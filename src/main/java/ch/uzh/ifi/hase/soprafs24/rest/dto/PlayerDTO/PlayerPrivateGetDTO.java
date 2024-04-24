@@ -48,6 +48,9 @@ public class PlayerPrivateGetDTO {
         }
     }
 
+    public void deleteCardsImage(){
+        this.cardsImage.clear();
+    }
     public boolean isFolded() {
         return folded;
     }
