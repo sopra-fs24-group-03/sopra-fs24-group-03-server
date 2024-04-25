@@ -33,7 +33,7 @@ public class TablePublicGetDTO {
     }
 
     public void setOpenCardsImage(List<Card> openCardsImage) {
-        for(Card card : openCardsImage) {
+        for (Card card : openCardsImage) {
             this.openCardsImage.add(card.getImage());
         }
     }

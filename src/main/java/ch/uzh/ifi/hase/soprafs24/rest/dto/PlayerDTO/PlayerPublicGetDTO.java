@@ -16,6 +16,7 @@ public class PlayerPublicGetDTO {
     public void setId(long id) {
         this.id = id;
     }
+
     public String getUsername() {
         return username;
     }
@@ -23,6 +24,7 @@ public class PlayerPublicGetDTO {
     public void setUsername(String username) {
         this.username = username;
     }
+
     public int getMoney() {
         return money;
     }

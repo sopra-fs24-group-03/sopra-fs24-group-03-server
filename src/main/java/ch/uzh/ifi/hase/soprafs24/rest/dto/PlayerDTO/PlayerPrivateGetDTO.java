@@ -21,6 +21,7 @@ public class PlayerPrivateGetDTO {
     public void setId(Long id) {
         this.id = id;
     }
+
     public String getUsername() {
         return username;
     }
@@ -28,6 +29,7 @@ public class PlayerPrivateGetDTO {
     public void setUsername(String username) {
         this.username = username;
     }
+
     public int getMoney() {
         return money;
     }
@@ -35,13 +37,20 @@ public class PlayerPrivateGetDTO {
     public void setMoney(int money) {
         this.money = money;
     }
-    public List<String> getCardsImage() { return cardsImage; }
+
+    public List<String> getCardsImage() {
+        return cardsImage;
+    }
+
     public void setCardsImage(List<Card> cards) {
-        for(Card card : cards) {
+        for (Card card : cards) {
             this.cardsImage.add(card.getImage());
         }
     }
 
+    public void deleteCardsImage(){
+        this.cardsImage.clear();
+    }
     public boolean isFolded() {
         return folded;
     }
@@ -49,6 +58,7 @@ public class PlayerPrivateGetDTO {
     public void setFolded(boolean folded) {
         this.folded = folded;
     }
+
     public boolean isTurn() {
         return turn;
     }

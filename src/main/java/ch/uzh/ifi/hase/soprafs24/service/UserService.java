@@ -13,9 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.UUID;
 
@@ -44,17 +41,17 @@ public class UserService {
         return this.userRepository.findAll();
     }
 
-    public User getUserById(long id){
+    public User getUserById(long id) {
         User user = userRepository.findById(id);
-        if (user != null){
+        if (user != null) {
             return user;
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown User!");
     }
 
-    public User getUserByToken(String token){
+    public User getUserByToken(String token) {
         User user = userRepository.findByToken(token);
-        if (user != null){
+        if (user != null) {
             return user;
         }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown User!");
@@ -108,51 +105,52 @@ public class UserService {
     }
 
     //Update user profile
-    public void updateUser(User userInput, long id){
+    public void updateUser(User userInput, long id) {
         User user = userRepository.findById(id);
         //if new username is given make sure it's not already in use, if same username is given nothing changes
         if (userInput.getUsername() != null && user != userRepository.findByUsername(userInput.getUsername())) {
             if (userRepository.findByUsername(userInput.getUsername()) == null) {
                 user.setUsername(userInput.getUsername());
-            } else throw new ResponseStatusException(HttpStatus.CONFLICT, "the provided Username is already in use!");
+            }
+            else throw new ResponseStatusException(HttpStatus.CONFLICT, "the provided Username is already in use!");
         }
     }
 
-    public void logout(String token){
-        setOffline( userRepository.findByToken(token));
+    public void logout(String token) {
+        setOffline(userRepository.findByToken(token));
     }
 
     //Only check token
-    public void authenticateUser(String token){
+    public void authenticateUser(String token) {
         User user = userRepository.findByToken(token);
 
-        if( user == null ){
+        if (user == null) {
             //UNAUTHORIZED, user is not logged so authorization not possible
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You can access this when logged in!");
         }
     }
 
     //token and user must match
-    public void authenticateUser(String token, long id){
+    public void authenticateUser(String token, long id) {
         User user = userRepository.findByToken(token);
 
-        if( user == null ){
+        if (user == null) {
             //UNAUTHORIZED, user is not logged so authorization not possible
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You can access this when logged in!");
         }
-        if (user.getId() != id){
+        if (user.getId() != id) {
             //FORBIDDEN, User trying to do unallowed action
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only access this when logged in as correct user!");
         }
     }
 
     //set user Status online
-    private void setOnline(User user){
+    private void setOnline(User user) {
         user.setStatus(UserStatus.ONLINE);
     }
 
     //set user Status offline
-    private void setOffline(User user){
+    private void setOffline(User user) {
         user.setStatus(UserStatus.OFFLINE);
     }
 }

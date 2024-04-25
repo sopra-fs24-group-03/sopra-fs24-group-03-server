@@ -14,7 +14,6 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPutDTO;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
-import javax.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -82,7 +81,6 @@ public interface DTOMapper {
 
 
     // Game Mappings
-    // TODO Complete Mappings once Game is done and add Tests
     @Mapping(source = "id", target = "id")
     @Mapping(source = "gameFinished", target = "gameFinished")
     @Mapping(source = "players", target = "players")

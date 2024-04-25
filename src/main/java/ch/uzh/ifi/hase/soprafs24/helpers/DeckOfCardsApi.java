@@ -15,8 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 
 
-
-
 @Service
 public class DeckOfCardsApi {
 
@@ -25,7 +23,7 @@ public class DeckOfCardsApi {
 
 
     //constructor for the DeckOfCardsApi, needs to be passed a RestTemplate object
-    public DeckOfCardsApi(RestTemplate restTemplate){
+    public DeckOfCardsApi(RestTemplate restTemplate) {
         this.restTemplate = restTemplate;
     }
 
@@ -40,19 +38,21 @@ public class DeckOfCardsApi {
             //insure correct response
             if (response != null && response.containsKey("success") && (boolean) response.get("success")) {
                 return (String) response.get("deck_id");
-            } else {
+            }
+            else {
                 throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "DeckOfCards API returned an error");
             }
 
-        //catch potential errors
-        } catch (RestClientException e) {
+            //catch potential errors
+        }
+        catch (RestClientException e) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Error occurred while communicating with DeckOfCards API: " + e.getMessage());
         }
     }
 
 
     //Draw cards from a deck, give id and amount of cards drawn
-    public List<Card> drawCards(String id, int amount){
+    public List<Card> drawCards(String id, int amount) {
 
         //Setup the URL
         String requestURI = String.format("%s/%s/draw/?count=%d", BASE_URI, id, amount);
@@ -65,7 +65,7 @@ public class DeckOfCardsApi {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(response);
 
-            if(jsonNode.get("cards") == null){
+            if (jsonNode.get("cards") == null) {
                 throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "DeckOfCards API returned a error");
             }
             JsonNode cardNode = jsonNode.get("cards");
@@ -83,14 +83,16 @@ public class DeckOfCardsApi {
 
             return cardList;
 
-        //catch processing error, in case response is not in expected format
-        } catch (JsonProcessingException e) {
+            //catch processing error, in case response is not in expected format
+        }
+        catch (JsonProcessingException e) {
             throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Unexpected API response");
 
-        //catch error, in case API is not working
-        } catch (RestClientException e) {
-        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Error occurred while communicating with DeckOfCards API: " + e.getMessage());
-    }
+            //catch error, in case API is not working
+        }
+        catch (RestClientException e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Error occurred while communicating with DeckOfCards API: " + e.getMessage());
+        }
 
     }
 }

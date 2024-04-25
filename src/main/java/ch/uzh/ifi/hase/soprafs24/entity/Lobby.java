@@ -1,14 +1,10 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
 
-import ch.uzh.ifi.hase.soprafs24.service.LobbyService;
-import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import javax.persistence.*;
-import javax.websocket.ClientEndpoint;
 import java.io.Serializable;
 import java.util.*;
 
@@ -18,8 +14,7 @@ import java.util.*;
 public class Lobby implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    @Transient
-    private final Logger log = LoggerFactory.getLogger(Lobby.class);
+
 
     @Id
     @GeneratedValue
@@ -28,7 +23,7 @@ public class Lobby implements Serializable {
 
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name="game_id", referencedColumnName = "id")
+    @JoinColumn(name = "game_id", referencedColumnName = "id")
     private Game game;
 
     @JsonIgnore //stop recursion
@@ -76,14 +71,17 @@ public class Lobby implements Serializable {
     public Game getGame() {
         return game;
     }
-    public void setGame(Game game){this.game = game;}
+
+    public void setGame(Game game) {
+        this.game = game;
+    }
 
     public void setGameToNull() {
         this.game = null;
     }
 
     // Used to create a new Game, assign same ID
-    public Game createGame(List<User> users){
+    public Game createGame(List<User> users) {
         Game game = new Game(users);
         this.game = game;
         return game;

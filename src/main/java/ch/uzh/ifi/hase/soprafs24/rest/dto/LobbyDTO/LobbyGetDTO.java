@@ -1,24 +1,22 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO;
 
 
-
 import ch.uzh.ifi.hase.soprafs24.entity.Game;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserGetDTO;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class LobbyGetDTO {
     private Long id;
+
     public Long getId() {
         return id;
     }
 
     private UserGetDTO lobbyLeader;
 
-    private List<UserGetDTO> lobbyUsers  = new ArrayList<>();
+    private List<UserGetDTO> lobbyUsers = new ArrayList<>();
 
     public void setId(Long id) {
         this.id = id;

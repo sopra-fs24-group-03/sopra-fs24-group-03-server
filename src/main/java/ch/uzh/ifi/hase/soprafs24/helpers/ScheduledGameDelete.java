@@ -3,15 +3,9 @@ package ch.uzh.ifi.hase.soprafs24.helpers;
 import ch.uzh.ifi.hase.soprafs24.entity.*;
 import ch.uzh.ifi.hase.soprafs24.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.LobbyRepository;
-import ch.uzh.ifi.hase.soprafs24.service.GameService;
-import ch.uzh.ifi.hase.soprafs24.service.LobbyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import javax.persistence.EntityManager;
-import javax.persistence.Lob;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -31,28 +25,17 @@ public class ScheduledGameDelete {
         executor.shutdown();
     }
 
-    private Lobby findLobby(long lobbyId){
+    private Lobby findLobby(long lobbyId) {
         Lobby lobby = lobbyRepository.findById(lobbyId);
-        if(lobby == null){
+        if (lobby == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown lobby");
         }
         return lobby;
     }
 
-    private void updateUserMoney(Lobby lobby, Game game) {
-        for(Player player : game.getPlayers()) {
-            for(User user : lobby.getLobbyusers()) {
-                if(user.getToken() == player.getToken()) {
-                    user.setMoney(player.getMoney());
-                }
-            }
-        }
-
-    }
     public void deleteGame(Game game) {
         Lobby lobby = findLobby(game.getId());
         lobby.setGameToNull();
-        updateUserMoney(lobby, game);
         lobbyRepository.save(lobby);
         gameRepository.delete(game);
         gameRepository.flush();

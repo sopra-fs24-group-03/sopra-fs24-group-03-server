@@ -7,14 +7,13 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.TableDTO.TablePublicGetDTO;
 
 import java.util.List;
 
-// TODO add necessary Game Attributes
 public class GameGetDTO {
     private long id;
     // pot ???
     private int currentBet;
     private List<PlayerPublicGetDTO> players;
     private PlayerPrivateGetDTO ownPlayer;
-    // we should not send the whole gameTable we have to countrol, that the right amount of cards is sent to the frontend
+    // we should not send the whole gameTable we have to control, that the right amount of cards is sent to the frontend
     private TablePublicGetDTO gameTable;
 
 
@@ -24,10 +23,6 @@ public class GameGetDTO {
     private List<PlayerPrivateGetDTO> notFoldedPlayers;
 
 
-    // cards of player
-    // something that
-
-    // last player which raised
     public long getId() {
         return id;
     }
@@ -59,9 +54,11 @@ public class GameGetDTO {
     public void setOwnPlayer(PlayerPrivateGetDTO ownPlayer) {
         this.ownPlayer = ownPlayer;
     }
+
     public void setGameTable(TablePublicGetDTO gameTable) {
         this.gameTable = gameTable;
     }
+
     public TablePublicGetDTO getGameTable() {
         return gameTable;
     }

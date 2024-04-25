@@ -58,9 +58,6 @@ public class GameServiceTest {
     private GameService gameService;
 
 
-    private User user;
-    private Lobby lobby;
-
     @Test
     public void turn_foldSuccess(){
         User user = new User();
@@ -266,8 +263,8 @@ public class GameServiceTest {
         players.add(currentPlayer);
 
         Mockito.when(gameRepository.findById(gameId)).thenReturn(game);
-        Mockito. when(game.getGameTable()).thenReturn(table);
-        Mockito. when(game.getPlayers()).thenReturn(players);
+        Mockito.when(game.getGameTable()).thenReturn(table);
+        Mockito.when(game.getPlayers()).thenReturn(players);
         Mockito.when(game.getPlayerTurnIndex()).thenReturn(0);
         Mockito.when(currentPlayer.getUsername()).thenReturn("username");
         Mockito.when(gameService.playersfolded(game)).thenReturn(false);
