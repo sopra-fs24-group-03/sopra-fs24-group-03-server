@@ -261,6 +261,72 @@ public class LobbyServiceTest {
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
         assertEquals("could not start game, lobby leader has insufficient money!", exception.getReason());
     }
+
+    @Test
+    public void testKickUserOutOfLobby_Success() {
+        // Setup
+        User kickedUser = new User();
+        kickedUser.setId(3L); // Different user ID
+        kickedUser.setUsername("kickedUser");
+        kickedUser.setToken("kickedToken");
+        lobby.addUserToLobby(kickedUser);
+
+        // Mocking the necessary methods
+        when(userService.getUserByToken("validToken")).thenReturn(user); // Lobbyleader
+        when(userService.getUserById(3L)).thenReturn(kickedUser);
+        when(lobbyRepository.findById(2L)).thenReturn(lobby);
+
+        // Call the method under test
+        lobbyService.kickUserOutOfLobby("validToken", 3L, 2L);
+
+        // Verify that the user is removed from the lobby
+        assertFalse(lobby.getLobbyusers().contains(kickedUser));
+        assertNull(kickedUser.getLobby());
+    }
+
+    @Test
+    public void testKickUserOutOfLobby_NotLeader() {
+        // Setup
+        User notLeaderUser = new User();
+        notLeaderUser.setId(4L);
+        notLeaderUser.setUsername("notLeaderUser");
+        notLeaderUser.setToken("notLeaderToken");
+
+        User kickedUser = new User();
+        kickedUser.setId(3L);
+        kickedUser.setUsername("kickedUser");
+        kickedUser.setToken("kickedToken");
+        lobby.addUserToLobby(kickedUser);
+
+        // Mocking the necessary methods
+        when(userService.getUserByToken("notLeaderToken")).thenReturn(notLeaderUser); // Not the Lobbyleader
+        when(lobbyRepository.findById(2L)).thenReturn(lobby);
+
+        // Call the method under test
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> lobbyService.kickUserOutOfLobby("notLeaderToken", 3L, 2L));
+
+        // Verify that the correct exception is thrown
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
+        assertEquals("Only the lobby leader can kick other players", exception.getReason());
+    }
+
+    @Test
+    public void testKickUserOutOfLobby_KickSelf() {
+        // Setup
+        when(userService.getUserByToken("validToken")).thenReturn(user); // Lobbyleader
+        when(userService.getUserById(1L)).thenReturn(user); // This should return the same user to simulate kicking self
+        when(lobbyRepository.findById(2L)).thenReturn(lobby);
+
+        // Attempting to kick oneself should raise an exception
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
+                () -> lobbyService.kickUserOutOfLobby("validToken", 1L, 2L)); // User's own ID
+
+        // Verify that the correct exception is thrown
+        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals("You can not kick yourself", exception.getReason());
+    }
+
 }
 
 

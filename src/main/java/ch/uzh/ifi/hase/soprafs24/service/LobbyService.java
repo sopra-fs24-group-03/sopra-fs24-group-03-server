@@ -190,12 +190,30 @@ public class LobbyService {
     }
 
     //returns requested lobby, if lobby doesn't exist throws exception
-    private Lobby findLobby(long lobbyId) {
+    public Lobby findLobby(long lobbyId) {
         Lobby lobby = lobbyRepository.findById(lobbyId);
         if (lobby == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown lobby");
         }
         return lobby;
+    }
+
+    public void kickUserOutOfLobby(String tokenOfDeleter, long kickedUserId, long lobbyId) {
+        Lobby lobby = findLobby(lobbyId);
+        // checks if the player who wants to delete someone is the Lobbyleader
+        if(userService.getUserByToken(tokenOfDeleter).equals(lobby.getLobbyLeader())) {
+            if(userService.getUserByToken(tokenOfDeleter) == userService.getUserById(kickedUserId)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can not kick yourself");
+            }
+            // not sure if this remove the user from jpa
+            User userToKick = userService.getUserById(kickedUserId);
+            userToKick.setLobby(null);
+            lobby.removeUserFromLobby(userToKick);
+//            lobbyRepository.flush();
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the lobby leader can kick other players");
+        }
     }
 
 

@@ -60,4 +60,10 @@ public class LobbyController {
         lobbyService.removeUserFromLobby(token);
 
     }
+
+    @DeleteMapping("/lobbies/{lobbyId}/remove/{userToDeleteId}")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void kickUserFromLobby(@PathVariable long lobbyId, @PathVariable long userToDeleteId, @RequestHeader String token) {
+        lobbyService.kickUserOutOfLobby(token, userToDeleteId, lobbyId);
+    }
 }

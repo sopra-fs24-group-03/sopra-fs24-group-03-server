@@ -6,6 +6,7 @@ import ch.uzh.ifi.hase.soprafs24.entity.Lobby;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.service.LobbyService;
 
+import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +16,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.web.server.ResponseStatusException;
 
 
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -32,6 +35,8 @@ public class LobbyControllerTest {
 
     @MockBean
     private LobbyService lobbyService;
+    @MockBean
+    private UserService userService;
 
     @Test
     public void userCreatesLobbySuccess() throws Exception {
@@ -198,6 +203,26 @@ public class LobbyControllerTest {
         mockMvc.perform(postRequest)
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    public void kickUserFromLobby_Success() throws Exception {
+        long lobbyId = 1L;
+        long userToDeleteId = 2L;
+        String token = "Bearer valid-token";
+
+        // Assume that the method will succeed and thus not throw an exception
+        Mockito.doNothing().when(lobbyService).kickUserOutOfLobby(token, userToDeleteId, lobbyId);
+
+        MockHttpServletRequestBuilder deleteRequest = delete("/lobbies/{lobbyId}/remove/{userToDeleteId}", 1L, 2L)
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("token", "token");
+        // Perform the DELETE request to the controller
+        mockMvc.perform(deleteRequest)
+                .andExpect(status().isAccepted());  // Ensure that the status is as expected (HTTP 202 ACCEPTED)
+    }
+
+
+
 
 
 }
