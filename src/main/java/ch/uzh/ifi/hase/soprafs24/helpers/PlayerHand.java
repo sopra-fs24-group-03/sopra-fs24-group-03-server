@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs24.constant.Hand;
 import ch.uzh.ifi.hase.soprafs24.entity.Player;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static ch.uzh.ifi.hase.soprafs24.helpers.Card.getValue;
@@ -181,55 +182,92 @@ public class PlayerHand {
     }
 
 
-    //TODO doesn't work with pair correctly
+    //TODO doesn't work with pair correctly cards are sorted from highest to lowest
     public static PlayerHand straight(List<Card> cards, Player player) {
         //Five cards of consecutive numerical value composed of more than one suit. An ace can normally
         // rank as low (below a 2) or high (above a king) but not at the same time in one hand.
-        int length = cards.size();
-        List<Card> hand = new ArrayList<Card>();
-
-        // Check for regular straights
-        for (int i = 0; i <= length - 5; i++) {
-            boolean isStraight = true;
-            hand.clear();
-            for (int j = i; j < i + 4; j++) {
-                hand.add(cards.get(j));
-                if (getValue(cards.get(j)) != getValue(cards.get(j + 1)) + 1) {
-                    isStraight = false;
-                    break;
-                }
+        //int length = cards.size();
+        int continues = 1;
+        ArrayList<Boolean> specialStraight = new ArrayList<>(Collections.nCopies(5, false));
+        for(int i = 0; i < 6; i++){
+            if(getValue(cards.get(i))-1 == getValue(cards.get(i+1))){
+                continues += 1;
             }
-            if (isStraight) {
+            else if (getValue(cards.get(i)) != getValue(cards.get(i+1))){
+                continues = 1;
+            }
+
+            if (continues == 5){
                 PlayerHand result = new PlayerHand();
                 result.setHand(Hand.STRAIGHT);
                 result.setCards(cards);
                 result.setPlayer(player);
                 return result;
             }
-        }
 
-        // Special case for Ace-low straight (A-2-3-4-5)
-        if (getValue(cards.get(length - 1)) == 14 && getValue(cards.get(0)) == 2) {
-            hand.clear();
-            hand.add(cards.get(length - 1));
-            // Check if the sequence A-2-3-4-5 exists
-            for (int i = 0; i < 4; i++) {
-                if (getValue(cards.get(length - 1 - i)) != getValue(cards.get(length - i - 2)) - 1) {
-                    hand.add(cards.get(length - 1 - i));
-                }
-                else break;
+            if(getValue(cards.get(i)) == 14){
+                specialStraight.set(0,true);
             }
-            if (hand.size() == 5) {
-                PlayerHand result = new PlayerHand();
-                result.setHand(Hand.STRAIGHT);
-                result.setCards(cards);
-                result.setPlayer(player);
-                return result;
+            else if(getValue(cards.get(i))<=5){
+                specialStraight.set(getValue(cards.get(i))-1,true);
             }
         }
-
-        //Player does not have a straight
-        return null;
+        for(int i = 0; i < 5; i++){
+            if(!specialStraight.get(i)){
+                //Player does not have a straight
+                return null;
+            }
+        }
+        PlayerHand result = new PlayerHand();
+        result.setHand(Hand.STRAIGHT);
+        result.setCards(cards);
+        result.setPlayer(player);
+        return result;
+//
+//        if(getValue(cards.get(0)) == 14 && getValue(cards.get(1)) == )
+//
+//        // Check for regular straights
+//        for (int i = 0; i <= length - 5; i++) {
+//            boolean isStraight = true;
+//            hand.clear();
+//            for (int j = i; j < i + 4; j++) {
+//                hand.add(cards.get(j));
+//                if (getValue(cards.get(j)) != getValue(cards.get(j + 1)) + 1) {
+//                    isStraight = false;
+//                    break;
+//                }
+//            }
+//            if (isStraight) {
+//                PlayerHand result = new PlayerHand();
+//                result.setHand(Hand.STRAIGHT);
+//                result.setCards(cards);
+//                result.setPlayer(player);
+//                return result;
+//            }
+//        }
+//
+//        // Special case for Ace-low straight (A-2-3-4-5)
+//        if (getValue(cards.get(length - 1)) == 14 && getValue(cards.get(0)) == 2) {
+//            hand.clear();
+//            hand.add(cards.get(length - 1));
+//            // Check if the sequence A-2-3-4-5 exists
+//            for (int i = 0; i < 4; i++) {
+//                if (getValue(cards.get(length - 1 - i)) != getValue(cards.get(length - i - 2)) - 1) {
+//                    hand.add(cards.get(length - 1 - i));
+//                }
+//                else break;
+//            }
+//            if (hand.size() == 5) {
+//                PlayerHand result = new PlayerHand();
+//                result.setHand(Hand.STRAIGHT);
+//                result.setCards(cards);
+//                result.setPlayer(player);
+//                return result;
+//            }
+//        }
+//
+//        //Player does not have a straight
+//        return null;
     }
 
     public static PlayerHand threeOfKind(List<Card> cards, Player player) {
