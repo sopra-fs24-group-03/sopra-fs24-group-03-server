@@ -22,7 +22,7 @@
 - Joel Huber:
 - Cédric Huber: Winning screen #62, #63
 - Linus Lautenschlager:
-- Colin Bächtold:
+- Colin Bächtold: Worked ahead from previous weeks
 - Noah Ziegler: Worked ahead from last week
 
 ## Milestone 4
