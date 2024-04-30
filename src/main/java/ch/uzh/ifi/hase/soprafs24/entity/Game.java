@@ -4,6 +4,7 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 import ch.uzh.ifi.hase.soprafs24.constant.Hand;
 import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 import ch.uzh.ifi.hase.soprafs24.helpers.DeckOfCardsApi;
+import ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
@@ -108,6 +109,13 @@ public class Game implements Serializable {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not part of this game!");
     }
 
+    public void setWinner(PlayerHand winningHand){
+        this.winner = winningHand.getPlayer();
+        this.handName = winningHand.getHand();
+        this.handCards = winningHand.getCards();
+        this.gameFinished = true;
+    }
+
 
     public void setPlayers(List<Player> players) {
         this.players = players;
@@ -171,10 +179,6 @@ public class Game implements Serializable {
 
     public Player getWinner() {
         return winner;
-    }
-
-    public void setWinner(Player winner) {
-        this.winner = winner;
     }
 
     public Player getSmallBlindPlayer() {

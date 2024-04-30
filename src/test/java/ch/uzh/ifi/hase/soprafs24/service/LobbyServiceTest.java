@@ -146,7 +146,6 @@ public class LobbyServiceTest {
         //method call
         Game createdGame = lobbyService.startGame(user.getToken(), lobby.getId());
         assertNotNull(createdGame);
-//        assertEquals(lobby, createdGame.getLobby());
     }
 
     @Test
@@ -224,42 +223,6 @@ public class LobbyServiceTest {
         // Verify that the correct exception is thrown
         assertEquals(HttpStatus.CONFLICT, exception.getStatus());
         assertEquals("lobby already has running game!", exception.getReason());
-    }
-
-    @Test
-    public void testCreateGame_LeaderOutOfMoney(){
-
-        //Setup
-
-        User user2 = new User();
-        User user3 = new User();
-
-        user.setMoney(0);
-
-        user2.setUsername("testUser2");
-        user2.setToken("token2");
-        user2.setPassword("Password");
-
-        user3.setUsername("testUser3");
-        user3.setToken("token3");
-        user3.setPassword("Password");
-
-        user2.setLobby(lobby);
-        lobby.addUserToLobby(user2);
-
-        user3.setLobby(lobby);
-        lobby.addUserToLobby(user3);
-
-        when(lobbyRepository.findById(anyLong())).thenReturn(lobby);
-
-        //method call
-        ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                ()->lobbyService.startGame(user.getToken(), lobby.getId()));
-
-
-        // Verify that the correct exception is thrown
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("could not start game, lobby leader has insufficient money!", exception.getReason());
     }
 
     @Test

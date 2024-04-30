@@ -368,4 +368,118 @@ public class GameServiceTest {
         //verify endGame is called with the correct parameters
         Mockito.verify(gameService).endGame(eq(1L), eq(playerHand2));
     }
+
+    @Test
+    public void endGame_noRetry(){
+        List<Player> players = new ArrayList<>(){{
+            add(mock(Player.class));
+            add(mock(Player.class));
+        }};
+
+        PlayerHand winner = mock(PlayerHand.class);
+
+        User user = new User();
+        User user2 = new User();
+        user.setUsername("user1");
+        user2.setUsername("user2");
+        user.setMoney(2000);
+        user2.setMoney(2000);
+        user.setTries(0);
+        user2.setTries(1);
+
+        //repos
+        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        Mockito.when(userRepository.findByUsername(eq(user.getUsername()))).thenReturn(user);
+        Mockito.when(userRepository.findByUsername(eq(user2.getUsername()))).thenReturn(user2);
+
+        //game
+        Mockito.when(game.getGameTable()).thenReturn(table);
+        Mockito.when(game.getPlayers()).thenReturn(players);
+        Mockito.doNothing().when(game).setWinner(Mockito.any());
+
+        //player
+        Mockito.when(players.get(0).getUsername()).thenReturn("user1");
+        Mockito.when(players.get(1).getUsername()).thenReturn("user2");
+        Mockito.when(players.get(0).getMoney()).thenReturn(1000);
+        Mockito.when(players.get(1).getMoney()).thenReturn(500);
+
+        //table
+        Mockito.when(table.getMoney()).thenReturn(1000);
+
+        //PlayerHand
+        Mockito.when(winner.getPlayer()).thenReturn(players.get(0));
+
+        //gameService
+        Mockito.doNothing().when(gameService).deleteGame(Mockito.any(), Mockito.anyInt());
+
+        gameService.endGame(0L, winner);
+
+        //insure user money has been updated
+        assertEquals(2000, user.getMoney());
+        assertEquals(500, user2.getMoney());
+        assertEquals(1, user2.getTries());
+        assertEquals(0, user.getTries());
+
+        //insure correct methods were called
+        Mockito.verify(game).setWinner(eq(winner));
+        Mockito.verify(gameService).deleteGame(eq(game), Mockito.anyInt());
+    }
+
+    @Test
+    public void endGame_userRetry(){
+        List<Player> players = new ArrayList<>(){{
+            add(mock(Player.class));
+            add(mock(Player.class));
+        }};
+
+        PlayerHand winner = mock(PlayerHand.class);
+
+        User user = new User();
+        User user2 = new User();
+        user.setUsername("user1");
+        user2.setUsername("user2");
+        user.setMoney(2000);
+        user2.setMoney(2000);
+        user.setTries(0);
+        user2.setTries(1);
+
+        //repos
+        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        Mockito.when(userRepository.findByUsername(eq(user.getUsername()))).thenReturn(user);
+        Mockito.when(userRepository.findByUsername(eq(user2.getUsername()))).thenReturn(user2);
+
+        //game
+        Mockito.when(game.getGameTable()).thenReturn(table);
+        Mockito.when(game.getPlayers()).thenReturn(players);
+        Mockito.doNothing().when(game).setWinner(Mockito.any());
+
+        //player
+        Mockito.when(players.get(0).getUsername()).thenReturn("user1");
+        Mockito.when(players.get(1).getUsername()).thenReturn("user2");
+        Mockito.when(players.get(0).getMoney()).thenReturn(1000);
+        Mockito.when(players.get(1).getMoney()).thenReturn(50);
+
+        //table
+        Mockito.when(table.getMoney()).thenReturn(1000);
+
+        //PlayerHand
+        Mockito.when(winner.getPlayer()).thenReturn(players.get(0));
+
+        //gameService
+        Mockito.doNothing().when(gameService).deleteGame(Mockito.any(), Mockito.anyInt());
+
+
+
+        gameService.endGame(0L, winner);
+
+        //insure user money has been updated
+        assertEquals(2000, user.getMoney());
+        assertEquals(2000, user2.getMoney());
+        assertEquals(2, user2.getTries());
+        assertEquals(0, user.getTries());
+
+        //insure correct methods were called
+        Mockito.verify(game).setWinner(eq(winner));
+        Mockito.verify(gameService).deleteGame(eq(game), Mockito.anyInt());
+    }
 }

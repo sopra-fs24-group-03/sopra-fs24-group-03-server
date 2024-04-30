@@ -325,19 +325,20 @@ public class GameService {
         //update user money
         for (Player player : game.getPlayers()) {
             user = userRepository.findByUsername(player.getUsername());
+
+            //winner gets money on table + unused money back
             if (player == winner.getPlayer()) {
-                user.setMoney(player.getMoney() + table.getMoney());  //winner gets unused money back plus money on table
+                user.updateMoney(player.getMoney() + table.getMoney());
             }
+
+            //losers just get unused money back
             else {
-                user.setMoney(player.getMoney()); //looser only gets unused money back
+                user.updateMoney(player.getMoney());
             }
         }
 
         //set winning player, name and cards of winning hand and then flag game as finished
-        game.setHandCards(winner.getCards());
-        game.setHandName(winner.getHand());
-        game.setWinner(winner.getPlayer());
-        game.setGameFinished(Boolean.TRUE);
+        game.setWinner(winner);
 
         deleteGame(game, 10);
     }
@@ -426,7 +427,7 @@ public class GameService {
             PlayerPublicGetDTO playerPublicGetDTO = DTOMapper.INSTANCE.convertEntityToPlayerPublicDTO(player);
             if (iteration == game.getPlayerTurnIndex()) {
                 playerPublicGetDTO.setTurn(true);
-                if (player.getId() == privatePlayer.getId()) {
+                if (Objects.equals(player.getId(), privatePlayer.getId())) {
                     privatePlayer.setTurn(true);
                 }
             }
@@ -442,7 +443,7 @@ public class GameService {
     public void addFinishedGamePlayers(GameGetDTO gameToReturn, Game game, List<Player> players) {
 
         List<PlayerPrivateGetDTO> notFoldedPlayers = new ArrayList<>();
-        if (game.getGameFinished() == true) {
+        if (game.getGameFinished()) {
             gameToReturn.setWinner(DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(game.getWinner()));
             for (Player player : players) {
                 if (!player.isFolded()) {

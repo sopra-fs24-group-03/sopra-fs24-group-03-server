@@ -131,24 +131,6 @@ public class LobbyService {
         if (lobby.getGame() != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "lobby already has running game!");
         }
-
-        //Iterate over all users, check cash, then add username and money to player hashmap
-        lobby.getLobbyusers().forEach((user) -> {
-
-
-            // Otherwise remove user, if user is leader throw exception, else continue starting game
-            if (!checkCash(user)) {
-                updateLoss(user);
-
-                // If user is lobby leader, exception is thrown and game start is cancelled
-                if (lobby.getLobbyLeader() == user) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "could not start game, lobby leader has insufficient money!");
-                }
-
-                //remove user  (might not be necessary, could also just update and continue, might change later)
-                removeUserFromLobby(user.getToken());
-            }
-        });
         List<User> users = lobby.getLobbyusers();
 
         //checks for enough users
@@ -167,13 +149,6 @@ public class LobbyService {
 
     }
 
-
-    //Updates user Money
-    private void updateLoss(User user) {
-        user.setTries(user.getTries() + 1);
-        user.setMoney(2000);
-    }
-
     //Check if provided token belongs to lobby leader, throws exception if not, does nothing otherwise.
     private void authenticateLeader(String token, Lobby lobby) {
         userService.authenticateUser(token);
@@ -184,10 +159,6 @@ public class LobbyService {
         }
     }
 
-    //checks for Cash, return bool
-    private boolean checkCash(User user) {
-        return user.getMoney() >= 100;
-    }
 
     //returns requested lobby, if lobby doesn't exist throws exception
     public Lobby findLobby(long lobbyId) {
