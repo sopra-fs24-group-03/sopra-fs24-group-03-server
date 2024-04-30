@@ -23,6 +23,6 @@
 - Cédric Huber:
 - Linus Lautenschlager:
 - Colin Bächtold:
-- Noah Ziegler:
+- Noah Ziegler: Worked ahead from last week
 
 ## Milestone 4
