@@ -1,8 +1,8 @@
 # Contributions
 ## Milestone 3
 ### Week 25.03-07.04
-- Joel Huber: Home view: #34,#35,#36
-- Cédric Huber: Lobby view: #30,#31,#32,#33,#37
+- Joel Huber: Home view: #31,#34,#35,#36
+- Cédric Huber: Lobby view: #30,#32,#33,#37
 - Linus Lautenschlager: Login / Register + Home; #23-#29
 - Colin Bächtold: Adjusted template, Added startGame mapping: #66,#67,#72,#73,#78,#99,#100,#101
 - Noah Ziegler: Created Lobby: #96,#95,#91,#90,#84,#83,#82
@@ -19,9 +19,9 @@
 - Colin Bächtold: Added endgame method to update user money and implemented winning condition check, started implementing methods for checking hands: #154, #155, #156 
 - Noah Ziegler: Implemented Fold, Raise, Check, Turn method update to correspond to actions, started impementing call: #131,#132, #138, #139, #144, #145, #150, #126
 ### Week 22.04-28.04
-- Joel Huber:
+- Joel Huber: Worked ahead from previous weeks
 - Cédric Huber: Winning screen #62, #63
-- Linus Lautenschlager:
+- Linus Lautenschlager:  Fixed Lobby and Player Highlight #23 #45
 - Colin Bächtold: Worked ahead from previous weeks
 - Noah Ziegler: Worked ahead from last week
 
