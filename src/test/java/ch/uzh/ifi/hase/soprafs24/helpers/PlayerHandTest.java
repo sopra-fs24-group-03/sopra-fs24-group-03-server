@@ -11,8 +11,11 @@ import org.mockito.Mockito;
 import java.util.ArrayList;
 import java.util.List;
 
+import static ch.uzh.ifi.hase.soprafs24.helpers.Card.getValue;
+import static ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand.fullHouse;
 import static ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand.straight;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 public class PlayerHandTest {
 
@@ -198,4 +201,57 @@ public class PlayerHandTest {
         assertNull(result);
     }
 
+    @Test
+    public void fullHouse_test(){
+
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("KS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("4S", "image"));
+            add(new Card("4H", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("3D", "image"));
+            add(new Card("2D", "image"));
+        }};
+
+        //Mock a player object
+        Player player = mock(Player.class);
+
+        //execute the method
+        PlayerHand result = fullHouse(cards, player);
+
+        //check result
+        assertNotNull(result);
+        assertEquals(Hand.FULL_HOUSE, result.getHand());
+
+        //insure correct order, first comes the three of a kind, then the pair
+        assertEquals(4, getValue(result.getCards().get(2)));
+        assertEquals(13, getValue(result.getCards().get(3)));
+        assertEquals(player, result.getPlayer());
+    }
+
+    @Test
+    public void notFullHouse_test(){
+
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("4S", "image"));
+            add(new Card("4H", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("3D", "image"));
+            add(new Card("2D", "image"));
+        }};
+
+        //Mock a player object
+        Player player = mock(Player.class);
+
+        //execute the method
+        PlayerHand result = fullHouse(cards, player);
+
+        //check result
+        assertNull(result);
+    }
 }

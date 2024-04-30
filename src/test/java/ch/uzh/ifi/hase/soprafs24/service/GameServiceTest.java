@@ -279,14 +279,10 @@ public class GameServiceTest {
     }
 
 
-
-
-
-
     @Test
     public void evaluateHand_flush(){
         List<Card> playerCards = Stream.of(
-                new Card("1H", "image"),
+                new Card("AH", "image"),
                 new Card("2H", "image")
         ).collect(Collectors.toList());
 
@@ -306,13 +302,13 @@ public class GameServiceTest {
         assertEquals(Hand.FLUSH, hand.getHand());
         assertEquals(5, hand.getCards().size());
         assertEquals("AH", hand.getCards().get(0).getCode());
-        assertEquals("1H", hand.getCards().get(4).getCode());
+        assertEquals("2H", hand.getCards().get(4).getCode());
     }
 
     @Test
     public void evaluateHand_highCard(){
         List<Card> playerCards = Stream.of(
-                new Card("1H", "image"),
+                new Card("7H", "image"),
                 new Card("2H", "image")
         ).collect(Collectors.toList());
 
@@ -332,7 +328,7 @@ public class GameServiceTest {
         assertEquals(Hand.HIGH_CARD, hand.getHand());
         assertEquals(5, hand.getCards().size());
         assertEquals("AH", hand.getCards().get(0).getCode());
-        assertEquals("3S", hand.getCards().get(4).getCode());
+        assertEquals("4D", hand.getCards().get(4).getCode());
     }
 
 
