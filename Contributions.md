@@ -21,7 +21,7 @@
 ### Week 22.04-28.04
 - Joel Huber:
 - Cédric Huber: Winning screen #62, #63
-- Linus Lautenschlager:
+- Linus Lautenschlager:  Fixed Lobby and Player Highlight #23 #45
 - Colin Bächtold: Worked ahead from previous weeks
 - Noah Ziegler: Worked ahead from last week
 
