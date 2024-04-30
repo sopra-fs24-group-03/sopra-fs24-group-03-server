@@ -20,7 +20,7 @@
 - Noah Ziegler: Implemented Fold, Raise, Check, Turn method update to correspond to actions, started impementing call: #131,#132, #138, #139, #144, #145, #150, #126
 ### Week 22.04-28.04
 - Joel Huber:
-- Cédric Huber:
+- Cédric Huber: Winning screen #62, #63
 - Linus Lautenschlager:
 - Colin Bächtold:
 - Noah Ziegler: Worked ahead from last week
