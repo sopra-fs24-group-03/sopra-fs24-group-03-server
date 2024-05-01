@@ -243,6 +243,61 @@ public class PlayerHandTest {
     }
 
     @Test
+    public void isRoyalFlush(){
+
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AD", "image"));
+            add(new Card("AS", "image"));
+            add(new Card("KS", "image"));
+            add(new Card("QS", "image"));
+            add(new Card("JH", "image"));
+            add(new Card("JS", "image"));
+            add(new Card("0S", "image"));
+        }};
+
+        //Mock a player object
+        Player player = mock(Player.class);
+
+        //execute the method
+        PlayerHand result = royalFlush(cards, player);
+
+        //check result
+        assertNotNull(result);
+        assertEquals(Hand.ROYAL_FLUSH, result.getHand());
+
+        assertEquals(14, getValue(result.getCards().get(0)));
+        assertEquals(13, getValue(result.getCards().get(1)));
+        assertEquals(12, getValue(result.getCards().get(2)));
+        assertEquals(11, getValue(result.getCards().get(3)));
+        assertEquals(10, getValue(result.getCards().get(4)));
+        assertEquals(player, result.getPlayer());
+    }
+    @Test
+    public void notRoyalFlush() {
+
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>() {{
+            add(new Card("AD", "image"));
+            add(new Card("AS", "image"));
+            add(new Card("KS", "image"));
+            add(new Card("QS", "image"));
+            add(new Card("JH", "image"));
+            add(new Card("0S", "image"));
+            add(new Card("0H", "image"));
+        }};
+
+        //Mock a player object
+        Player player = mock(Player.class);
+
+        //execute the method
+        PlayerHand result = royalFlush(cards, player);
+
+        //check result
+        assertNull(result);
+    }
+
+    @Test
     public void fullHouse_test(){
 
         //create sorted List of cards
