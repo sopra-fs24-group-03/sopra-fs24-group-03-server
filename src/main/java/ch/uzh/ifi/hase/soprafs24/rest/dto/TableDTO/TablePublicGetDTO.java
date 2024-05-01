@@ -1,7 +1,9 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto.TableDTO;
 
+import ch.uzh.ifi.hase.soprafs24.constant.Moves;
 import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 
+import javax.persistence.Column;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,6 +13,13 @@ public class TablePublicGetDTO {
     private Long id;
 
     private List<String> openCardsImage = new ArrayList<>();
+
+    private long playerIdOfLastMove;
+
+
+    private Moves lastMove;
+
+    private int lastMoveAmount;
 
     public int getMoney() {
         return money;
@@ -37,6 +46,28 @@ public class TablePublicGetDTO {
             this.openCardsImage.add(card.getImage());
         }
     }
+    public int getLastMoveAmount() {
+        return lastMoveAmount;
+    }
 
+    public void setLastMoveAmount(int lastMoveAmount) {
+        this.lastMoveAmount = lastMoveAmount;
+    }
+
+    public long getPlayerIdOfLastMove() {
+        return playerIdOfLastMove;
+    }
+
+    public void setPlayerIdOfLastMove(long playerIdOfLastMove) {
+        this.playerIdOfLastMove = playerIdOfLastMove;
+    }
+
+    public Moves getLastMove() {
+        return lastMove;
+    }
+
+    public void setLastMove(Moves lastMove) {
+        this.lastMove = lastMove;
+    }
 
 }

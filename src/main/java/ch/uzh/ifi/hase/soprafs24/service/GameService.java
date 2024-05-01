@@ -29,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static ch.uzh.ifi.hase.soprafs24.constant.Moves.*;
 import static ch.uzh.ifi.hase.soprafs24.helpers.Card.getValue;
 import static ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand.*;
 
@@ -81,12 +82,20 @@ public class GameService {
     }
 
 
+
+    private void setMoveInGameTable(GameTable gameTable, Moves move,int amount, long playerId){
+        if(gameTable != null) {
+            gameTable.setLastMove(move);
+            gameTable.setLastMoveAmount(amount);
+            gameTable.setPlayerIdOfLastMove(playerId);
+        }
+    }
+
     //method to make moves
     public int turn(GamePutDTO move, long game_id, String token) {
         String username = userRepository.findByToken(token).getUsername();
         Game game = gameRepository.findById(game_id);
-
-
+        GameTable gameTable = game.getGameTable();
         Player player = game.getPlayerByUsername(username);
 
 
@@ -97,6 +106,7 @@ public class GameService {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Fold with an Amount");
                 }
                 //set folded attribute to true, but he "remains" in game
+                setMoveInGameTable(gameTable,Fold,0,player.getId());
                 player.setFolded(true);
                 if (game.getRaisePlayer() == player) {
                     game.setRaisePlayer(null);
@@ -110,6 +120,7 @@ public class GameService {
                 }
                 //if raise is legal, update the order and current bet and call raise
                 if (move.getAmount() > game.getBet()) {
+
                     game.setBet(move.getAmount()); //set the current highest bet in game
                     int moneyLost = move.getAmount() - player.getLastRaiseAmount();
                     player.setMoney((player.getMoney() - moneyLost)); //remove money from user
@@ -118,6 +129,7 @@ public class GameService {
 
                     //set the raise player so that it can be check in update game mehtod
                     game.setRaisePlayer(player);
+                    setMoveInGameTable(gameTable,Raise,move.getAmount(),player.getId());
 
                     yield move.getAmount(); //return bet amount
                 }
@@ -130,6 +142,7 @@ public class GameService {
                 }
                 //only check if there was no bet made this betting round
                 if (game.getBet() == 0) {
+                    setMoveInGameTable(gameTable,Check,0,player.getId());
                     yield 0;
                 }
                 else {
@@ -152,6 +165,7 @@ public class GameService {
                     int loss = game.getBet() - player.getLastRaiseAmount();
                     player.setMoney(player.getMoney() - loss); //p1 raises 100, p2 raises to 200, p1 calls --> only subtract (200-100 = 100) --> in total also 200
                     player.setLastRaiseAmount(player.getLastRaiseAmount() + loss);
+                    setMoveInGameTable(gameTable,Call,0,player.getId());
                     yield loss;
                 }
             }

@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.entity;
 
 
+import ch.uzh.ifi.hase.soprafs24.constant.Moves;
 import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 
 import javax.persistence.*;
@@ -13,6 +14,18 @@ import java.util.List;
 public class GameTable implements Serializable {
     @Column
     private int Money;
+
+
+    @Column
+    private long playerIdOfLastMove;
+
+
+    @Column
+    private Moves lastMove;
+
+    @Column
+    private int lastMoveAmount;
+
 
 
     @Id
@@ -84,5 +97,27 @@ public class GameTable implements Serializable {
         this.id = id;
     }
 
+    public int getLastMoveAmount() {
+        return lastMoveAmount;
+    }
 
+    public void setLastMoveAmount(int lastMoveAmount) {
+        this.lastMoveAmount = lastMoveAmount;
+    }
+
+    public long getPlayerIdOfLastMove() {
+        return playerIdOfLastMove;
+    }
+
+    public void setPlayerIdOfLastMove(long playerIdOfLastMove) {
+        this.playerIdOfLastMove = playerIdOfLastMove;
+    }
+
+    public Moves getLastMove() {
+        return lastMove;
+    }
+
+    public void setLastMove(Moves lastMove) {
+        this.lastMove = lastMove;
+    }
 }
