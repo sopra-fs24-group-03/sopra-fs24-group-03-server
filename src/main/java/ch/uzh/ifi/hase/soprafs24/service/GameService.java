@@ -29,6 +29,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static ch.uzh.ifi.hase.soprafs24.constant.Moves.*;
 import static ch.uzh.ifi.hase.soprafs24.helpers.Card.getValue;
 import static ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand.*;
 
@@ -81,11 +82,20 @@ public class GameService {
     }
 
 
+
+    private void setMoveInGameTable(GameTable gameTable, Moves move,int amount, long playerId){
+        if(gameTable != null) {
+            gameTable.setLastMove(move);
+            gameTable.setLastMoveAmount(amount);
+            gameTable.setPlayerIdOfLastMove(playerId);
+        }
+    }
+
     //method to make moves
     public int turn(GamePutDTO move, long game_id, String token) {
         String username = userRepository.findByToken(token).getUsername();
         Game game = gameRepository.findById(game_id);
-
+        GameTable gameTable = game.getGameTable();
         Player player = game.getPlayerByUsername(username);
 
 
@@ -96,6 +106,7 @@ public class GameService {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Fold with an Amount");
                 }
                 //set folded attribute to true, but he "remains" in game
+                setMoveInGameTable(gameTable,Fold,0,player.getId());
                 player.setFolded(true);
                 if (game.getRaisePlayer() == player) {
                     game.setRaisePlayer(null);
@@ -117,6 +128,7 @@ public class GameService {
 
                     //set the raise player so that it can be check in update game mehtod
                     game.setRaisePlayer(player);
+                    setMoveInGameTable(gameTable,Raise,move.getAmount(),player.getId());
 
                     yield moneyLost; //return bet amount
                 }
@@ -129,6 +141,7 @@ public class GameService {
                 }
                 //only check if there was no bet made this betting round
                 if (game.getBet()-player.getLastRaiseAmount() == 0) {
+                    setMoveInGameTable(gameTable,Check,0,player.getId());
                     yield 0;
                 }
                 else {
@@ -151,6 +164,7 @@ public class GameService {
                     int loss = game.getBet() - player.getLastRaiseAmount();
                     player.setMoney(player.getMoney() - loss); //p1 raises 100, p2 raises to 200, p1 calls --> only subtract (200-100 = 100) --> in total also 200
                     player.setLastRaiseAmount(player.getLastRaiseAmount() + loss);
+                    setMoveInGameTable(gameTable,Call,0,player.getId());
                     yield loss;
                 }
             }
@@ -185,8 +199,6 @@ public class GameService {
 
         }
 
-
-
         //check if current betting round is finished
         if ((game.getRaisePlayer() != null && Objects.equals(game.getRaisePlayer().getUsername(), nextPlayerUsername))) {
             //reset betting to 0 after 1 betting round
@@ -206,7 +218,6 @@ public class GameService {
             //Sets the "Raiseplayer" to smallblind/ first person which hasent folded --> If noone raises so that the game still ends
             game.setRaisePlayer(setRaisePlayerCorrect(game));
         }
-
         if (game.getRaisePlayer() == null) {
             game.setRaisePlayer(game.getPlayers().get(game.getPlayerTurnIndex()));
         }
@@ -216,11 +227,11 @@ public class GameService {
 
 
     public void authorize(String token, long id) {
-        String username = userRepository.findByToken(token).getUsername();
+        User user = userRepository.findByToken(token);
         Game game = gameRepository.findById(id);
 
         //Check if valid inputs
-        if (username == null) {
+        if (user == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You can access this when logged in!");
         }
         if (game == null) {
@@ -228,7 +239,7 @@ public class GameService {
         }
 
         //will throw correct exception if not in player list
-        Player player = game.getPlayerByUsername(username);
+        Player player = game.getPlayerByUsername(user.getUsername());
 
         if (game.getPlayers().get(game.getPlayerTurnIndex()) != player) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "It is not your turn!");
@@ -295,28 +306,39 @@ public class GameService {
     }
 
 
-    public void endGame(long game_id, PlayerHand winner) {
+    public void endGame(long game_id, List<PlayerHand> winners) {
         Game game = gameRepository.findById(game_id);
         GameTable table = game.getGameTable();
         User user;
+        boolean updated;
 
         //update user money
         for (Player player : game.getPlayers()) {
             user = userRepository.findByUsername(player.getUsername());
+            updated = false;
 
-            //winner gets money on table + unused money back
-            if (player == winner.getPlayer()) {
-                user.updateMoney(player.getMoney() + table.getMoney());
+            //check if player is a winner, update money in that case
+            for (PlayerHand winner : winners) {
+                if (player == winner.getPlayer()) {
+                    //divide the pot between the winners, the result is rounded up
+                    int reward = (int) Math.ceil((double) table.getMoney() / winners.size());
+
+                    user.updateMoney(player.getMoney() + reward);
+                    updated = true;
+                    break;
+                }
             }
 
-            //losers just get unused money back
-            else {
+            //otherwise simply return unused money
+            if (!updated) {
                 user.updateMoney(player.getMoney());
             }
         }
 
+
         //set winning player, name and cards of winning hand and then flag game as finished
-        game.setWinner(winner);
+        game.setWinner(winners);
+        game.setGameFinished(true);
 
         deleteGame(game, 10);
     }
@@ -325,7 +347,9 @@ public class GameService {
     public void winningCondition(long game_id) {
         Game game = gameRepository.findById(game_id);
         GameTable table = game.getGameTable();
-        PlayerHand winner = null;
+
+        //has to be list to accommodate for potential draws
+        List<PlayerHand> winner = new ArrayList<>();
 
         //find the best hand
         for (Player player : game.getPlayers()) {
@@ -336,21 +360,34 @@ public class GameService {
             }
             PlayerHand curHand = evaluateHand(player, table);
 
-            curHand.getCards().sort(new Comparator<Card>() {
-                @Override
-                public int compare(Card c1, Card c2) {
-                    return -Integer.compare(getValue(c1), getValue(c2));
-                }
-            });
-
-            if (winner == null || handRank(curHand.getHand()) > handRank(winner.getHand())) {
-                winner = curHand;
+            //the curHand has the better hand, update winner
+            if (winner.isEmpty() || handRank(curHand.getHand()) > handRank(winner.get(0).getHand())) {
+                winner.clear();
+                winner.add(curHand);
             }
 
-            //TODO if two player have same hand (check further)
-            else if (handRank(curHand.getHand()) == handRank(winner.getHand())) {
-                if (getValue(curHand.getCards().get(0)) > getValue(winner.getCards().get(0))) {
-                    winner = curHand;
+            //the hands are equal, compare the cards
+            else if (handRank(curHand.getHand()) == handRank(winner.get(0).getHand())) {
+
+                //iterate over all cards to compare and resolve the draw
+                for (int i = 0; i < winner.get(0).getCards().size(); i++) {
+
+                    //the winner has the better cards, break out of the loop
+                    if (getValue(winner.get(0).getCards().get(i)) > getValue(curHand.getCards().get(i))) {
+                        break;
+                    }
+
+                    //the curHand has the better cards, update winner and break out of the loop
+                    else if (getValue(winner.get(0).getCards().get(i)) < getValue(curHand.getCards().get(i))) {
+                        winner.clear();
+                        winner.add(curHand);
+                        break;
+                    }
+
+                    //all cards have been compared and neither side has the better hand, the 2 players have a draw
+                    else if (i == winner.get(0).getCards().size() - 1) {
+                        winner.add(curHand);
+                    }
                 }
             }
         }
@@ -422,7 +459,9 @@ public class GameService {
 
         List<PlayerPrivateGetDTO> notFoldedPlayers = new ArrayList<>();
         if (game.getGameFinished()) {
-            gameToReturn.setWinner(DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(game.getWinner()));
+            for (Player winner : game.getWinner()) {
+                gameToReturn.addWinner(DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(winner));
+            }
             for (Player player : players) {
                 if (!player.isFolded()) {
                     notFoldedPlayers.add(DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(player));
@@ -433,10 +472,11 @@ public class GameService {
                     notFoldedPlayers.add(playerWithoutCards);
                 }
             }
+            game.setGameFinished(true);
             gameToReturn.setNotFoldedPlayers(notFoldedPlayers);
         }
         else {
-            gameToReturn.setWinner(null);
+            gameToReturn.noWinner();
             gameToReturn.setNotFoldedPlayers(notFoldedPlayers);
         }
     }

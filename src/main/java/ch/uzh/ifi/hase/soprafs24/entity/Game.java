@@ -74,9 +74,9 @@ public class Game implements Serializable {
     @JoinColumn(name = "smallBlindPlayer_id", referencedColumnName = "id")
     private Player smallBlindPlayer;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "winner_id", referencedColumnName = "id")
-    private Player winner;
+    private List<Player> winner = null;
 
     @Id
     @Column(unique = true, nullable = false)
@@ -111,11 +111,12 @@ public class Game implements Serializable {
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not part of this game!");
     }
 
-    public void setWinner(PlayerHand winningHand){
-        this.winner = winningHand.getPlayer();
-        this.handName = winningHand.getHand();
-        this.handCards = winningHand.getCards();
-        this.gameFinished = true;
+    public void setWinner(List<PlayerHand> winningHands) {
+        this.handName = winningHands.get(0).getHand();
+        this.handCards = winningHands.get(0).getCards();
+        for (PlayerHand playerHand : winningHands) {
+            this.winner.add(playerHand.getPlayer());
+        }
     }
 
 
@@ -179,7 +180,7 @@ public class Game implements Serializable {
         this.gameFinished = gameFinished;
     }
 
-    public Player getWinner() {
+    public List<Player> getWinner() {
         return winner;
     }
 

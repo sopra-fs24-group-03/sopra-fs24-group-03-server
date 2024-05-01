@@ -41,7 +41,6 @@ public class PlayerHand {
 
 
     //Implementations to determine Hands, methods should return a PlayerHand class
-    //TODO evaluate the remaining hands, insure correct list ordering is returned! x
     public static PlayerHand royalFlush(List<Card> cards, Player player) {
         //The royal flush is the best hand available in poker. It features five consecutive cards, all of the same suit, in order of value from 10 through to ace.
         int length = cards.size();

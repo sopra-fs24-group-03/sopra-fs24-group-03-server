@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPrivateGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPublicGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.TableDTO.TablePublicGetDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class GameGetDTO {
@@ -19,7 +20,7 @@ public class GameGetDTO {
 
     private boolean gameFinished;
 
-    private PlayerPrivateGetDTO winner;
+    private List<PlayerPrivateGetDTO> winner;
     private List<PlayerPrivateGetDTO> notFoldedPlayers;
 
 
@@ -71,12 +72,19 @@ public class GameGetDTO {
         this.gameFinished = gameFinished;
     }
 
-    public PlayerPrivateGetDTO getWinner() {
+    public List<PlayerPrivateGetDTO> getWinner() {
         return winner;
     }
 
-    public void setWinner(PlayerPrivateGetDTO winner) {
-        this.winner = winner;
+    public void addWinner(PlayerPrivateGetDTO winner) {
+        if(this.winner == null){
+            this.winner = new ArrayList<>();
+        }
+        this.winner.add(winner);
+    }
+
+    public void noWinner() {
+        this.winner = null;
     }
 
     public List<PlayerPrivateGetDTO> getNotFoldedPlayers() {
