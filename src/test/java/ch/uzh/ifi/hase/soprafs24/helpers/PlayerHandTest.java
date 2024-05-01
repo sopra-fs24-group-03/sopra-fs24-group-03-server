@@ -12,8 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static ch.uzh.ifi.hase.soprafs24.helpers.Card.getValue;
-import static ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand.fullHouse;
-import static ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand.straight;
+import static ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
@@ -22,182 +21,224 @@ public class PlayerHandTest {
     @Test
     public void isStraight(){
 
-        User user = new User();
-        user.setId(1L);
-        user.setUsername("testUsername");
-        user.setStatus(UserStatus.ONLINE);
-        user.setMoney(2000);
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("QS", "image"));
+            add(new Card("JH", "image"));
+            add(new Card("0D", "image"));
+            add(new Card("9D", "image"));
+            add(new Card("2D", "image"));
+        }};
 
-        User user1 = new User();
-        user1.setId(2L);
-        user1.setUsername("testUsername1");
-        user1.setStatus(UserStatus.ONLINE);
-        user1.setMoney(2000);
+        //Mock a player object
+        Player player = mock(Player.class);
 
-        List<User> users = new ArrayList<>();
-        users.add(user);
-        users.add(user1);
-
-
-
-        Card card1 = new Card("A", "2");
-        Card card2 = new Card("K", "4");
-        Card card3 = new Card("Q", "1");
-        Card card4 = new Card("J", "4");
-        Card card5 = new Card("0", "3");
-        Card card6 = new Card("6", "2");
-        Card card7 = new Card("5", "1");
-        List<Card> cards = new ArrayList<>();
-        cards.add(card1);
-        cards.add(card2);
-        cards.add(card3);
-        cards.add(card4);
-        cards.add(card5);
-        cards.add(card6);
-        cards.add(card7);
-
-        Game game = new Game(users);
-        game.setId(1L);
-        game.setPlayerTurnIndex(0);
-
-        List<Card> playerCards = new ArrayList<>();
-        playerCards.add(card6);
-        playerCards.add(card7);
-        Player player1 = new Player(game, "PlayerOne", 2000, "validToken1", playerCards);
-        player1.setId(2L);
-
-        Player player2 = new Player(game, "PlayerTwo", 2000, "validToken2", playerCards);
-        player1.setId(3L);
-
-
-        List<Player> players = new ArrayList<>();
-        players.add(player1);
-        players.add(player2);
-        game.setPlayers(players);
-
-        PlayerHand result = straight(cards,player1);
+        PlayerHand result = straight(cards,player);
         assertNotNull(result);
+        assertEquals(5,result.getCards().size());
         assertEquals(result.getHand(), Hand.STRAIGHT);
+        assertEquals(13,getValue(result.getCards().get(0)));
+        assertEquals(12,getValue(result.getCards().get(1)));
+        assertEquals(11,getValue(result.getCards().get(2)));
+        assertEquals(10,getValue(result.getCards().get(3)));
+        assertEquals(9,getValue(result.getCards().get(4)));
     }
 
     @Test
     public void specialStraight(){
 
-        User user = new User();
-        user.setId(1L);
-        user.setUsername("testUsername");
-        user.setStatus(UserStatus.ONLINE);
-        user.setMoney(2000);
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("5S", "image"));
+            add(new Card("4H", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("3D", "image"));
+            add(new Card("2D", "image"));
+        }};
 
-        User user1 = new User();
-        user1.setId(2L);
-        user1.setUsername("testUsername1");
-        user1.setStatus(UserStatus.ONLINE);
-        user1.setMoney(2000);
-
-        List<User> users = new ArrayList<>();
-        users.add(user);
-        users.add(user1);
+        //Mock a player object
+        Player player = mock(Player.class);
 
 
-
-        Card card1 = new Card("A", "2");
-        Card card2 = new Card("K", "4");
-        Card card3 = new Card("5", "1");
-        Card card4 = new Card("4", "4");
-        Card card5 = new Card("3", "3");
-        Card card6 = new Card("2", "2");
-        Card card7 = new Card("2", "1");
-        List<Card> cards = new ArrayList<>();
-        cards.add(card1);
-        cards.add(card2);
-        cards.add(card3);
-        cards.add(card4);
-        cards.add(card5);
-        cards.add(card6);
-        cards.add(card7);
-
-        Game game = new Game(users);
-        game.setId(1L);
-        game.setPlayerTurnIndex(0);
-
-        List<Card> playerCards = new ArrayList<>();
-        playerCards.add(card6);
-        playerCards.add(card7);
-        Player player1 = new Player(game, "PlayerOne", 2000, "validToken1", playerCards);
-        player1.setId(2L);
-
-        Player player2 = new Player(game, "PlayerTwo", 2000, "validToken2", playerCards);
-        player1.setId(3L);
-
-
-        List<Player> players = new ArrayList<>();
-        players.add(player1);
-        players.add(player2);
-        game.setPlayers(players);
-
-        PlayerHand result = straight(cards,player1);
+        PlayerHand result = straight(cards,player);
         assertNotNull(result);
-        assertEquals(result.getHand(), Hand.STRAIGHT);
+        assertEquals(result.getCards().size(),5);
+        assertEquals(Hand.STRAIGHT,result.getHand());
+        assertEquals(5,getValue(result.getCards().get(0)));
+        assertEquals(4,getValue(result.getCards().get(1)));
+        assertEquals(3,getValue(result.getCards().get(2)));
+        assertEquals(2,getValue(result.getCards().get(3)));
+        assertEquals(14,getValue(result.getCards().get(4)));
     }
 
     @Test
     public void notStraight(){
 
-        User user = new User();
-        user.setId(1L);
-        user.setUsername("testUsername");
-        user.setStatus(UserStatus.ONLINE);
-        user.setMoney(2000);
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("4S", "image"));
+            add(new Card("4H", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("3D", "image"));
+            add(new Card("2D", "image"));
+        }};
 
-        User user1 = new User();
-        user1.setId(2L);
-        user1.setUsername("testUsername1");
-        user1.setStatus(UserStatus.ONLINE);
-        user1.setMoney(2000);
-
-        List<User> users = new ArrayList<>();
-        users.add(user);
-        users.add(user1);
+        //Mock a player object
+        Player player = mock(Player.class);
 
 
+        PlayerHand result = straight(cards,player);
+        assertNull(result);
+    }
 
-        Card card1 = new Card("A", "2");
-        Card card2 = new Card("K", "4");
-        Card card3 = new Card("Q", "1");
-        Card card4 = new Card("J", "4");
-        Card card5 = new Card("9", "3");
-        Card card6 = new Card("6", "2");
-        Card card7 = new Card("5", "1");
-        List<Card> cards = new ArrayList<>();
-        cards.add(card1);
-        cards.add(card2);
-        cards.add(card3);
-        cards.add(card4);
-        cards.add(card5);
-        cards.add(card6);
-        cards.add(card7);
+    @Test
+    public void isFlush(){
 
-        Game game = new Game(users);
-        game.setId(1L);
-        game.setPlayerTurnIndex(0);
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AS", "image"));
+            add(new Card("KS", "image"));
+            add(new Card("4S", "image"));
+            add(new Card("4H", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("3S", "image"));
+            add(new Card("2S", "image"));
+        }};
 
-        List<Card> playerCards = new ArrayList<>();
-        playerCards.add(card6);
-        playerCards.add(card7);
-        Player player1 = new Player(game, "PlayerOne", 2000, "validToken1", playerCards);
-        player1.setId(2L);
+        //Mock a player object
+        Player player = mock(Player.class);
 
-        Player player2 = new Player(game, "PlayerTwo", 2000, "validToken2", playerCards);
-        player1.setId(3L);
+        //execute the method
+        PlayerHand result = flush(cards, player);
 
+        //check result
+        assertNotNull(result);
+        assertEquals(Hand.FLUSH, result.getHand());
 
-        List<Player> players = new ArrayList<>();
-        players.add(player1);
-        players.add(player2);
-        game.setPlayers(players);
+        assertEquals(14, getValue(result.getCards().get(0)));
+        assertEquals(13, getValue(result.getCards().get(1)));
+        assertEquals(4, getValue(result.getCards().get(2)));
+        assertEquals(3, getValue(result.getCards().get(3)));
+        assertEquals(2, getValue(result.getCards().get(4)));
+        assertEquals(player, result.getPlayer());
+    }
 
-        PlayerHand result = straight(cards,player1);
+    @Test
+    public void noFlush(){
+
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AH", "image"));
+            add(new Card("KS", "image"));
+            add(new Card("4S", "image"));
+            add(new Card("4H", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("3S", "image"));
+            add(new Card("2S", "image"));
+        }};
+
+        //Mock a player object
+        Player player = mock(Player.class);
+
+        //execute the method
+        PlayerHand result = flush(cards, player);
+
+        //check result
+        assertNull(result);
+
+    }
+
+    @Test
+    public void isStraightFlush(){
+
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("QH", "image"));
+            add(new Card("JD", "image"));
+            add(new Card("JH", "image"));
+            add(new Card("0H", "image"));
+            add(new Card("9H", "image"));
+        }};
+
+        //Mock a player object
+        Player player = mock(Player.class);
+
+        //execute the method
+        PlayerHand result = straightFlush(cards, player);
+
+        //check result
+        assertNotNull(result);
+        assertEquals(Hand.STRAIGHT_FLUSH, result.getHand());
+
+        assertEquals(13, getValue(result.getCards().get(0)));
+        assertEquals(12, getValue(result.getCards().get(1)));
+        assertEquals(11, getValue(result.getCards().get(2)));
+        assertEquals(10, getValue(result.getCards().get(3)));
+        assertEquals(9, getValue(result.getCards().get(4)));
+        assertEquals(player, result.getPlayer());
+    }
+
+    @Test
+    public void specialStraightFlush(){
+
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AD", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("5D", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("4H", "image"));
+            add(new Card("3D", "image"));
+            add(new Card("2D", "image"));
+        }};
+
+        //Mock a player object
+        Player player = mock(Player.class);
+
+        //execute the method
+        PlayerHand result = straightFlush(cards, player);
+
+        //check result
+        assertNotNull(result);
+        assertEquals(Hand.STRAIGHT_FLUSH, result.getHand());
+
+        assertEquals(5, getValue(result.getCards().get(0)));
+        assertEquals(4, getValue(result.getCards().get(1)));
+        assertEquals(3, getValue(result.getCards().get(2)));
+        assertEquals(2, getValue(result.getCards().get(3)));
+        assertEquals(14, getValue(result.getCards().get(4)));
+        assertEquals(player, result.getPlayer());
+    }
+
+    @Test
+    public void notStraightFlush(){
+
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AS", "image"));
+            add(new Card("KS", "image"));
+            add(new Card("4S", "image"));
+            add(new Card("4H", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("3S", "image"));
+            add(new Card("2S", "image"));
+        }};
+
+        //Mock a player object
+        Player player = mock(Player.class);
+
+        //execute the method
+        PlayerHand result = straightFlush(cards, player);
+
+        //check result
         assertNull(result);
     }
 
@@ -254,4 +295,7 @@ public class PlayerHandTest {
         //check result
         assertNull(result);
     }
+
+
+
 }
