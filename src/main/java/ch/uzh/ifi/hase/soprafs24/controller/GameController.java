@@ -32,7 +32,7 @@ public class GameController {
         Game game = gameService.getGameById(id, token);
         GameGetDTO gameToReturn = DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
         //getting ownPlayer and convert to privatPlayer and put in gametoreturn
-        List<Player> players = new ArrayList<>();
+        List<Player> players;
         players = game.getPlayers();
         Player ownPlayer = gameService.getPlayerByToken(players, token);
         PlayerPrivateGetDTO privatePlayer = DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(ownPlayer);
