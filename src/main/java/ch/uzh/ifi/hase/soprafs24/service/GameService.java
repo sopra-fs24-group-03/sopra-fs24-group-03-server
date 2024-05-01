@@ -118,7 +118,7 @@ public class GameService {
                     //set the raise player so that it can be check in update game mehtod
                     game.setRaisePlayer(player);
 
-                    yield move.getAmount(); //return bet amount
+                    yield moneyLost; //return bet amount
                 }
                 else
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You need to bet higher than the current highest bet!");
@@ -128,7 +128,7 @@ public class GameService {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Check with an Amount");
                 }
                 //only check if there was no bet made this betting round
-                if (game.getBet() == 0) {
+                if (game.getBet()-player.getLastRaiseAmount() == 0) {
                     yield 0;
                 }
                 else {
@@ -137,7 +137,7 @@ public class GameService {
 
             }
             case Call -> {
-                if (game.getBet() == 0) {
+                if (game.getBet() - player.getLastRaiseAmount()== 0) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only call if a Bet was made before");
                 }
                 if (move.getAmount() != 0) {
@@ -156,6 +156,11 @@ public class GameService {
             }
 
         };
+        //For very first betting round, so that Bigblind can play again, it sets the raiseplayer to 1 in front of bigblind so that he can make another move and then new betting round starts
+        if(game.getGameTable().getOpenCards().size()==0 && game.getRaisePlayer()==null){
+            game.setRaisePlayer(game.getPlayers().get(game.getPlayerTurnIndex()));
+
+        }
         game.setsNextPlayerTurnIndex();
         return amount;
 
@@ -179,8 +184,8 @@ public class GameService {
             return;
 
         }
-        //TODO BIG BLIND CAN PLAY AGAIN AFTER 1st round and ONLY after 1st round && 1st betting round
-        //if(table.getCards().size() == 0 && bet == 25){}
+
+
 
         //check if current betting round is finished
         if ((game.getRaisePlayer() != null && Objects.equals(game.getRaisePlayer().getUsername(), nextPlayerUsername))) {
@@ -201,6 +206,7 @@ public class GameService {
             //Sets the "Raiseplayer" to smallblind/ first person which hasent folded --> If noone raises so that the game still ends
             game.setRaisePlayer(setRaisePlayerCorrect(game));
         }
+
         if (game.getRaisePlayer() == null) {
             game.setRaisePlayer(game.getPlayers().get(game.getPlayerTurnIndex()));
         }
@@ -242,35 +248,7 @@ public class GameService {
         return (foldedPlayersCount == (players.size() - 1));
     }
 
-    public void initializeBlinds(Game game) {
-        List<Player> players = game.getPlayers();
 
-        // Set blinds
-        int smallBlind = 25;
-        int bigBlind = 50;
-
-        // Assume players are in order and rotate as per game rounds
-        Player smallBlindPlayer = players.get(0);
-        Player bigBlindPlayer = players.get(1);
-
-        GamePutDTO gamePutDTOsmall = new GamePutDTO();
-        gamePutDTOsmall.setMove(Moves.Raise);
-        gamePutDTOsmall.setAmount(smallBlind);
-
-
-        authorize(smallBlindPlayer.getToken(), game.getId());
-        turn(gamePutDTOsmall, game.getId(), smallBlindPlayer.getToken());
-        updateGame(game.getId(), smallBlind);
-
-        GamePutDTO gamePutDTObig = new GamePutDTO();
-        gamePutDTObig.setMove(Moves.Raise);
-        gamePutDTObig.setAmount(bigBlind);
-
-        authorize(bigBlindPlayer.getToken(), game.getId());
-        turn(gamePutDTObig, game.getId(), bigBlindPlayer.getToken());
-        updateGame(game.getId(), bigBlind);
-
-    }
 
     public void setIndexToSBPlayer(Game game) {
         List<Player> players = game.getPlayers();

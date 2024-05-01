@@ -38,6 +38,8 @@ public class Game implements Serializable {
         this.gameTable = new GameTable(cardsApi.drawCards(deckId, 5));
         this.smallBlindPlayer = players.get(0);
 
+        setUpBlinds();
+
     }
 
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
@@ -187,5 +189,25 @@ public class Game implements Serializable {
 
     public void setSmallBlindPlayer(Player smallBlindPlayer) {
         this.smallBlindPlayer = smallBlindPlayer;
+    }
+    private void setUpBlinds(){
+        // Set blinds
+        int smallBlind = 25;
+        int bigBlind = 50;
+
+        // Assume players are in order and rotate as per game rounds
+        Player smallBlindPlayer = players.get(0);
+        Player bigBlindPlayer = players.get(1);
+
+        smallBlindPlayer.setMoney(smallBlindPlayer.getMoney()-smallBlind);
+        smallBlindPlayer.setLastRaiseAmount(smallBlind);
+        bigBlindPlayer.setMoney(bigBlindPlayer.getMoney()-bigBlind);
+        bigBlindPlayer.setLastRaiseAmount(50);
+        this.setBet(50);
+        this.gameTable.setMoney(smallBlind+bigBlind);
+
+        setsNextPlayerTurnIndex();
+        setsNextPlayerTurnIndex();
+
     }
 }

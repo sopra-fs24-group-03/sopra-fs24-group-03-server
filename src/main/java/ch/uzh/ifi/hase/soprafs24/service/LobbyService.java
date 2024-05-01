@@ -142,7 +142,6 @@ public class LobbyService {
             log.info("created game {}", game);
             lobbyRepository.save(lobby);
             lobbyRepository.flush();
-            gameService.initializeBlinds(game);
             return game;
         }
         else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough players");
