@@ -191,7 +191,7 @@ public class GameControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 //.andExpect(jsonPath("$.players[0].username").value("PlayerOne"))
-                .andExpect(jsonPath("$.currentBet").value(0));
+                .andExpect(jsonPath("$.currentBet").value(50));
 
 
     }

@@ -172,8 +172,10 @@ public class LobbyControllerTest {
     public void createGameWithLobbyIdSuccess() throws Exception {
 
         User user1 = new User();
+        User user2 = new User();
         ArrayList<User> Userlist = new ArrayList<User>();
         Userlist.add(user1);
+        Userlist.add(user2);
 
         Lobby lobby = new Lobby();
         Game game = new Game(Userlist);

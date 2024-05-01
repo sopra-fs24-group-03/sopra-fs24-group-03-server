@@ -89,8 +89,14 @@ public class DTOMapperTest {
         user.setUsername("testUsername");
         user.setMoney(2000);
 
+        User user2 = new User();
+        user.setToken("token");
+        user.setUsername("testUsername");
+        user.setMoney(2000);
+
         List<User> users = new ArrayList<>();
         users.add(user);
+        users.add(user2);
         Game game = new Game(users);
         game.setId(1L);
 
@@ -98,7 +104,8 @@ public class DTOMapperTest {
         GameGetDTO gameGetDTO = DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
         // check content
         assertEquals(game.getId(), gameGetDTO.getId());
-        assertEquals(user.getMoney(),gameGetDTO.getPlayers().get(0).getMoney());
+        //1975 because small blind is directly deducted from player upon game creation
+        assertEquals(1975,gameGetDTO.getPlayers().get(0).getMoney());
         assertEquals(user.getUsername(),gameGetDTO.getPlayers().get(0).getUsername() );
 
     }

@@ -63,11 +63,18 @@ public class GameServiceTest {
         User user = new User();
 
         user.setUsername("username");
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("QS", "image"));
+        }};
 
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
         Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
         Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
         Mockito.when(move.getMove()).thenReturn(Moves.Fold);
+        Mockito.when(game.getGameTable()).thenReturn(table);
+        Mockito.when(table.getOpenCards()).thenReturn(cards);
 
 
         int bet = gameService.turn(move, 1, "token");
@@ -80,6 +87,12 @@ public class GameServiceTest {
         User user = new User();
 
         user.setUsername("username");
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("QS", "image"));
+        }};
+
 
 
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
@@ -90,6 +103,8 @@ public class GameServiceTest {
         Mockito.when(move.getAmount()).thenReturn(100);
         Mockito.when(move.getMove()).thenReturn(Moves.Raise);
         Mockito.doNothing().when(game).setBet(Mockito.anyInt());
+        Mockito.when(game.getGameTable()).thenReturn(table);
+        Mockito.when(table.getOpenCards()).thenReturn(cards);
 
         int bet = gameService.turn(move, 1, "token");
         assertEquals(100, bet);
@@ -101,12 +116,14 @@ public class GameServiceTest {
         user.setUsername("username");
 
 
+
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
         Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
         Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
         Mockito.when(player.getMoney()).thenReturn(50);
         Mockito.when(move.getAmount()).thenReturn(100);
         Mockito.when(move.getMove()).thenReturn(Moves.Raise);
+
 
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
                 ()-> gameService.turn(move, 1, "token")
@@ -122,12 +139,14 @@ public class GameServiceTest {
         user.setUsername("username");
 
 
+
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
         Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
         Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
         Mockito.when(game.getBet()).thenReturn(100);
         Mockito.when(move.getAmount()).thenReturn(0);
         Mockito.when(move.getMove()).thenReturn(Moves.Raise);
+
 
 
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
@@ -140,6 +159,11 @@ public class GameServiceTest {
     public void turn_checkSuccess(){
         User user = new User();
         user.setUsername("username");
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("QS", "image"));
+        }};
 
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
         Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
@@ -147,6 +171,8 @@ public class GameServiceTest {
         Mockito.when(game.getBet()).thenReturn(0);
         Mockito.when(move.getAmount()).thenReturn(0);
         Mockito.when(move.getMove()).thenReturn(Moves.Check);
+        Mockito.when(game.getGameTable()).thenReturn(table);
+        Mockito.when(table.getOpenCards()).thenReturn(cards);
 
         int bet = gameService.turn(move, 1, "token");
         assertEquals(0, bet);
@@ -156,12 +182,14 @@ public class GameServiceTest {
         User user = new User();
         user.setUsername("username");
 
+
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
         Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
         Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
         Mockito.when(game.getBet()).thenReturn(100);
         Mockito.when(move.getAmount()).thenReturn(0);
         Mockito.when(move.getMove()).thenReturn(Moves.Check);
+
 
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
                 ()-> gameService.turn(move, 1, "token")
@@ -174,6 +202,11 @@ public class GameServiceTest {
         User user = new User();
 
         user.setUsername("username");
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("QS", "image"));
+        }};
 
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
         Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
@@ -183,6 +216,8 @@ public class GameServiceTest {
         Mockito.when(move.getAmount()).thenReturn(0);
         Mockito.when(player.getLastRaiseAmount()).thenReturn(0);
         Mockito.when(move.getMove()).thenReturn(Moves.Call);
+        Mockito.when(game.getGameTable()).thenReturn(table);
+        Mockito.when(table.getOpenCards()).thenReturn(cards);
 
         int bet = gameService.turn(move, 1, "token");
         assertEquals(100, bet);
@@ -193,11 +228,13 @@ public class GameServiceTest {
 
         user.setUsername("username");
 
+
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
         Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
         Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
         Mockito.when(game.getBet()).thenReturn(0);
         Mockito.when(move.getMove()).thenReturn(Moves.Call);
+
 
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
                 ()-> gameService.turn(move, 1, "token")
