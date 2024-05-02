@@ -156,7 +156,7 @@ public class GameService {
                 if (move.getAmount() != 0) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Call with an Amount");
                 }
-                if (game.getBet() > player.getMoney()) {
+                if (game.getBet() > player.getMoney() + player.getLastRaiseAmount()) {
                     //TODO All in call not implemented yet
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only call if you have enough money");
                 }
