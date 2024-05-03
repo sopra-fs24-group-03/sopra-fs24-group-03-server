@@ -171,7 +171,7 @@ public class GameService {
 
         };
         //For very first betting round, so that Bigblind can play again, it sets the raiseplayer to 1 in front of bigblind so that he can make another move and then new betting round starts
-        if(game.getGameTable().getOpenCards().size()==0 && game.getRaisePlayer()==null){
+        if(game.getGameTable().getOpenCards().size()==0 && game.getRaisePlayer()==null && move.getMove() != Fold){
             game.setRaisePlayer(game.getPlayers().get(game.getPlayerTurnIndex()));
 
         }
