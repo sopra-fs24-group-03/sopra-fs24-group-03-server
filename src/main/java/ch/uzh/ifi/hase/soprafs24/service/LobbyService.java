@@ -17,6 +17,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Objects;
 
+import static java.util.Collections.rotate;
+
 
 @Service
 @Transactional
@@ -135,6 +137,10 @@ public class LobbyService {
 
         //checks for enough users
         if (users.size() >= 2) {
+            //rotate the lobbylist by correct amount so that SB and BB players change
+            rotate(users, -lobby.getIndexStartingPlayer());
+            lobby.setIndexStartingPlayer(lobby.getIndexStartingPlayer()+1);
+
             Game game = new Game(users);
             lobby.setGame(game);
             game.setId(lobby.getId());
