@@ -42,6 +42,8 @@ public class GameServiceTest {
 
     @Mock
     private Game game;
+    @Mock
+    private Pot pot;
 
     @Mock
     private GameTable table;
@@ -304,6 +306,7 @@ public class GameServiceTest {
         Mockito.when(game.getPlayerTurnIndex()).thenReturn(0);
         Mockito.when(currentPlayer.getUsername()).thenReturn("username");
         Mockito.when(gameService.playersfolded(game)).thenReturn(false);
+        Mockito.when(table.getPotByName("mainPot")).thenReturn(pot);
 
 
         // Explicitly block winningCondition from being called

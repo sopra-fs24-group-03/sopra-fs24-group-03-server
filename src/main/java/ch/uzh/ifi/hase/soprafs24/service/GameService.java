@@ -115,7 +115,7 @@ public class GameService {
                 yield 0;
             }
             case Raise -> {
-                if (player.getMoney() < move.getAmount()) {
+                if (player.getMoney() < move.getAmount() + player.getLastRaiseAmount()) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot bet more money than you have!");
                 }
                 //if raise is legal, update the order and current bet and call raise
@@ -129,6 +129,15 @@ public class GameService {
                     //set the raise player so that it can be check in update game mehtod
                     game.setRaisePlayer(player);
                     setMoveInGameTable(gameTable,Raise,move.getAmount(),player.getId());
+
+                    //set the amounts of current betting round
+                    gameTable.setTotalTableBettingInCurrentRound(gameTable.getTotalTableBettingInCurrentRound() + moneyLost);
+                    player.setTotalBettingInCurrentRound(player.getTotalBettingInCurrentRound()+moneyLost);
+
+                    //if he went all in
+                    if(player.getMoney() == 0){
+                        player.setAllIn(true);
+                    }
 
                     yield moneyLost; //return bet amount
                 }
@@ -156,22 +165,36 @@ public class GameService {
                 if (move.getAmount() != 0) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Call with an Amount");
                 }
-                if (game.getBet() > player.getMoney() + player.getLastRaiseAmount()) {
-                    //TODO All in call not implemented yet
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only call if you have enough money");
+                if (game.getBet() >= player.getMoney() + player.getLastRaiseAmount()) { //ALL IN
+                    player.setAllIn(true);
+                    int playerMoney = player.getMoney();
+                    player.setMoney(0);
+                    player.setLastRaiseAmount(playerMoney);
+                    setMoveInGameTable(gameTable,Call,0,player.getId());
+
+                    gameTable.setTotalTableBettingInCurrentRound(gameTable.getTotalTableBettingInCurrentRound() +playerMoney);
+                    player.setTotalBettingInCurrentRound(player.getTotalBettingInCurrentRound() + playerMoney);
+                    yield playerMoney;
+
+
                 }
                 else { //if enough money, bet the current bet
                     int loss = game.getBet() - player.getLastRaiseAmount();
                     player.setMoney(player.getMoney() - loss); //p1 raises 100, p2 raises to 200, p1 calls --> only subtract (200-100 = 100) --> in total also 200
                     player.setLastRaiseAmount(player.getLastRaiseAmount() + loss);
                     setMoveInGameTable(gameTable,Call,0,player.getId());
+
+                    //set the amounts of current betting round
+                    gameTable.setTotalTableBettingInCurrentRound(gameTable.getTotalTableBettingInCurrentRound() + loss);
+                    player.setTotalBettingInCurrentRound(player.getTotalBettingInCurrentRound()+loss);
+                    //return amount to be updated in table
                     yield loss;
                 }
             }
 
         };
         //For very first betting round, so that Bigblind can play again, it sets the raiseplayer to 1 in front of bigblind so that he can make another move and then new betting round starts
-        if(game.getGameTable().getOpenCards().size()==0 && game.getRaisePlayer()==null && move.getMove() != Fold){
+        if(game.getGameTable().getOpenCards().size()==0 && game.getRaisePlayer()==null && move.getMove() != Fold && !player.isAllIn()){
             game.setRaisePlayer(game.getPlayers().get(game.getPlayerTurnIndex()));
 
         }
@@ -188,11 +211,14 @@ public class GameService {
         GameTable table = game.getGameTable();
         String nextPlayerUsername = game.getPlayers().get(game.getPlayerTurnIndex()).getUsername();
 
+        //TODO POTS VS MONEY
         if (bet > 0) {
             table.updateMoney(bet);
+            table.getPotByName("mainPot").updateMoney(bet);
         }
 
         //check if all players except 1 folded
+        //TODO same for when all except 1 players are all in (but other player still has to say if he folds or if he calls)
         if (playersfolded(game)) {
             winningCondition(game_id); //then game ends, call winning condition
             return;
@@ -201,11 +227,14 @@ public class GameService {
 
         //check if current betting round is finished
         if ((game.getRaisePlayer() != null && Objects.equals(game.getRaisePlayer().getUsername(), nextPlayerUsername))) {
-            //reset betting to 0 after 1 betting round
+            //TODO add function call for creating pots here
 
+            //reset betting to 0 after a betting round
             game.setBet(0);
+            table.setTotalTableBettingInCurrentRound(0);
             for (Player player : game.getPlayers()) {
                 player.setLastRaiseAmount(0);
+                player.setTotalBettingInCurrentRound(0);
             }
 
             //check if final round to end game
@@ -221,8 +250,6 @@ public class GameService {
         if (game.getRaisePlayer() == null) {
             game.setRaisePlayer(game.getPlayers().get(game.getPlayerTurnIndex()));
         }
-
-
     }
 
 
@@ -260,7 +287,6 @@ public class GameService {
     }
 
 
-
     public void setIndexToSBPlayer(Game game) {
         List<Player> players = game.getPlayers();
 
@@ -269,7 +295,7 @@ public class GameService {
         for (int i = 0; i < players.size(); i++) {
             if (players.get(i).equals(smallBlindPlayer)) {
                 game.setPlayerTurnIndex(i);
-                if (smallBlindPlayer.isFolded()) {
+                if (smallBlindPlayer.isFolded() || smallBlindPlayer.isAllIn()) {
                     game.setsNextPlayerTurnIndex();
                 }
                 break;
@@ -281,7 +307,7 @@ public class GameService {
         List<Player> players = game.getPlayers();
         Player smallBlindPlayer = game.getSmallBlindPlayer();
 
-        if (!smallBlindPlayer.isFolded()) {
+        if (!smallBlindPlayer.isFolded() && !smallBlindPlayer.isAllIn()) {
             return smallBlindPlayer;
         }
 
@@ -292,7 +318,7 @@ public class GameService {
             int playerTurnIndex = (startIdx + i + 1) % numberOfPlayers;
             Player currentPlayer = players.get(playerTurnIndex);
 
-            if (!currentPlayer.isFolded()) {
+            if (!currentPlayer.isFolded() && !currentPlayer.isAllIn()) {
                 return currentPlayer;
             }
         }

@@ -37,6 +37,7 @@ public class Game implements Serializable {
         // create Table and give five cards
         this.gameTable = new GameTable(cardsApi.drawCards(deckId, 5));
         this.smallBlindPlayer = players.get(0);
+        this.gameTable.getPotByName("mainPot").setEligiblePlayers(this.players);
 
         setUpBlinds();
 
@@ -86,7 +87,7 @@ public class Game implements Serializable {
         int numberOfPlayers = players.size();
         for (int i = 0; i < numberOfPlayers; i++) {
             this.playerTurnIndex = (this.playerTurnIndex + 1) % numberOfPlayers;
-            if (!players.get(playerTurnIndex).isFolded()) {
+            if (!players.get(playerTurnIndex).isFolded() && !players.get(playerTurnIndex).isAllIn()) {
                 break;
             }
         }
@@ -202,10 +203,16 @@ public class Game implements Serializable {
 
         smallBlindPlayer.setMoney(smallBlindPlayer.getMoney()-smallBlind);
         smallBlindPlayer.setLastRaiseAmount(smallBlind);
+        smallBlindPlayer.setTotalBettingInCurrentRound(smallBlind);
         bigBlindPlayer.setMoney(bigBlindPlayer.getMoney()-bigBlind);
-        bigBlindPlayer.setLastRaiseAmount(50);
-        this.setBet(50);
+        bigBlindPlayer.setLastRaiseAmount(bigBlind);
+        bigBlindPlayer.setTotalBettingInCurrentRound(bigBlind);
+        this.setBet(bigBlind);
+
+        //TODO POTS VS MONEY
+        this.gameTable.getPotByName("mainPot").setMoney(smallBlind+bigBlind);
         this.gameTable.setMoney(smallBlind+bigBlind);
+        this.gameTable.setTotalTableBettingInCurrentRound(smallBlind+bigBlind);
 
         setsNextPlayerTurnIndex();
         setsNextPlayerTurnIndex();

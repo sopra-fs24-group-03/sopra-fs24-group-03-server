@@ -14,6 +14,8 @@ import java.util.List;
 public class GameTable implements Serializable {
     @Column
     private int Money;
+    @Column
+    private int totalTableBettingInCurrentRound;
 
 
     @Column
@@ -35,6 +37,8 @@ public class GameTable implements Serializable {
 
     @OneToMany(mappedBy = "gameTable", cascade = CascadeType.ALL)
     private List<Card> cards;
+    @OneToMany(mappedBy = "gameTable", cascade = CascadeType.ALL)
+    private List<Pot> pots = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "gameTable_id_open") // Adjust the join column as needed
@@ -46,6 +50,10 @@ public class GameTable implements Serializable {
         cards.forEach(card -> card.setGameTable(this));
         setCards(cards);
         Money = 0;
+
+        Pot mainPot = new Pot(0, "mainPot");
+        mainPot.setGameTable(this);
+        pots.add(mainPot);
     }
 
     //default constructor
@@ -119,5 +127,29 @@ public class GameTable implements Serializable {
 
     public void setLastMove(Moves lastMove) {
         this.lastMove = lastMove;
+    }
+
+    public int getTotalTableBettingInCurrentRound() {
+        return totalTableBettingInCurrentRound;
+    }
+
+    public void setTotalTableBettingInCurrentRound(int totalTableBettingInCurrentRound) {
+        this.totalTableBettingInCurrentRound = totalTableBettingInCurrentRound;
+    }
+
+    public List<Pot> getPots() {
+        return pots;
+    }
+
+    public void setPots(List<Pot> pots) {
+        this.pots = pots;
+    }
+    public Pot getPotByName(String potName) {
+        for (Pot pot : pots) {
+            if (pot.getName().equals(potName)) {
+                return pot;
+            }
+        }
+        return null; // if no pot found
     }
 }
