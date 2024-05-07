@@ -29,7 +29,7 @@
 ### Week 29.04-05.05
 - Joel Huber: Implement that lobby leader can kick players #178, #70, #71, #72
 - Cédric Huber: Impelement hands for winning condition #171, #172, #174, #175
-- Linus Lautenschlager:  
+- Linus Lautenschlager:  Add draw option + adjust UI #75 # 81 # 83 ° 73 # 74
 - Colin Bächtold: Adjusted endGame method to allow draws, fixed Money update of user at the end of a game: #173, #185, #186
 - Noah Ziegler: Big blind can play another move in first betting round, BB and SB rotate, fixed bug: #206, #207, #189
 ### Week 6.05-12.05
