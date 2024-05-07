@@ -27,9 +27,26 @@
 
 ## Milestone 4
 ### Week 29.04-05.05
-Week 29.04-05.05
-Joel Huber: Implement that lobby leader can kick players #178, #70, #71, #72
-Cédric Huber:
-Linus Lautenschlager:
-Colin Bächtold:
-Noah Ziegler:
+- Joel Huber: Implement that lobby leader can kick players #178, #70, #71, #72
+- Cédric Huber: 
+- Linus Lautenschlager:  
+- Colin Bächtold: 
+- Noah Ziegler: Big blind can play another move in first betting round, BB and SB rotate, fixed bug: #206, #207, #189
+### Week 6.05-12.05
+- Joel Huber: 
+- Cédric Huber: 
+- Linus Lautenschlager:  
+- Colin Bächtold: 
+- Noah Ziegler:
+### Week 13.03-19-05
+- Joel Huber: 
+- Cédric Huber: 
+- Linus Lautenschlager:  
+- Colin Bächtold: 
+- Noah Ziegler:
+### Week 20.05-24.05
+- Joel Huber: 
+- Cédric Huber: 
+- Linus Lautenschlager:  
+- Colin Bächtold: 
+- Noah Ziegler: 
