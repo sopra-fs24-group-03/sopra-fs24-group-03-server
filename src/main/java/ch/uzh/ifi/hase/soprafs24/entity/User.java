@@ -51,15 +51,11 @@ public class User implements Serializable {
 
 
     //update the users money and if necessary their tries
-    public void updateMoney(int newMoney){
-        if (newMoney < 100){
+    public void updateUser(){
+        if (this.money < 100){
             this.tries += 1;
             this.money = 2000;
         }
-        else{
-            this.money = newMoney;
-        }
-
     }
 
 

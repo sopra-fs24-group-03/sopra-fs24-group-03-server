@@ -1,6 +1,5 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
-import antlr.Lookahead;
 import ch.uzh.ifi.hase.soprafs24.constant.Hand;
 import ch.uzh.ifi.hase.soprafs24.constant.Moves;
 import ch.uzh.ifi.hase.soprafs24.entity.*;
@@ -9,7 +8,6 @@ import ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand;
 import ch.uzh.ifi.hase.soprafs24.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GamePutDTO;
-import org.assertj.core.internal.Arrays;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -17,7 +15,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -305,12 +302,12 @@ public class GameServiceTest {
         Mockito.when(game.getPlayers()).thenReturn(players);
         Mockito.when(game.getPlayerTurnIndex()).thenReturn(0);
         Mockito.when(currentPlayer.getUsername()).thenReturn("username");
-        Mockito.when(gameService.playersfolded(game)).thenReturn(false);
+        Mockito.when(gameService.playersFinished(game)).thenReturn(false);
         Mockito.when(table.getPotByName("mainPot")).thenReturn(pot);
 
 
         // Explicitly block winningCondition from being called
-        Mockito.doNothing().when(gameService).winningCondition(Mockito.anyLong());
+        Mockito.doNothing().when(gameService).endGame(Mockito.anyLong());
 
         gameService.updateGame(gameId, betAmount);
 
@@ -394,19 +391,13 @@ public class GameServiceTest {
 
         List<Player> players = Stream.of(player1, player2).toList();
 
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(game.getGameTable()).thenReturn(table);
-        Mockito.when(game.getPlayers()).thenReturn(players);
+        Mockito.when(pot.getGameTable()).thenReturn(table);
+        Mockito.when(pot.getEligiblePlayers()).thenReturn(players);
         Mockito.doReturn(playerHand1).doReturn(playerHand2).when(gameService).evaluateHand(Mockito.any(), Mockito.any());
-        Mockito.doNothing().when(gameService).endGame(Mockito.anyLong(), Mockito.any());
 
         //method call
-        gameService.winningCondition(1L);
+        List<PlayerHand> result = gameService.winningCondition(pot);
 
-        
-        //verify endGame is called with the correct parameters
-        Mockito.verify(gameService).endGame(eq(1L), captor.capture());
-        List <PlayerHand> result = captor.getValue();
 
         assertEquals(1, result.size());
         assertEquals(playerHand2, result.get(0));
@@ -435,19 +426,13 @@ public class GameServiceTest {
 
         List<Player> players = Stream.of(player1, player2).toList();
 
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(game.getGameTable()).thenReturn(table);
-        Mockito.when(game.getPlayers()).thenReturn(players);
+        Mockito.when(pot.getGameTable()).thenReturn(table);
+        Mockito.when(pot.getEligiblePlayers()).thenReturn(players);
         Mockito.doReturn(playerHand1).doReturn(playerHand2).when(gameService).evaluateHand(Mockito.any(), Mockito.any());
-        Mockito.doNothing().when(gameService).endGame(Mockito.anyLong(), Mockito.any());
 
         //method call
-        gameService.winningCondition(1L);
+        List<PlayerHand> result = gameService.winningCondition(pot);
 
-
-        //verify endGame is called with the correct parameters
-        Mockito.verify(gameService).endGame(eq(1L), captor.capture());
-        List <PlayerHand> result = captor.getValue();
 
         assertEquals(2, result.size());
         assert(result.contains(playerHand2));
@@ -485,19 +470,12 @@ public class GameServiceTest {
 
         List<Player> players = Stream.of(player1, player2).toList();
 
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(game.getGameTable()).thenReturn(table);
-        Mockito.when(game.getPlayers()).thenReturn(players);
+        Mockito.when(pot.getGameTable()).thenReturn(table);
+        Mockito.when(pot.getEligiblePlayers()).thenReturn(players);
         Mockito.doReturn(playerHand1).doReturn(playerHand2).when(gameService).evaluateHand(Mockito.any(), Mockito.any());
-        Mockito.doNothing().when(gameService).endGame(Mockito.anyLong(), Mockito.any());
 
         //method call
-        gameService.winningCondition(1L);
-
-
-        //verify endGame is called with the correct parameters
-        Mockito.verify(gameService).endGame(eq(1L), captor.capture());
-        List <PlayerHand> result = captor.getValue();
+        List<PlayerHand> result = gameService.winningCondition(pot);
 
         assertEquals(1, result.size());
         assertEquals(playerHand1, result.get(0));
@@ -512,6 +490,10 @@ public class GameServiceTest {
 
         List<PlayerHand> winner = new ArrayList<>(){{
             add(mock(PlayerHand.class));
+        }};
+
+        List<Pot> pots = new ArrayList<>(){{
+            add(new Pot(1000, "mainPot"));
         }};
 
 
@@ -541,15 +523,17 @@ public class GameServiceTest {
         Mockito.when(players.get(1).getMoney()).thenReturn(500);
 
         //table
-        Mockito.when(table.getMoney()).thenReturn(1000);
+        Mockito.when(table.getPots()).thenReturn(pots);
 
         //PlayerHand
         Mockito.when(winner.get(0).getPlayer()).thenReturn(players.get(0));
 
         //gameService
         Mockito.doNothing().when(gameService).deleteGame(Mockito.any(), Mockito.anyInt());
+        Mockito.when(gameService.winningCondition(pots.get(0))).thenReturn(winner);
 
-        gameService.endGame(0L, winner);
+        //method call
+        gameService.endGame(0L);
 
         //insure user money has been updated
         assertEquals(2000, user.getMoney());
@@ -563,76 +547,24 @@ public class GameServiceTest {
     }
 
     @Test
-    public void endGame_userRetry(){
-        List<Player> players = new ArrayList<>(){{
-            add(mock(Player.class));
-            add(mock(Player.class));
-        }};
-
-        List<PlayerHand> winner = new ArrayList<>(){{
-            add(mock(PlayerHand.class));
-        }};
-
-        User user = new User();
-        User user2 = new User();
-        user.setUsername("user1");
-        user2.setUsername("user2");
-        user.setMoney(2000);
-        user2.setMoney(2000);
-        user.setTries(0);
-        user2.setTries(1);
-
-        //repos
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(userRepository.findByUsername(eq(user.getUsername()))).thenReturn(user);
-        Mockito.when(userRepository.findByUsername(eq(user2.getUsername()))).thenReturn(user2);
-
-        //game
-        Mockito.when(game.getGameTable()).thenReturn(table);
-        Mockito.when(game.getPlayers()).thenReturn(players);
-        Mockito.doNothing().when(game).setWinner(Mockito.any());
-
-        //player
-        Mockito.when(players.get(0).getUsername()).thenReturn("user1");
-        Mockito.when(players.get(1).getUsername()).thenReturn("user2");
-        Mockito.when(players.get(0).getMoney()).thenReturn(1000);
-        Mockito.when(players.get(1).getMoney()).thenReturn(50);
-
-        //table
-        Mockito.when(table.getMoney()).thenReturn(1000);
-
-        //PlayerHand
-        Mockito.when(winner.get(0).getPlayer()).thenReturn(players.get(0));
-
-        //gameService
-        Mockito.doNothing().when(gameService).deleteGame(Mockito.any(), Mockito.anyInt());
-
-
-
-        gameService.endGame(0L, winner);
-
-        //insure user money has been updated
-        assertEquals(2000, user.getMoney());
-        assertEquals(2000, user2.getMoney());
-        assertEquals(2, user2.getTries());
-        assertEquals(0, user.getTries());
-
-        //insure correct methods were called
-        Mockito.verify(game).setWinner(eq(winner));
-        Mockito.verify(gameService).deleteGame(eq(game), Mockito.anyInt());
-    }
-
-    @Test
-    public void endGame_draw(){
+    public void endGame_multiplePots(){
         List<Player> players = new ArrayList<>(){{
             add(mock(Player.class));
             add(mock(Player.class));
             add(mock(Player.class));
         }};
 
-        List<PlayerHand> winner = new ArrayList<>(){{
+        List<PlayerHand> winner1 = new ArrayList<>(){{
             add(mock(PlayerHand.class));
+        }};
+
+        List<PlayerHand> winner2 = new ArrayList<>(){{
             add(mock(PlayerHand.class));
+        }};
+
+        List<Pot> pots = new ArrayList<>(){{
+            add(new Pot(1000, "mainPot"));
+            add(new Pot(500, "sidePot")); //possible pot name change...
         }};
 
         User user = new User();
@@ -668,7 +600,152 @@ public class GameServiceTest {
         Mockito.when(players.get(2).getMoney()).thenReturn(1000);
 
         //table
-        Mockito.when(table.getMoney()).thenReturn(999);
+        Mockito.when(table.getPots()).thenReturn(pots);
+
+        //PlayerHand
+        Mockito.when(winner1.get(0).getPlayer()).thenReturn(players.get(0));
+        Mockito.when(winner2.get(0).getPlayer()).thenReturn(players.get(1));
+
+        //gameService
+        Mockito.doNothing().when(gameService).deleteGame(Mockito.any(), Mockito.anyInt());
+        Mockito.when(gameService.winningCondition(pots.get(0))).thenReturn(winner1);
+        Mockito.when(gameService.winningCondition(pots.get(1))).thenReturn(winner2);
+
+        //method call
+        gameService.endGame(0L);
+
+        //insure user money has been updated
+        assertEquals(2000, user.getMoney());
+        assertEquals(550, user2.getMoney());
+        assertEquals(1000, user3.getMoney());
+        assertEquals(1, user2.getTries());
+        assertEquals(0, user.getTries());
+        assertEquals(2, user3.getTries());
+
+        //insure correct methods were called
+        Mockito.verify(game).setWinner(eq(winner1));
+        Mockito.verify(gameService).deleteGame(eq(game), Mockito.anyInt());
+    }
+
+    @Test
+    public void endGame_userRetry(){
+        List<Player> players = new ArrayList<>(){{
+            add(mock(Player.class));
+            add(mock(Player.class));
+        }};
+
+        List<PlayerHand> winner = new ArrayList<>(){{
+            add(mock(PlayerHand.class));
+        }};
+
+        List<Pot> pots = new ArrayList<>(){{
+            add(new Pot(1000, "mainPot"));
+        }};
+
+        pot.setEligiblePlayers(players);
+
+        User user = new User();
+        User user2 = new User();
+        user.setUsername("user1");
+        user2.setUsername("user2");
+        user.setMoney(2000);
+        user2.setMoney(2000);
+        user.setTries(0);
+        user2.setTries(1);
+
+        //repos
+        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        Mockito.when(userRepository.findByUsername(eq(user.getUsername()))).thenReturn(user);
+        Mockito.when(userRepository.findByUsername(eq(user2.getUsername()))).thenReturn(user2);
+
+        //game
+        Mockito.when(game.getGameTable()).thenReturn(table);
+        Mockito.when(game.getPlayers()).thenReturn(players);
+        Mockito.doNothing().when(game).setWinner(Mockito.any());
+
+        //player
+        Mockito.when(players.get(0).getUsername()).thenReturn("user1");
+        Mockito.when(players.get(1).getUsername()).thenReturn("user2");
+        Mockito.when(players.get(0).getMoney()).thenReturn(1000);
+        Mockito.when(players.get(1).getMoney()).thenReturn(50);
+
+        //table
+        Mockito.when(table.getPots()).thenReturn(pots);
+
+        //PlayerHand
+        Mockito.when(winner.get(0).getPlayer()).thenReturn(players.get(0));
+
+        //gameService
+        Mockito.doNothing().when(gameService).deleteGame(Mockito.any(), Mockito.anyInt());
+        Mockito.when(gameService.winningCondition(pots.get(0))).thenReturn(winner);
+
+        //method call
+        gameService.endGame(0L);
+
+        //insure user money has been updated
+        assertEquals(2000, user.getMoney());
+        assertEquals(2000, user2.getMoney());
+        assertEquals(2, user2.getTries());
+        assertEquals(0, user.getTries());
+
+        //insure correct methods were called
+        Mockito.verify(game).setWinner(eq(winner));
+        Mockito.verify(gameService).deleteGame(eq(game), Mockito.anyInt());
+    }
+
+    @Test
+    public void endGame_draw(){
+        List<Player> players = new ArrayList<>(){{
+            add(mock(Player.class));
+            add(mock(Player.class));
+            add(mock(Player.class));
+        }};
+
+        List<PlayerHand> winner = new ArrayList<>(){{
+            add(mock(PlayerHand.class));
+            add(mock(PlayerHand.class));
+        }};
+
+        List<Pot> pots = new ArrayList<>(){{
+            add(new Pot(1000, "mainPot"));
+        }};
+
+        pot.setEligiblePlayers(players);
+
+        User user = new User();
+        User user2 = new User();
+        User user3 = new User();
+        user.setUsername("user1");
+        user2.setUsername("user2");
+        user3.setUsername("user3");
+        user.setMoney(2000);
+        user2.setMoney(2000);
+        user3.setMoney(2000);
+        user.setTries(0);
+        user2.setTries(1);
+        user3.setTries(2);
+
+        //repos
+        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        Mockito.when(userRepository.findByUsername(eq(user.getUsername()))).thenReturn(user);
+        Mockito.when(userRepository.findByUsername(eq(user2.getUsername()))).thenReturn(user2);
+        Mockito.when(userRepository.findByUsername(eq(user3.getUsername()))).thenReturn(user3);
+
+        //game
+        Mockito.when(game.getGameTable()).thenReturn(table);
+        Mockito.when(game.getPlayers()).thenReturn(players);
+        Mockito.doNothing().when(game).setWinner(Mockito.any());
+
+        //player
+        Mockito.when(players.get(0).getUsername()).thenReturn("user1");
+        Mockito.when(players.get(1).getUsername()).thenReturn("user2");
+        Mockito.when(players.get(2).getUsername()).thenReturn("user3");
+        Mockito.when(players.get(0).getMoney()).thenReturn(1000);
+        Mockito.when(players.get(1).getMoney()).thenReturn(50);
+        Mockito.when(players.get(2).getMoney()).thenReturn(1000);
+
+        //table
+        Mockito.when(table.getPots()).thenReturn(pots);
 
         //PlayerHand
         Mockito.when(winner.get(0).getPlayer()).thenReturn(players.get(0));
@@ -676,10 +753,11 @@ public class GameServiceTest {
 
         //gameService
         Mockito.doNothing().when(gameService).deleteGame(Mockito.any(), Mockito.anyInt());
+        Mockito.when(gameService.winningCondition(pots.get(0))).thenReturn(winner);
 
 
 
-        gameService.endGame(0L, winner);
+        gameService.endGame(0L);
 
         //insure user money has been updated
         assertEquals(1500, user.getMoney());

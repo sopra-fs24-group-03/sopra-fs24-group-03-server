@@ -3,10 +3,7 @@ package ch.uzh.ifi.hase.soprafs24.service;
 
 import ch.uzh.ifi.hase.soprafs24.constant.Hand;
 import ch.uzh.ifi.hase.soprafs24.constant.Moves;
-import ch.uzh.ifi.hase.soprafs24.entity.Game;
-import ch.uzh.ifi.hase.soprafs24.entity.GameTable;
-import ch.uzh.ifi.hase.soprafs24.entity.Player;
-import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.entity.*;
 import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 import ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand;
 import ch.uzh.ifi.hase.soprafs24.helpers.ScheduledGameDelete;
@@ -219,8 +216,8 @@ public class GameService {
 
         //check if all players except 1 folded
         //TODO same for when all except 1 players are all in (but other player still has to say if he folds or if he calls)
-        if (playersfolded(game)) {
-            winningCondition(game_id); //then game ends, call winning condition
+        if (playersFinished(game)) {
+            endGame(game_id); //then game ends, call winning condition
             return;
 
         }
@@ -239,7 +236,7 @@ public class GameService {
 
             //check if final round to end game
             if (table.getOpenCards().size() == 5) {
-                winningCondition(game_id); //then game ends, call winning condition
+                endGame(game_id); //then game ends, call winning condition
                 return;
             }
             table.updateOpenCards();
@@ -274,16 +271,16 @@ public class GameService {
     }
 
 
-    public boolean playersfolded(Game game) {
+    public boolean playersFinished(Game game) {
         List<Player> players = game.getPlayers();
-        int foldedPlayersCount = 0; // Initialize counter for folded players
+        int finishedPlayersCount = 0; // Initialize counter for folded players
 
         for (Player player : players) {
-            if (player.isFolded()) {
-                foldedPlayersCount++;
+            if (player.isFolded() || player.isAllIn()) {
+                finishedPlayersCount++;
             }
         }
-        return (foldedPlayersCount == (players.size() - 1));
+        return (finishedPlayersCount == (players.size() - 1));
     }
 
 
@@ -331,54 +328,58 @@ public class GameService {
         scheduledGameDelete.scheduleGameDeletion(game, time);
     }
 
-
-    public void endGame(long game_id, List<PlayerHand> winners) {
+    public void endGame(long game_id) {
         Game game = gameRepository.findById(game_id);
         GameTable table = game.getGameTable();
         User user;
-        boolean updated;
+        List<PlayerHand> overallWinner = new ArrayList<>();
 
-        //update user money
-        for (Player player : game.getPlayers()) {
+        //in case game finishes before all cards are opened
+        table.updateOpenCards();
+        table.updateOpenCards();
+
+        //return unused money
+        for(Player player : game.getPlayers()) {
             user = userRepository.findByUsername(player.getUsername());
-            updated = false;
+            user.setMoney(player.getMoney());
+        }
 
-            //check if player is a winner, update money in that case
-            for (PlayerHand winner : winners) {
-                if (player == winner.getPlayer()) {
-                    //divide the pot between the winners, the result is rounded up
-                    int reward = (int) Math.ceil((double) table.getMoney() / winners.size());
+        //split the pots among the winners
+        for(Pot pot : table.getPots()){
+            List<PlayerHand> winners = winningCondition(pot);
 
-                    user.updateMoney(player.getMoney() + reward);
-                    updated = true;
-                    break;
-                }
+            //this is to evaluate the best hand
+            if(Objects.equals(pot.getName(), "mainPot")){
+                overallWinner = winners;
             }
 
-            //otherwise simply return unused money
-            if (!updated) {
-                user.updateMoney(player.getMoney());
+            for (PlayerHand winner : winners) {
+                user = userRepository.findByUsername(winner.getPlayer().getUsername());
+                int reward = (int) Math.ceil((double) pot.getMoney() / winners.size());
+                user.setMoney(reward + user.getMoney());
             }
         }
 
+        //update user tries
+        for(Player player : game.getPlayers()) {
+            user = userRepository.findByUsername(player.getUsername());
+            user.updateUser();
+        }
 
         //set winning player, name and cards of winning hand and then flag game as finished
-        game.setWinner(winners);
+        game.setWinner(overallWinner);
         game.setGameFinished(true);
-
         deleteGame(game, 10);
     }
 
 
-    public void winningCondition(long game_id) {
-        Game game = gameRepository.findById(game_id);
-        GameTable table = game.getGameTable();
-
+    public List<PlayerHand> winningCondition(Pot pot) {
+        GameTable table = pot.getGameTable();
         //has to be list to accommodate for potential draws
         List<PlayerHand> winner = new ArrayList<>();
 
         //find the best hand
-        for (Player player : game.getPlayers()) {
+        for (Player player : pot.getEligiblePlayers()) {
 
             //ignore folded players
             if (player.isFolded()) {
@@ -417,7 +418,7 @@ public class GameService {
                 }
             }
         }
-        endGame(game_id, winner);
+        return winner;
     }
 
 
