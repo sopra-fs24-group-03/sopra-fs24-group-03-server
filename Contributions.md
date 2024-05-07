@@ -26,3 +26,10 @@
 - Noah Ziegler: Worked ahead from last week
 
 ## Milestone 4
+### Week 29.04-05.05
+Week 29.04-05.05
+Joel Huber: Implement that lobby leader can kick players #178, #70, #71, #72
+Cédric Huber:
+Linus Lautenschlager:
+Colin Bächtold:
+Noah Ziegler:
