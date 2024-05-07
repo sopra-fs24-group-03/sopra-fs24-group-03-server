@@ -27,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ch.uzh.ifi.hase.soprafs24.constant.Moves.*;
@@ -210,10 +211,9 @@ public class GameService {
         Game game = gameRepository.findById(game_id);
         GameTable table = game.getGameTable();
         String nextPlayerUsername = game.getPlayers().get(game.getPlayerTurnIndex()).getUsername();
+        List<Player> players = game.getPlayers();
 
-        //TODO POTS VS MONEY
         if (bet > 0) {
-            table.updateMoney(bet);
             table.getPotByName("mainPot").updateMoney(bet);
         }
 
@@ -228,6 +228,12 @@ public class GameService {
         //check if current betting round is finished
         if ((game.getRaisePlayer() != null && Objects.equals(game.getRaisePlayer().getUsername(), nextPlayerUsername))) {
             //TODO add function call for creating pots here
+            List<Player> allInPlayers = filterPlayersAllIn(players);
+            List<Player> notFoldedPlayers = filterPlayersNotFolded(players);
+
+            if (!allInPlayers.isEmpty()) {
+                calculatePots(allInPlayers, notFoldedPlayers, table.getTotalTableBettingInCurrentRound());
+            }
 
             //reset betting to 0 after a betting round
             game.setBet(0);
@@ -274,6 +280,34 @@ public class GameService {
     }
 
 
+    public List<Player> filterPlayersAllIn(List<Player> players) {
+        List<Player> qualifiedPlayers = new ArrayList<>();
+
+        for (Player player : players) {
+            if (player.isAllIn() && player.getTotalBettingInCurrentRound() != 0) {
+                qualifiedPlayers.add(player);
+            }
+        }
+
+        return  qualifiedPlayers;
+    }
+    public List<Player> filterPlayersNotFolded(List<Player> players) {
+        List<Player> qualifiedPlayers = new ArrayList<>();
+
+        for (Player player : players) {
+            if (!player.isFolded()) {
+                qualifiedPlayers.add(player);
+            }
+        }
+
+        return qualifiedPlayers;
+    }
+    public void calculatePots(List<Player> allInPlayersOrdered, List<Player> allNotFoldedPlayers, int totalBetting){
+
+        for (Player player : allInPlayersOrdered) {
+            System.out.println("Username: " + player.getUsername() + ", Total Betting: " + player.getTotalBettingInCurrentRound());
+        }
+    }
     public boolean playersfolded(Game game) {
         List<Player> players = game.getPlayers();
         int foldedPlayersCount = 0; // Initialize counter for folded players
@@ -347,7 +381,7 @@ public class GameService {
             for (PlayerHand winner : winners) {
                 if (player == winner.getPlayer()) {
                     //divide the pot between the winners, the result is rounded up
-                    int reward = (int) Math.ceil((double) table.getMoney() / winners.size());
+                    int reward = (int) Math.ceil((double) table.getPotByName("mainPot").getMoney() / winners.size());
 
                     user.updateMoney(player.getMoney() + reward);
                     updated = true;

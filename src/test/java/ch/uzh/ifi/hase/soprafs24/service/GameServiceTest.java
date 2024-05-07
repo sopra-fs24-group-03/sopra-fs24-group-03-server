@@ -314,7 +314,7 @@ public class GameServiceTest {
 
         gameService.updateGame(gameId, betAmount);
 
-        Mockito.verify(table, Mockito.times(1)).updateMoney(betAmount); // Check if table.updateMoney was called with the correct amount
+        Mockito.verify(table.getPotByName("mainPot"), Mockito.times(1)).updateMoney(betAmount); // Check if table.updateMoney was called with the correct amount
     }
 
 
@@ -533,6 +533,7 @@ public class GameServiceTest {
         Mockito.when(game.getGameTable()).thenReturn(table);
         Mockito.when(game.getPlayers()).thenReturn(players);
         Mockito.doNothing().when(game).setWinner(Mockito.any());
+        Mockito.when(table.getPotByName("mainPot")).thenReturn(pot);
 
         //player
         Mockito.when(players.get(0).getUsername()).thenReturn("user1");
@@ -541,7 +542,7 @@ public class GameServiceTest {
         Mockito.when(players.get(1).getMoney()).thenReturn(500);
 
         //table
-        Mockito.when(table.getMoney()).thenReturn(1000);
+        Mockito.when(table.getPotByName("mainPot").getMoney()).thenReturn(1000);
 
         //PlayerHand
         Mockito.when(winner.get(0).getPlayer()).thenReturn(players.get(0));
@@ -591,6 +592,7 @@ public class GameServiceTest {
         Mockito.when(game.getGameTable()).thenReturn(table);
         Mockito.when(game.getPlayers()).thenReturn(players);
         Mockito.doNothing().when(game).setWinner(Mockito.any());
+        Mockito.when(table.getPotByName("mainPot")).thenReturn(pot);
 
         //player
         Mockito.when(players.get(0).getUsername()).thenReturn("user1");
@@ -599,7 +601,7 @@ public class GameServiceTest {
         Mockito.when(players.get(1).getMoney()).thenReturn(50);
 
         //table
-        Mockito.when(table.getMoney()).thenReturn(1000);
+        Mockito.when(table.getPotByName("mainPot").getMoney()).thenReturn(1000);
 
         //PlayerHand
         Mockito.when(winner.get(0).getPlayer()).thenReturn(players.get(0));
@@ -666,9 +668,9 @@ public class GameServiceTest {
         Mockito.when(players.get(0).getMoney()).thenReturn(1000);
         Mockito.when(players.get(1).getMoney()).thenReturn(50);
         Mockito.when(players.get(2).getMoney()).thenReturn(1000);
-
+        Mockito.when(table.getPotByName("mainPot")).thenReturn(pot);
         //table
-        Mockito.when(table.getMoney()).thenReturn(999);
+        Mockito.when(table.getPotByName("mainPot").getMoney()).thenReturn(1000);
 
         //PlayerHand
         Mockito.when(winner.get(0).getPlayer()).thenReturn(players.get(0));

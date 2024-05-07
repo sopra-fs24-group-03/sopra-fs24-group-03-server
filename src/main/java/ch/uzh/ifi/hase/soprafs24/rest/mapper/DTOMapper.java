@@ -103,7 +103,7 @@ public interface DTOMapper {
 
     @Mapping(source = "openCards", target = "openCardsImage")
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "money", target = "money")
+    @Mapping(source = "pots", target = "pots")
     TablePublicGetDTO converEntityToTablePublicGetDTO(GameTable gameTable);
 
 }
