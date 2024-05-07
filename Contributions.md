@@ -30,7 +30,7 @@
 - Joel Huber: Implement that lobby leader can kick players #178, #70, #71, #72
 - Cédric Huber: 
 - Linus Lautenschlager:  
-- Colin Bächtold: 
+- Colin Bächtold: Adjusted endGame method to allow draws, fixed Money update of user at the end of a game: #173, #185, #186
 - Noah Ziegler: Big blind can play another move in first betting round, BB and SB rotate, fixed bug: #206, #207, #189
 ### Week 6.05-12.05
 - Joel Huber: 
