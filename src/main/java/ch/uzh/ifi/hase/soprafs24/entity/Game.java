@@ -209,9 +209,8 @@ public class Game implements Serializable {
         bigBlindPlayer.setTotalBettingInCurrentRound(bigBlind);
         this.setBet(bigBlind);
 
-        //TODO POTS VS MONEY
+
         this.gameTable.getPotByName("mainPot").setMoney(smallBlind+bigBlind);
-        this.gameTable.setMoney(smallBlind+bigBlind);
         this.gameTable.setTotalTableBettingInCurrentRound(smallBlind+bigBlind);
 
         setsNextPlayerTurnIndex();

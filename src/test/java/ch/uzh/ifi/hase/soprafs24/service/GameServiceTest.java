@@ -311,7 +311,7 @@ public class GameServiceTest {
 
         gameService.updateGame(gameId, betAmount);
 
-        Mockito.verify(table, Mockito.times(1)).updateMoney(betAmount); // Check if table.updateMoney was called with the correct amount
+        Mockito.verify(table.getPotByName("mainPot"), Mockito.times(1)).updateMoney(betAmount); // Check if table.updateMoney was called with the correct amount
     }
 
 

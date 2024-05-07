@@ -12,8 +12,7 @@ import java.util.List;
 @Entity
 @Table(name = "GAMETABLE")
 public class GameTable implements Serializable {
-    @Column
-    private int Money;
+
     @Column
     private int totalTableBettingInCurrentRound;
 
@@ -49,7 +48,6 @@ public class GameTable implements Serializable {
         this.cards = cards;
         cards.forEach(card -> card.setGameTable(this));
         setCards(cards);
-        Money = 0;
 
         Pot mainPot = new Pot(0, "mainPot");
         mainPot.setGameTable(this);
@@ -61,17 +59,7 @@ public class GameTable implements Serializable {
     }
 
 
-    public void updateMoney(int amount) {
-        Money += amount;
-    }
 
-    public int getMoney() {
-        return Money;
-    }
-
-    public void setMoney(int money) {
-        Money = money;
-    }
 
     public List<Card> getCards() {
         return cards;

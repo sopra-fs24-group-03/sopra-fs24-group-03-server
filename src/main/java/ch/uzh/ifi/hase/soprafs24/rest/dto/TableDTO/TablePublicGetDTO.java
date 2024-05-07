@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto.TableDTO;
 
 import ch.uzh.ifi.hase.soprafs24.constant.Moves;
+import ch.uzh.ifi.hase.soprafs24.entity.Pot;
 import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 
 import javax.persistence.Column;
@@ -8,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TablePublicGetDTO {
-    private int money;
+    private List<Pot> pots = new ArrayList<>();
 
     private Long id;
 
@@ -21,12 +22,12 @@ public class TablePublicGetDTO {
 
     private int lastMoveAmount;
 
-    public int getMoney() {
-        return money;
+    public List<Pot> getPots() {
+        return pots;
     }
 
-    public void setMoney(int money) {
-        this.money = money;
+    public void setPots(List<Pot> pots) {
+        this.pots = pots;
     }
 
     public Long getId() {
