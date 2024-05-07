@@ -28,7 +28,7 @@
 ## Milestone 4
 ### Week 29.04-05.05
 - Joel Huber: Implement that lobby leader can kick players #178, #70, #71, #72
-- Cédric Huber: 
+- Cédric Huber: Impelement hands for winning condition #171, #172, #174, #175
 - Linus Lautenschlager:  
 - Colin Bächtold: 
 - Noah Ziegler: Big blind can play another move in first betting round, BB and SB rotate, fixed bug: #206, #207, #189
