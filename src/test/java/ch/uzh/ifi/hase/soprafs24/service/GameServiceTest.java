@@ -302,7 +302,7 @@ public class GameServiceTest {
         Mockito.when(game.getPlayers()).thenReturn(players);
         Mockito.when(game.getPlayerTurnIndex()).thenReturn(0);
         Mockito.when(currentPlayer.getUsername()).thenReturn("username");
-        Mockito.when(gameService.playersFinished(game)).thenReturn(false);
+        Mockito.when(gameService.playersFolded(game)).thenReturn(false);
         Mockito.when(table.getPotByName("mainPot")).thenReturn(pot);
 
 
