@@ -237,10 +237,11 @@ public class GameService {
         //check if current betting round is finished
         if ((game.getRaisePlayer() != null && Objects.equals(game.getRaisePlayer().getUsername(), nextPlayerUsername))) {
             List<Player> allInPlayers = filterPlayersAllIn(players);
+            players.sort(Comparator.comparing(Player::getTotalBettingInCurrentRound));
             List<Player> notFoldedPlayers = filterPlayersNotFolded(players);
 
             if (!allInPlayers.isEmpty()) {
-                calculatePots(allInPlayers, notFoldedPlayers, table.getTotalTableBettingInCurrentRound());
+                calculatePots(game,allInPlayers, notFoldedPlayers, table.getTotalTableBettingInCurrentRound());
             }
 
             //reset betting to 0 after a betting round
@@ -310,6 +311,7 @@ public class GameService {
 
         return qualifiedPlayers;
     }
+
     public boolean playersAllIn (List<Player> notFoldedPlayers){
         int finishedPlayersCount = 0; // Initialize counter for folded players
 
@@ -321,8 +323,38 @@ public class GameService {
         return (finishedPlayersCount >= (notFoldedPlayers.size() - 1));
 
     }
-    public void calculatePots(List<Player> allInPlayersOrdered, List<Player> allNotFoldedPlayers, int totalBetting){
 
+    public void calculatePots(Game game, List<Player> allInPlayersOrdered, List<Player> allNotFoldedPlayers, int totalBetting){
+        int amountOfMinimumAllIn = 0;
+        int amountForPreviousPot = 0;
+        int potNumber = 1;
+        int money = 0;
+        int numberOfPlayers = allNotFoldedPlayers.size();
+        List<Pot> newSidePots = new ArrayList<>();
+        for (Player player: allInPlayersOrdered){
+            if(amountOfMinimumAllIn == player.getTotalBettingInCurrentRound()){
+                numberOfPlayers -= 1;
+                continue;
+            }
+            amountOfMinimumAllIn = player.getTotalBettingInCurrentRound();
+            money = (player.getTotalBettingInCurrentRound() - amountForPreviousPot) * numberOfPlayers ;
+            amountForPreviousPot = amountOfMinimumAllIn;
+            numberOfPlayers -= 1;
+            String name = "sidepot" + potNumber;
+            Pot sidepot = new Pot(money, name);
+            newSidePots.add(sidepot);
+        }
+        List<Pot> oldPots = game.getGameTable().getPots();
+        for (Pot sidePot : newSidePots){
+            oldPots.add(sidePot);
+        }
+        Pot mainPot = oldPots.get(0);
+        int mainMoney = mainPot.getMoney();
+        for (Pot pot : newSidePots){
+            totalBetting -= pot.getMoney();
+        }
+        mainMoney += totalBetting;
+        mainPot.setMoney(mainMoney);
         for (Player player : allInPlayersOrdered) {
             System.out.println("Username: " + player.getUsername() + ", Total Betting: " + player.getTotalBettingInCurrentRound());
         }
