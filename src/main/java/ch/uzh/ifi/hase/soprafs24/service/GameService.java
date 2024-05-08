@@ -113,7 +113,7 @@ public class GameService {
                 yield 0;
             }
             case Raise -> {
-                if (player.getMoney() < move.getAmount() + player.getLastRaiseAmount()) {
+                if (player.getMoney() < move.getAmount() - player.getLastRaiseAmount()) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot bet more money than you have!");
                 }
                 //if raise is legal, update the order and current bet and call raise
@@ -135,6 +135,9 @@ public class GameService {
                     //if he went all in
                     if(player.getMoney() == 0){
                         player.setAllIn(true);
+                        if (game.getRaisePlayer() == player) {
+                            game.setRaisePlayer(null);
+                        }
                     }
 
                     yield moneyLost; //return bet amount
@@ -172,6 +175,10 @@ public class GameService {
 
                     gameTable.setTotalTableBettingInCurrentRound(gameTable.getTotalTableBettingInCurrentRound() +playerMoney);
                     player.setTotalBettingInCurrentRound(player.getTotalBettingInCurrentRound() + playerMoney);
+
+                    if (game.getRaisePlayer() == player) {
+                        game.setRaisePlayer(null);
+                    }
                     yield playerMoney;
 
 
@@ -215,16 +222,20 @@ public class GameService {
         }
 
         //check if all players except 1 folded
-        //TODO same for when all except 1 players are all in (but other player still has to say if he folds or if he calls)
-        if (playersFinished(game)) {
+        if (playersFolded(game)) {
             endGame(game_id); //then game ends, call winning condition
             return;
-
         }
+        //checks if ALL players are folded OR all In --> end game
+        if (playersFoldedOrAllIn(game)) {
+            endGame(game_id); //then game ends, call winning condition
+            return;
+        }
+
+
 
         //check if current betting round is finished
         if ((game.getRaisePlayer() != null && Objects.equals(game.getRaisePlayer().getUsername(), nextPlayerUsername))) {
-            //TODO add function call for creating pots here
             List<Player> allInPlayers = filterPlayersAllIn(players);
             List<Player> notFoldedPlayers = filterPlayersNotFolded(players);
 
@@ -241,7 +252,7 @@ public class GameService {
             }
 
             //check if final round to end game
-            if (table.getOpenCards().size() == 5) {
+            if (table.getOpenCards().size() == 5 || playersAllIn(notFoldedPlayers)) {
                 endGame(game_id); //then game ends, call winning condition
                 return;
             }
@@ -299,13 +310,35 @@ public class GameService {
 
         return qualifiedPlayers;
     }
+    public boolean playersAllIn (List<Player> notFoldedPlayers){
+        int finishedPlayersCount = 0; // Initialize counter for folded players
+
+        for (Player player : notFoldedPlayers) {
+            if (player.isAllIn()) {
+                finishedPlayersCount++;
+            }
+        }
+        return (finishedPlayersCount >= (notFoldedPlayers.size() - 1));
+
+    }
     public void calculatePots(List<Player> allInPlayersOrdered, List<Player> allNotFoldedPlayers, int totalBetting){
 
         for (Player player : allInPlayersOrdered) {
             System.out.println("Username: " + player.getUsername() + ", Total Betting: " + player.getTotalBettingInCurrentRound());
         }
     }
-    public boolean playersFinished(Game game) {
+    public boolean playersFolded(Game game) {
+        List<Player> players = game.getPlayers();
+        int finishedPlayersCount = 0; // Initialize counter for folded players
+
+        for (Player player : players) {
+            if (player.isFolded()) {
+                finishedPlayersCount++;
+            }
+        }
+        return (finishedPlayersCount == (players.size() - 1));
+    }
+    public boolean playersFoldedOrAllIn(Game game) {
         List<Player> players = game.getPlayers();
         int finishedPlayersCount = 0; // Initialize counter for folded players
 
@@ -314,7 +347,7 @@ public class GameService {
                 finishedPlayersCount++;
             }
         }
-        return (finishedPlayersCount == (players.size() - 1));
+        return (finishedPlayersCount == (players.size()));
     }
 
 
@@ -368,9 +401,7 @@ public class GameService {
         User user;
         List<PlayerHand> overallWinner = new ArrayList<>();
 
-        //in case game finishes before all cards are opened
-        table.updateOpenCards();
-        table.updateOpenCards();
+
 
         //return unused money
         for(Player player : game.getPlayers()) {
