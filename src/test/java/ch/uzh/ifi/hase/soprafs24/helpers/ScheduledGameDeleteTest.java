@@ -28,7 +28,7 @@ public class ScheduledGameDeleteTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
     }
-
+    @Test
     void testDeleteGame() {
         // Given
         Game mockGame = mock(Game.class);

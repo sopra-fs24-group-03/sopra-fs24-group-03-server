@@ -1,23 +1,33 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto.TableDTO;
 
+import ch.uzh.ifi.hase.soprafs24.constant.Moves;
+import ch.uzh.ifi.hase.soprafs24.entity.Pot;
 import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 
+import javax.persistence.Column;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TablePublicGetDTO {
-    private int money;
+    private List<Pot> pots = new ArrayList<>();
 
     private Long id;
 
     private List<String> openCardsImage = new ArrayList<>();
 
-    public int getMoney() {
-        return money;
+    private long playerIdOfLastMove;
+
+
+    private Moves lastMove;
+
+    private int lastMoveAmount;
+
+    public List<Pot> getPots() {
+        return pots;
     }
 
-    public void setMoney(int money) {
-        this.money = money;
+    public void setPots(List<Pot> pots) {
+        this.pots = pots;
     }
 
     public Long getId() {
@@ -37,6 +47,28 @@ public class TablePublicGetDTO {
             this.openCardsImage.add(card.getImage());
         }
     }
+    public int getLastMoveAmount() {
+        return lastMoveAmount;
+    }
 
+    public void setLastMoveAmount(int lastMoveAmount) {
+        this.lastMoveAmount = lastMoveAmount;
+    }
+
+    public long getPlayerIdOfLastMove() {
+        return playerIdOfLastMove;
+    }
+
+    public void setPlayerIdOfLastMove(long playerIdOfLastMove) {
+        this.playerIdOfLastMove = playerIdOfLastMove;
+    }
+
+    public Moves getLastMove() {
+        return lastMove;
+    }
+
+    public void setLastMove(Moves lastMove) {
+        this.lastMove = lastMove;
+    }
 
 }

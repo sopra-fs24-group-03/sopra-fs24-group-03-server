@@ -4,6 +4,7 @@ package ch.uzh.ifi.hase.soprafs24.entity;
 import ch.uzh.ifi.hase.soprafs24.constant.Hand;
 import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 import ch.uzh.ifi.hase.soprafs24.helpers.DeckOfCardsApi;
+import ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
@@ -36,6 +37,9 @@ public class Game implements Serializable {
         // create Table and give five cards
         this.gameTable = new GameTable(cardsApi.drawCards(deckId, 5));
         this.smallBlindPlayer = players.get(0);
+        this.gameTable.getPotByName("mainPot").setEligiblePlayers(this.players);
+
+        setUpBlinds();
 
     }
 
@@ -71,9 +75,9 @@ public class Game implements Serializable {
     @JoinColumn(name = "smallBlindPlayer_id", referencedColumnName = "id")
     private Player smallBlindPlayer;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "winner_id", referencedColumnName = "id")
-    private Player winner;
+    private List<Player> winner = null;
 
     @Id
     @Column(unique = true, nullable = false)
@@ -83,7 +87,7 @@ public class Game implements Serializable {
         int numberOfPlayers = players.size();
         for (int i = 0; i < numberOfPlayers; i++) {
             this.playerTurnIndex = (this.playerTurnIndex + 1) % numberOfPlayers;
-            if (!players.get(playerTurnIndex).isFolded()) {
+            if (!players.get(playerTurnIndex).isFolded() && !players.get(playerTurnIndex).isAllIn()) {
                 break;
             }
         }
@@ -106,6 +110,14 @@ public class Game implements Serializable {
         }
         //if player folded
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You are not part of this game!");
+    }
+
+    public void setWinner(List<PlayerHand> winningHands) {
+        this.handName = winningHands.get(0).getHand();
+        this.handCards = winningHands.get(0).getCards();
+        for (PlayerHand playerHand : winningHands) {
+            this.winner.add(playerHand.getPlayer());
+        }
     }
 
 
@@ -169,12 +181,8 @@ public class Game implements Serializable {
         this.gameFinished = gameFinished;
     }
 
-    public Player getWinner() {
+    public List<Player> getWinner() {
         return winner;
-    }
-
-    public void setWinner(Player winner) {
-        this.winner = winner;
     }
 
     public Player getSmallBlindPlayer() {
@@ -183,5 +191,30 @@ public class Game implements Serializable {
 
     public void setSmallBlindPlayer(Player smallBlindPlayer) {
         this.smallBlindPlayer = smallBlindPlayer;
+    }
+    private void setUpBlinds(){
+        // Set blinds
+        int smallBlind = 25;
+        int bigBlind = 50;
+
+        // Assume players are in order and rotate as per game rounds
+        Player smallBlindPlayer = players.get(0);
+        Player bigBlindPlayer = players.get(1);
+
+        smallBlindPlayer.setMoney(smallBlindPlayer.getMoney()-smallBlind);
+        smallBlindPlayer.setLastRaiseAmount(smallBlind);
+        smallBlindPlayer.setTotalBettingInCurrentRound(smallBlind);
+        bigBlindPlayer.setMoney(bigBlindPlayer.getMoney()-bigBlind);
+        bigBlindPlayer.setLastRaiseAmount(bigBlind);
+        bigBlindPlayer.setTotalBettingInCurrentRound(bigBlind);
+        this.setBet(bigBlind);
+
+
+        this.gameTable.getPotByName("mainPot").setMoney(smallBlind+bigBlind);
+        this.gameTable.setTotalTableBettingInCurrentRound(smallBlind+bigBlind);
+
+        setsNextPlayerTurnIndex();
+        setsNextPlayerTurnIndex();
+
     }
 }

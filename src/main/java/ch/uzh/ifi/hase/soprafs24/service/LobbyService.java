@@ -17,6 +17,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Objects;
 
+import static java.util.Collections.rotate;
+
 
 @Service
 @Transactional
@@ -131,28 +133,14 @@ public class LobbyService {
         if (lobby.getGame() != null) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "lobby already has running game!");
         }
-
-        //Iterate over all users, check cash, then add username and money to player hashmap
-        lobby.getLobbyusers().forEach((user) -> {
-
-
-            // Otherwise remove user, if user is leader throw exception, else continue starting game
-            if (!checkCash(user)) {
-                updateLoss(user);
-
-                // If user is lobby leader, exception is thrown and game start is cancelled
-                if (lobby.getLobbyLeader() == user) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "could not start game, lobby leader has insufficient money!");
-                }
-
-                //remove user  (might not be necessary, could also just update and continue, might change later)
-                removeUserFromLobby(user.getToken());
-            }
-        });
         List<User> users = lobby.getLobbyusers();
 
         //checks for enough users
         if (users.size() >= 2) {
+            //rotate the lobbylist by correct amount so that SB and BB players change
+            rotate(users, -lobby.getIndexStartingPlayer());
+            lobby.setIndexStartingPlayer(lobby.getIndexStartingPlayer()+1);
+
             Game game = new Game(users);
             lobby.setGame(game);
             game.setId(lobby.getId());
@@ -160,18 +148,10 @@ public class LobbyService {
             log.info("created game {}", game);
             lobbyRepository.save(lobby);
             lobbyRepository.flush();
-            gameService.initializeBlinds(game);
             return game;
         }
         else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough players");
 
-    }
-
-
-    //Updates user Money
-    private void updateLoss(User user) {
-        user.setTries(user.getTries() + 1);
-        user.setMoney(2000);
     }
 
     //Check if provided token belongs to lobby leader, throws exception if not, does nothing otherwise.
@@ -184,18 +164,32 @@ public class LobbyService {
         }
     }
 
-    //checks for Cash, return bool
-    private boolean checkCash(User user) {
-        return user.getMoney() >= 100;
-    }
 
     //returns requested lobby, if lobby doesn't exist throws exception
-    private Lobby findLobby(long lobbyId) {
+    public Lobby findLobby(long lobbyId) {
         Lobby lobby = lobbyRepository.findById(lobbyId);
         if (lobby == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unknown lobby");
         }
         return lobby;
+    }
+
+    public void kickUserOutOfLobby(String tokenOfDeleter, long kickedUserId, long lobbyId) {
+        Lobby lobby = findLobby(lobbyId);
+        // checks if the player who wants to delete someone is the Lobbyleader
+        if(userService.getUserByToken(tokenOfDeleter).equals(lobby.getLobbyLeader())) {
+            if(userService.getUserByToken(tokenOfDeleter) == userService.getUserById(kickedUserId)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can not kick yourself");
+            }
+            // not sure if this remove the user from jpa
+            User userToKick = userService.getUserById(kickedUserId);
+            userToKick.setLobby(null);
+            lobby.removeUserFromLobby(userToKick);
+//            lobbyRepository.flush();
+        }
+        else {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the lobby leader can kick other players");
+        }
     }
 
 

@@ -49,6 +49,16 @@ public class User implements Serializable {
     @Column(nullable = false)
     private UserStatus status;
 
+
+    //update the users money and if necessary their tries
+    public void updateUser(){
+        if (this.money < 100){
+            this.tries += 1;
+            this.money = 2000;
+        }
+    }
+
+
     public Long getId() {
         return id;
     }

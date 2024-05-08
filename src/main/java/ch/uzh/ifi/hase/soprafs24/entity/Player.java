@@ -4,6 +4,7 @@ import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -32,12 +33,21 @@ public class Player {
     private int lastRaiseAmount;
     @Column
     private boolean folded;
+    @Column
+    private boolean AllIn;
+    @Column
+    private int totalBettingInCurrentRound;
+
 
 
     @JsonIgnore
     @ManyToOne()
     @JoinColumn(name = "game_id", referencedColumnName = "id")
     private Game game;
+    @JsonIgnore
+    @ManyToMany(mappedBy = "eligiblePlayers")
+    private List<Pot> pots = new ArrayList<>();
+
 
     public Player(Game game, String username, int money, String token, List<Card> cards) {
         this.game = game;
@@ -114,5 +124,29 @@ public class Player {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public boolean isAllIn() {
+        return AllIn;
+    }
+
+    public void setAllIn(boolean allIn) {
+        AllIn = allIn;
+    }
+
+    public int getTotalBettingInCurrentRound() {
+        return totalBettingInCurrentRound;
+    }
+
+    public void setTotalBettingInCurrentRound(int totalBettingInCurrentRound) {
+        this.totalBettingInCurrentRound = totalBettingInCurrentRound;
+    }
+
+    public List<Pot> getPots() {
+        return pots;
+    }
+
+    public void setPots(List<Pot> pots) {
+        this.pots = pots;
     }
 }

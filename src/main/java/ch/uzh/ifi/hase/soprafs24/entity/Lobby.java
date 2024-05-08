@@ -28,7 +28,10 @@ public class Lobby implements Serializable {
 
     @JsonIgnore //stop recursion
     @OneToMany(mappedBy = "lobby")
+    @OrderBy("id ASC")
     private List<User> lobbyusers = new ArrayList<>();
+    @Column
+    private int indexStartingPlayer = 0;
 
     @JsonIgnore //stop recursion
     @OneToOne
@@ -85,6 +88,13 @@ public class Lobby implements Serializable {
         Game game = new Game(users);
         this.game = game;
         return game;
+    }
+    public int getIndexStartingPlayer() {
+        return indexStartingPlayer;
+    }
+
+    public void setIndexStartingPlayer(int indexStartingPlayer) {
+        this.indexStartingPlayer = indexStartingPlayer;
     }
 
 }

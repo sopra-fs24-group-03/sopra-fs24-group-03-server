@@ -8,6 +8,7 @@ public class UserGetDTO {
     private String username;
     private UserStatus status;
 
+    private int tries;
     private int money;
 
     public Long getId() {
@@ -40,6 +41,14 @@ public class UserGetDTO {
 
     public void setMoney(int money) {
         this.money = money;
+    }
+
+    public int getTries() {
+        return tries;
+    }
+
+    public void setTries(int tries) {
+        this.tries = tries;
     }
 
 }
