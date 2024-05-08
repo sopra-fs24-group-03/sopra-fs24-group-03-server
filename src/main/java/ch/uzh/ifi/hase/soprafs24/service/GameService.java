@@ -14,6 +14,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GameGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GamePutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPrivateGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPublicGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PotDTO.PotPublicGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static ch.uzh.ifi.hase.soprafs24.constant.Moves.*;
@@ -39,6 +44,11 @@ public class GameService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final LobbyRepository lobbyRepository;
+
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> currentFoldTask;
+
+
 
 
     @Autowired
@@ -204,10 +214,13 @@ public class GameService {
 
         }
         game.setsNextPlayerTurnIndex();
+        List<Player> players = game.getPlayers();
+        int turn = game.getPlayerTurnIndex();
+        //startTimer(game_id, players.get(turn).getToken());
         return amount;
-
-
     }
+
+
 
 
     //updates game state (split from turn for easier testing)
@@ -603,6 +616,13 @@ public class GameService {
             gameToReturn.noWinner();
             gameToReturn.setNotFoldedPlayers(notFoldedPlayers);
         }
+    }
+    public List<PotPublicGetDTO> settingPotsInGameTable(List<Pot> pots) {
+        List<PotPublicGetDTO> potPublicGetDTO = new ArrayList<>();
+        for(Pot pot : pots) {
+            potPublicGetDTO.add(DTOMapper.INSTANCE.convertEntityToPotPublicGetDTO(pot));
+        }
+        return potPublicGetDTO;
     }
 }
 

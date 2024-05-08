@@ -2,6 +2,7 @@ package ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO;
 
 
 import ch.uzh.ifi.hase.soprafs24.entity.Game;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GameGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserGetDTO;
 
 import java.util.ArrayList;
@@ -22,13 +23,13 @@ public class LobbyGetDTO {
         this.id = id;
     }
 
-    private Game game;
+    private GameGetDTO game;
 
-    public Game getGame() {
+    public GameGetDTO getGame() {
         return game;
     }
 
-    public void setGame(Game game) {
+    public void setGame(GameGetDTO game) {
         this.game = game;
     }
 

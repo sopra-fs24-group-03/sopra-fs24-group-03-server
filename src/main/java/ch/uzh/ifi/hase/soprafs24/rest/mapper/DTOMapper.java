@@ -6,6 +6,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPrivateGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPublicGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO.LobbyGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO.LobbyGetDTOComplete;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PotDTO.PotPublicGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.TableDTO.TablePublicGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPostDTO;
@@ -103,7 +104,11 @@ public interface DTOMapper {
 
     @Mapping(source = "openCards", target = "openCardsImage")
     @Mapping(source = "id", target = "id")
-    @Mapping(source = "pots", target = "pots")
     TablePublicGetDTO converEntityToTablePublicGetDTO(GameTable gameTable);
+
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "money", target = "money")
+    @Mapping(source = "name", target = "name")
+    PotPublicGetDTO convertEntityToPotPublicGetDTO(Pot pot);
 
 }
