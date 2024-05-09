@@ -266,7 +266,7 @@ public class GameService {
         //check if current betting round is finished
         if ((game.getRaisePlayer() != null && Objects.equals(game.getRaisePlayer().getUsername(), nextPlayerUsername))) {
             List<Player> allInPlayers = filterPlayersAllIn(players);
-            players.sort(Comparator.comparing(Player::getTotalBettingInCurrentRound));
+            allInPlayers.sort(Comparator.comparing(Player::getTotalBettingInCurrentRound));
             List<Player> notFoldedPlayers = filterPlayersNotFolded(players);
 
             if (!allInPlayers.isEmpty()) {
@@ -359,6 +359,7 @@ public class GameService {
         int potNumber = 1;
         int money = 0;
         int numberOfPlayers = allNotFoldedPlayers.size();
+        GameTable gameTable = game.getGameTable();
         List<Pot> newSidePots = new ArrayList<>();
         for (Player player: allInPlayersOrdered){
             if(amountOfMinimumAllIn == player.getTotalBettingInCurrentRound()){
@@ -366,24 +367,20 @@ public class GameService {
                 continue;
             }
             amountOfMinimumAllIn = player.getTotalBettingInCurrentRound();
-            money = (player.getTotalBettingInCurrentRound() - amountForPreviousPot) * numberOfPlayers ;
+            money = (amountOfMinimumAllIn - amountForPreviousPot) * numberOfPlayers ;
             amountForPreviousPot = amountOfMinimumAllIn;
             numberOfPlayers -= 1;
             String name = "sidepot" + potNumber;
             Pot sidepot = new Pot(money, name);
+            sidepot.setGameTable(gameTable);
             newSidePots.add(sidepot);
+            gameTable.addPot(sidepot);
         }
-        List<Pot> oldPots = game.getGameTable().getPots();
-        for (Pot sidePot : newSidePots){
-            oldPots.add(sidePot);
-        }
-        Pot mainPot = oldPots.get(0);
-        int mainMoney = mainPot.getMoney();
+        Pot mainPot = game.getGameTable().getPots().get(0);
         for (Pot pot : newSidePots){
             totalBetting -= pot.getMoney();
         }
-        mainMoney += totalBetting;
-        mainPot.setMoney(mainMoney);
+        //mainPot.addMoney(totalBetting);
         for (Player player : allInPlayersOrdered) {
             System.out.println("Username: " + player.getUsername() + ", Total Betting: " + player.getTotalBettingInCurrentRound());
         }

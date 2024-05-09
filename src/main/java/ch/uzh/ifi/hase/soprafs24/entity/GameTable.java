@@ -140,4 +140,8 @@ public class GameTable implements Serializable {
         }
         return null; // if no pot found
     }
+
+    public void addPot(Pot pot){
+            pots.add(pot);
+    }
 }
