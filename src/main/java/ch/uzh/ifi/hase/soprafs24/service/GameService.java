@@ -100,6 +100,7 @@ public class GameService {
     }
 
     //method to make moves
+    @Transactional
     public int turn(GamePutDTO move, long game_id, String token) {
         String username = userRepository.findByToken(token).getUsername();
         Game game = gameRepository.findById(game_id);
@@ -119,6 +120,8 @@ public class GameService {
                 if (game.getRaisePlayer() == player) {
                     game.setRaisePlayer(null);
                 }
+                gameRepository.save(game);
+                gameRepository.flush();
                 //no bet was made
                 yield 0;
             }
@@ -216,10 +219,23 @@ public class GameService {
         game.setsNextPlayerTurnIndex();
         List<Player> players = game.getPlayers();
         int turn = game.getPlayerTurnIndex();
-        //startTimer(game_id, players.get(turn).getToken());
+        startTimer(game_id, players.get(turn).getToken());
         return amount;
     }
 
+    public void startTimer(long game_id, String token) {
+        // Cancel the previous task if it exists
+        if (currentFoldTask != null && !currentFoldTask.isDone()) {
+            currentFoldTask.cancel(false);
+        }
+        GamePutDTO move = new GamePutDTO();
+        move.setMove(Moves.Fold);
+        Runnable foldTask = () -> {
+            int bet = turn(move, game_id, token);
+            updateGame(game_id, bet);
+        };
+        currentFoldTask = scheduler.schedule(foldTask, 200, TimeUnit.SECONDS);
+    }
 
 
 

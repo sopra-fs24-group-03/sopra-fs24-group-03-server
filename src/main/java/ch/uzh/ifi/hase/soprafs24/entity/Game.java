@@ -5,6 +5,7 @@ import ch.uzh.ifi.hase.soprafs24.constant.Hand;
 import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 import ch.uzh.ifi.hase.soprafs24.helpers.DeckOfCardsApi;
 import ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand;
+import ch.uzh.ifi.hase.soprafs24.service.GameService;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
@@ -217,6 +218,7 @@ public class Game implements Serializable {
 
         setsNextPlayerTurnIndex();
         setsNextPlayerTurnIndex();
+        //GameService.startTimer(this.id, this.players.get(this.playerTurnIndex).getToken());
 
     }
 }
