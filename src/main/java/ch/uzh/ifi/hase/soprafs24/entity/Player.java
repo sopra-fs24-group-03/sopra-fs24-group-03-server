@@ -158,4 +158,8 @@ public class Player {
     public void setProfit(int profit) {
         this.profit = profit;
     }
+
+    public boolean getFolded() {
+        return folded;
+    }
 }

@@ -39,6 +39,8 @@ public class GameTable implements Serializable {
     @OneToMany(mappedBy = "gameTable", cascade = CascadeType.ALL)
     private List<Pot> pots = new ArrayList<>();
 
+
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "gameTable_id_open") // Adjust the join column as needed
     private List<Card> openCards = new ArrayList<>();
@@ -67,6 +69,9 @@ public class GameTable implements Serializable {
 
     public List<Card> getOpenCards() {
         return openCards;
+    }
+    public void setOpenCards(List<Card> openCards) {
+        this.openCards = openCards;
     }
 
     public void updateOpenCards() {

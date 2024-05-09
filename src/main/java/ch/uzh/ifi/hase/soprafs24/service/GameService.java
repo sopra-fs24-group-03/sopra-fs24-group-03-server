@@ -100,7 +100,7 @@ public class GameService {
     }
 
     //method to make moves
-    @Transactional
+
     public int turn(GamePutDTO move, long game_id, String token) {
         String username = userRepository.findByToken(token).getUsername();
         Game game = gameRepository.findById(game_id);

@@ -15,6 +15,8 @@ public class PlayerPrivateGetDTO {
 
     private boolean turn;
 
+    private boolean AllIn;
+
     public Long getId() {
         return id;
     }
@@ -75,4 +77,17 @@ public class PlayerPrivateGetDTO {
     public void setProfit(int profit) {
         this.profit = profit;
     }
+
+    public boolean getFolded() {
+        return folded;
+    }
+
+    public boolean isAllIn() {
+        return AllIn;
+    }
+
+    public void setAllIn(boolean allIn) {
+        AllIn = allIn;
+    }
+
 }

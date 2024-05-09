@@ -9,6 +9,8 @@ public class PlayerPublicGetDTO {
     private boolean folded;
     private boolean turn;
 
+    private boolean AllIn;
+
     public long getId() {
         return id;
     }
@@ -47,6 +49,14 @@ public class PlayerPublicGetDTO {
 
     public void setTurn(boolean turn) {
         this.turn = turn;
+    }
+
+    public boolean isAllIn() {
+        return AllIn;
+    }
+
+    public void setAllIn(boolean allIn) {
+        AllIn = allIn;
     }
 }
 
