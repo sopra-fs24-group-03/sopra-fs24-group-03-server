@@ -28,7 +28,6 @@ public class Player {
     private List<Card> cards;
     @Column(nullable = false, unique = true)
     private String token;
-
     @Column
     private int lastRaiseAmount;
     @Column
@@ -37,6 +36,8 @@ public class Player {
     private boolean AllIn;
     @Column
     private int totalBettingInCurrentRound;
+    @Column
+    private int profit;
 
 
 
@@ -148,5 +149,13 @@ public class Player {
 
     public void setPots(List<Pot> pots) {
         this.pots = pots;
+    }
+
+    public int getProfit() {
+        return profit;
+    }
+
+    public void setProfit(int profit) {
+        this.profit = profit;
     }
 }

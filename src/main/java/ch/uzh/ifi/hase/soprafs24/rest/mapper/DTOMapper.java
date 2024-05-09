@@ -100,6 +100,7 @@ public interface DTOMapper {
     @Mapping(source = "username", target = "username")
     @Mapping(source = "folded", target = "folded")
     @Mapping(source = "cards", target = "cardsImage")
+    @Mapping(source = "profit", target = "profit")
     PlayerPrivateGetDTO convertEntityToPlayerPrivateDTO(Player player);
 
     @Mapping(source = "openCards", target = "openCardsImage")

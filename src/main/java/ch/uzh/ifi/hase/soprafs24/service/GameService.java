@@ -451,6 +451,9 @@ public class GameService {
         //return unused money
         for(Player player : game.getPlayers()) {
             user = userRepository.findByUsername(player.getUsername());
+
+            //set profit to send to frontend
+            player.setProfit(player.getMoney()-user.getMoney());
             user.setMoney(player.getMoney());
         }
 
@@ -466,6 +469,9 @@ public class GameService {
             for (PlayerHand winner : winners) {
                 user = userRepository.findByUsername(winner.getPlayer().getUsername());
                 int reward = (int) Math.ceil((double) pot.getMoney() / winners.size());
+
+                //add reward to profit
+                winner.getPlayer().setProfit(winner.getPlayer().getProfit() + reward);
                 user.setMoney(reward + user.getMoney());
             }
         }

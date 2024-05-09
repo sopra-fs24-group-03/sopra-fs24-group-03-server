@@ -9,6 +9,7 @@ public class PlayerPrivateGetDTO {
     private Long id;
     private String username;
     private int money;
+    private int profit;
     private List<String> cardsImage = new ArrayList<>();
     private boolean folded;
 
@@ -67,4 +68,11 @@ public class PlayerPrivateGetDTO {
         this.turn = turn;
     }
 
+    public int getProfit() {
+        return profit;
+    }
+
+    public void setProfit(int profit) {
+        this.profit = profit;
+    }
 }
