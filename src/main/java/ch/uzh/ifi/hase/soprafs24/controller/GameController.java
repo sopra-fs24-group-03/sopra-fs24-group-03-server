@@ -29,23 +29,21 @@ public class GameController {
     @GetMapping("/games/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public Game getGameById(@PathVariable long id, @RequestHeader String token) {
-        //get game
+    public GameGetDTO getGameById(@PathVariable long id, @RequestHeader String token) {
         Game game = gameService.getGameById(id, token);
-        return game;
-//        GameGetDTO gameToReturn = DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
-//        //getting ownPlayer and convert to privatPlayer and put in gametoreturn
-//        List<Player> players = game.getPlayers();
-//        List<Pot> pots = game.getGameTable().getPots();
-//        Player ownPlayer = gameService.getPlayerByToken(players, token);
-//        PlayerPrivateGetDTO privatePlayer = DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(ownPlayer);
-//        gameService.addFinishedGamePlayers(gameToReturn, game, players);
-//        gameToReturn.setPlayers(gameService.settingPlayerInGameGetDTO(game, players, privatePlayer));
-//        gameToReturn.setOwnPlayer(privatePlayer);
-//        TablePublicGetDTO gameTable = gameToReturn.getGameTable();
-//        gameTable.setPots(gameService.settingPotsInGameTable(pots));
-//        gameToReturn.setGameTable(gameTable);
-//        return gameToReturn;
+        GameGetDTO gameToReturn = DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
+       //getting ownPlayer and convert to privatPlayer and put in gametoreturn
+        List<Player> players = game.getPlayers();
+        List<Pot> pots = game.getGameTable().getPots();
+        Player ownPlayer = gameService.getPlayerByToken(players, token);
+        PlayerPrivateGetDTO privatePlayer = DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(ownPlayer);
+        gameService.addFinishedGamePlayers(gameToReturn, game, players);
+        gameToReturn.setPlayers(gameService.settingPlayerInGameGetDTO(game, players, privatePlayer));
+        gameToReturn.setOwnPlayer(privatePlayer);
+        TablePublicGetDTO gameTable = gameToReturn.getGameTable();
+        gameTable.setPots(gameService.settingPotsInGameTable(pots));
+        gameToReturn.setGameTable(gameTable);
+        return gameToReturn;
 
     }
 
