@@ -815,6 +815,8 @@ public class GameServiceTest {
         List<Card> cards = new ArrayList<>();
         cards.add(card);
         GameTable gameTable = new GameTable(cards);
+
+
         Mockito.when(game.getGameTable()).thenReturn(gameTable);
 
         // Create mock players
@@ -831,6 +833,8 @@ public class GameServiceTest {
         player4.setTotalBettingInCurrentRound(100);
         player4.setAllIn(false);
 
+
+
         List<Player> allInPlayersOrdered = new ArrayList<>();
         allInPlayersOrdered.add(player3);
         allInPlayersOrdered.add(player2);
@@ -841,9 +845,13 @@ public class GameServiceTest {
         allNotFoldedPlayers.add(player3);
         allNotFoldedPlayers.add(player4);
 
-        int totalBetting = 280;
+        List<Pot> pots = new ArrayList<>();
+        Pot mainPot = new Pot(0,"mainPot");
+        mainPot.setEligiblePlayers(allNotFoldedPlayers);
+        pots.add(mainPot);
+        gameTable.setPots(pots);
 
-        gameService.calculatePots(game, allInPlayersOrdered, allNotFoldedPlayers, totalBetting);
+        gameService.calculatePots(game, allInPlayersOrdered);
 
         assertEquals(3, gameTable.getPots().size());
         //assertEquals(100, gameTable.getPots().get(0).getMoney());
@@ -893,12 +901,18 @@ public class GameServiceTest {
         allNotFoldedPlayers.add(player5);
         allNotFoldedPlayers.add(player6);
 
-        int totalBetting = 950;
+        List<Pot> pots = new ArrayList<>();
+        Pot mainPot = new Pot(0,"mainPot");
+        mainPot.setEligiblePlayers(allNotFoldedPlayers);
+        mainPot.setMoney(950);
+        pots.add(mainPot);
+        gameTable.setPots(pots);
+        
 
-        gameService.calculatePots(game, allInPlayersOrdered, allNotFoldedPlayers, totalBetting);
+        gameService.calculatePots(game, allInPlayersOrdered);
 
         assertEquals(3, gameTable.getPots().size());
-        //assertEquals(150, gameTable.getPots().get(0).getMoney());
+        assertEquals(150, gameTable.getPots().get(0).getMoney());
         assertEquals(300, gameTable.getPots().get(1).getMoney());
         assertEquals(500, gameTable.getPots().get(2).getMoney());
     }

@@ -267,10 +267,9 @@ public class GameService {
         if ((game.getRaisePlayer() != null && Objects.equals(game.getRaisePlayer().getUsername(), nextPlayerUsername))) {
             List<Player> allInPlayers = filterPlayersAllIn(players);
             allInPlayers.sort(Comparator.comparing(Player::getTotalBettingInCurrentRound));
-            List<Player> notFoldedPlayers = filterPlayersNotFolded(players);
 
             if (!allInPlayers.isEmpty()) {
-                calculatePots(game,allInPlayers, notFoldedPlayers, table.getTotalTableBettingInCurrentRound());
+                calculatePots(game,allInPlayers);
             }
 
             //reset betting to 0 after a betting round
@@ -281,6 +280,7 @@ public class GameService {
                 player.setTotalBettingInCurrentRound(0);
             }
 
+            List<Player> notFoldedPlayers = filterPlayersNotFolded(players);
             //check if final round to end game
             if (table.getOpenCards().size() == 5 || playersAllIn(notFoldedPlayers)) {
                 endGame(game_id); //then game ends, call winning condition
@@ -353,38 +353,62 @@ public class GameService {
 
     }
 
-    public void calculatePots(Game game, List<Player> allInPlayersOrdered, List<Player> allNotFoldedPlayers, int totalBetting){
+    public void calculatePots(Game game, List<Player> allInPlayersOrdered){
         int amountOfMinimumAllIn = 0;
         int amountForPreviousPot = 0;
-        int potNumber = 1;
+        int totalMoneyInNewPots = 0;
         int money = 0;
-        int numberOfPlayers = allNotFoldedPlayers.size();
         GameTable gameTable = game.getGameTable();
+        Pot mainPot = gameTable.getPotByName("mainPot");
+        int numberOfMainPotPlayers = mainPot.getEligiblePlayers().size();
+        int potNumber = gameTable.getPots().size();
         List<Pot> newSidePots = new ArrayList<>();
+
+
+        //eligible players for sidepots
+        List<Player> eligiblePlayers = new ArrayList<>(mainPot.getEligiblePlayers());
+
         for (Player player: allInPlayersOrdered){
+
             if(amountOfMinimumAllIn == player.getTotalBettingInCurrentRound()){
-                numberOfPlayers -= 1;
+                numberOfMainPotPlayers -= 1;
                 continue;
             }
+
+
             amountOfMinimumAllIn = player.getTotalBettingInCurrentRound();
-            money = (amountOfMinimumAllIn - amountForPreviousPot) * numberOfPlayers ;
+            money = (amountOfMinimumAllIn - amountForPreviousPot) * numberOfMainPotPlayers ;
             amountForPreviousPot = amountOfMinimumAllIn;
-            numberOfPlayers -= 1;
+            numberOfMainPotPlayers -= 1;
             String name = "sidepot" + potNumber;
+            potNumber++;
             Pot sidepot = new Pot(money, name);
+
             sidepot.setGameTable(gameTable);
-            newSidePots.add(sidepot);
             gameTable.addPot(sidepot);
+            newSidePots.add(sidepot);
+
+
+            //set eligible players
+            sidepot.setEligiblePlayers(new ArrayList<>(eligiblePlayers));
+            eligiblePlayers.remove(player);
+
         }
-        Pot mainPot = game.getGameTable().getPots().get(0);
         for (Pot pot : newSidePots){
-            totalBetting -= pot.getMoney();
+            totalMoneyInNewPots += pot.getMoney();
         }
-        //mainPot.addMoney(totalBetting);
-        for (Player player : allInPlayersOrdered) {
-            System.out.println("Username: " + player.getUsername() + ", Total Betting: " + player.getTotalBettingInCurrentRound());
-        }
+        mainPot.setMoney(mainPot.getMoney()-totalMoneyInNewPots);
+
+
+        //set eligible players for main pot
+        List<Player> MainPotPlayers = new ArrayList<>(mainPot.getEligiblePlayers());
+        MainPotPlayers.removeAll(allInPlayersOrdered);
+        mainPot.setEligiblePlayers(new ArrayList<>(MainPotPlayers));
+
+
+
     }
+
     public boolean playersFolded(Game game) {
         List<Player> players = game.getPlayers();
         int finishedPlayersCount = 0; // Initialize counter for folded players
@@ -644,4 +668,3 @@ public class GameService {
         return potPublicGetDTO;
     }
 }
-
