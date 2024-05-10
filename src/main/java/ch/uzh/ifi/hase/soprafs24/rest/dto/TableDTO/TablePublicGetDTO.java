@@ -3,13 +3,14 @@ package ch.uzh.ifi.hase.soprafs24.rest.dto.TableDTO;
 import ch.uzh.ifi.hase.soprafs24.constant.Moves;
 import ch.uzh.ifi.hase.soprafs24.entity.Pot;
 import ch.uzh.ifi.hase.soprafs24.helpers.Card;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PotDTO.PotPublicGetDTO;
 
 import javax.persistence.Column;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TablePublicGetDTO {
-    private List<Pot> pots = new ArrayList<>();
+    private List<PotPublicGetDTO> pots = new ArrayList<>();
 
     private Long id;
 
@@ -22,11 +23,11 @@ public class TablePublicGetDTO {
 
     private int lastMoveAmount;
 
-    public List<Pot> getPots() {
+    public List<PotPublicGetDTO> getPots() {
         return pots;
     }
 
-    public void setPots(List<Pot> pots) {
+    public void setPots(List<PotPublicGetDTO> pots) {
         this.pots = pots;
     }
 

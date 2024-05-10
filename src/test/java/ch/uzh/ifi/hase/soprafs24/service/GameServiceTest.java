@@ -8,6 +8,7 @@ import ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand;
 import ch.uzh.ifi.hase.soprafs24.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GamePutDTO;
+import javassist.expr.NewArray;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
@@ -59,7 +60,7 @@ public class GameServiceTest {
     @Test
     public void turn_foldSuccess(){
         User user = new User();
-
+        //List<User> = new ArrayList<>()
         user.setUsername("username");
         List<Card> cards = new ArrayList<>(){{
             add(new Card("kS", "image"));
@@ -67,12 +68,23 @@ public class GameServiceTest {
             add(new Card("QS", "image"));
         }};
 
+        Game game = mock(Game.class);
+
+        Player player = new Player(game, "hans", 1, "t", cards);
+        player.setId(2L);
+        List<Player> players = new ArrayList<>();
+        players.add(player);
+
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
         Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
         Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
         Mockito.when(move.getMove()).thenReturn(Moves.Fold);
         Mockito.when(game.getGameTable()).thenReturn(table);
         Mockito.when(table.getOpenCards()).thenReturn(cards);
+        Mockito.when(game.getPlayers()).thenReturn(players);
+        Mockito.doNothing().when(gameService).startTimer(Mockito.anyLong(), Mockito.anyString());
+
+
 
 
         int bet = gameService.turn(move, 1, "token");
@@ -91,6 +103,12 @@ public class GameServiceTest {
             add(new Card("QS", "image"));
         }};
 
+        Player player1 = new Player(game, "hans", 1, "t", cards);
+        player1.setId(2L);
+        player1.setLastRaiseAmount(1);
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+
 
 
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
@@ -103,6 +121,8 @@ public class GameServiceTest {
         Mockito.doNothing().when(game).setBet(Mockito.anyInt());
         Mockito.when(game.getGameTable()).thenReturn(table);
         Mockito.when(table.getOpenCards()).thenReturn(cards);
+        Mockito.when(game.getPlayers()).thenReturn(players);
+        Mockito.doNothing().when(gameService).startTimer(Mockito.anyLong(), Mockito.anyString());
 
         int bet = gameService.turn(move, 1, "token");
         assertEquals(100, bet);
@@ -163,6 +183,12 @@ public class GameServiceTest {
             add(new Card("QS", "image"));
         }};
 
+        Player player1 = new Player(game, "hans", 1, "t", cards);
+        player1.setId(2L);
+        player1.setLastRaiseAmount(1);
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
         Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
         Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
@@ -171,6 +197,8 @@ public class GameServiceTest {
         Mockito.when(move.getMove()).thenReturn(Moves.Check);
         Mockito.when(game.getGameTable()).thenReturn(table);
         Mockito.when(table.getOpenCards()).thenReturn(cards);
+        Mockito.when(game.getPlayers()).thenReturn(players);
+        Mockito.doNothing().when(gameService).startTimer(Mockito.anyLong(), Mockito.anyString());
 
         int bet = gameService.turn(move, 1, "token");
         assertEquals(0, bet);
@@ -206,6 +234,12 @@ public class GameServiceTest {
             add(new Card("QS", "image"));
         }};
 
+        Player player1 = new Player(game, "hans", 1, "t", cards);
+        player1.setId(2L);
+        player1.setLastRaiseAmount(1);
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+
         Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
         Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
         Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
@@ -216,6 +250,8 @@ public class GameServiceTest {
         Mockito.when(move.getMove()).thenReturn(Moves.Call);
         Mockito.when(game.getGameTable()).thenReturn(table);
         Mockito.when(table.getOpenCards()).thenReturn(cards);
+        Mockito.when(game.getPlayers()).thenReturn(players);
+        Mockito.doNothing().when(gameService).startTimer(Mockito.anyLong(), Mockito.anyString());
 
         int bet = gameService.turn(move, 1, "token");
         assertEquals(100, bet);
@@ -771,4 +807,114 @@ public class GameServiceTest {
         Mockito.verify(game).setWinner(eq(winner));
         Mockito.verify(gameService).deleteGame(eq(game), Mockito.anyInt());
     }
+
+    @Test
+    public void calculatePotsTwoAllIn(){
+        Game game = mock(Game.class);
+        Card card = mock(Card.class);
+        List<Card> cards = new ArrayList<>();
+        cards.add(card);
+        GameTable gameTable = new GameTable(cards);
+
+
+        Mockito.when(game.getGameTable()).thenReturn(gameTable);
+
+        // Create mock players
+        Player player1 = new Player(game,"player1",100,"token1",cards);
+        player1.setTotalBettingInCurrentRound(100);
+        player1.setAllIn(false);
+        Player player2 = new Player(game,"player2",0,"token2",cards);
+        player2.setTotalBettingInCurrentRound(50);
+        player2.setAllIn(true);
+        Player player3 = new Player(game,"player3",0,"token3",cards);
+        player3.setTotalBettingInCurrentRound(30);
+        player3.setAllIn(true);
+        Player player4 = new Player(game,"player4",1000,"token4",cards);
+        player4.setTotalBettingInCurrentRound(100);
+        player4.setAllIn(false);
+
+
+
+        List<Player> allInPlayersOrdered = new ArrayList<>();
+        allInPlayersOrdered.add(player3);
+        allInPlayersOrdered.add(player2);
+
+        List<Player> allNotFoldedPlayers = new ArrayList<>();
+        allNotFoldedPlayers.add(player1);
+        allNotFoldedPlayers.add(player2);
+        allNotFoldedPlayers.add(player3);
+        allNotFoldedPlayers.add(player4);
+
+        List<Pot> pots = new ArrayList<>();
+        Pot mainPot = new Pot(0,"mainPot");
+        mainPot.setEligiblePlayers(allNotFoldedPlayers);
+        pots.add(mainPot);
+        gameTable.setPots(pots);
+
+        gameService.calculatePots(game, allInPlayersOrdered);
+
+        assertEquals(3, gameTable.getPots().size());
+        //assertEquals(100, gameTable.getPots().get(0).getMoney());
+        assertEquals(120, gameTable.getPots().get(1).getMoney());
+        assertEquals(60, gameTable.getPots().get(2).getMoney());
+    }
+
+    @Test
+    public void calculatePotsSameAllIn(){
+        Game game = mock(Game.class);
+        Card card = mock(Card.class);
+        List<Card> cards = new ArrayList<>();
+        cards.add(card);
+        GameTable gameTable = new GameTable(cards);
+        Mockito.when(game.getGameTable()).thenReturn(gameTable);
+
+        // Create mock players
+        Player player1 = new Player(game,"player1",0,"token1",cards);
+        player1.setTotalBettingInCurrentRound(150);
+        player1.setAllIn(true);
+        Player player2 = new Player(game,"player2",0,"token2",cards);
+        player2.setTotalBettingInCurrentRound(50);
+        player2.setAllIn(true);
+        Player player3 = new Player(game,"player3",20,"token3",cards);
+        player3.setTotalBettingInCurrentRound(200);
+        player3.setAllIn(false);
+        Player player4 = new Player(game,"player4",1000,"token4",cards);
+        player4.setTotalBettingInCurrentRound(200);
+        player4.setAllIn(false);
+        Player player5 = new Player(game,"player5",0,"token5",cards);
+        player5.setTotalBettingInCurrentRound(150);
+        player5.setAllIn(true);
+        Player player6 = new Player(game,"player6",1000,"token6",cards);
+        player6.setTotalBettingInCurrentRound(200);
+        player6.setAllIn(false);
+
+        List<Player> allInPlayersOrdered = new ArrayList<>();
+        allInPlayersOrdered.add(player2);
+        allInPlayersOrdered.add(player1);
+        allInPlayersOrdered.add(player5);
+
+        List<Player> allNotFoldedPlayers = new ArrayList<>();
+        allNotFoldedPlayers.add(player1);
+        allNotFoldedPlayers.add(player2);
+        allNotFoldedPlayers.add(player3);
+        allNotFoldedPlayers.add(player4);
+        allNotFoldedPlayers.add(player5);
+        allNotFoldedPlayers.add(player6);
+
+        List<Pot> pots = new ArrayList<>();
+        Pot mainPot = new Pot(0,"mainPot");
+        mainPot.setEligiblePlayers(allNotFoldedPlayers);
+        mainPot.setMoney(950);
+        pots.add(mainPot);
+        gameTable.setPots(pots);
+        
+
+        gameService.calculatePots(game, allInPlayersOrdered);
+
+        assertEquals(3, gameTable.getPots().size());
+        assertEquals(150, gameTable.getPots().get(0).getMoney());
+        assertEquals(300, gameTable.getPots().get(1).getMoney());
+        assertEquals(500, gameTable.getPots().get(2).getMoney());
+    }
+
 }

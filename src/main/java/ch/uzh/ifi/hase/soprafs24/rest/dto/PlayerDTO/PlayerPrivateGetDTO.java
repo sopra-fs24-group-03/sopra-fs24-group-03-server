@@ -9,10 +9,13 @@ public class PlayerPrivateGetDTO {
     private Long id;
     private String username;
     private int money;
+    private int profit;
     private List<String> cardsImage = new ArrayList<>();
     private boolean folded;
 
     private boolean turn;
+
+    private boolean AllIn;
 
     public Long getId() {
         return id;
@@ -65,6 +68,26 @@ public class PlayerPrivateGetDTO {
 
     public void setTurn(boolean turn) {
         this.turn = turn;
+    }
+
+    public int getProfit() {
+        return profit;
+    }
+
+    public void setProfit(int profit) {
+        this.profit = profit;
+    }
+
+    public boolean getFolded() {
+        return folded;
+    }
+
+    public boolean isAllIn() {
+        return AllIn;
+    }
+
+    public void setAllIn(boolean allIn) {
+        AllIn = allIn;
     }
 
 }

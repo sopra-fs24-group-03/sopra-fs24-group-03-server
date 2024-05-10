@@ -3,6 +3,7 @@ package ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO;
 
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPrivateGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPublicGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PotDTO.PotPublicGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.TableDTO.TablePublicGetDTO;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public class GameGetDTO {
 
     private List<PlayerPrivateGetDTO> winner;
     private List<PlayerPrivateGetDTO> notFoldedPlayers;
+
 
 
     public long getId() {

@@ -84,4 +84,8 @@ public class Pot implements Serializable {
     public void setName(String name) {
         Name = name;
     }
+
+    public void addMoney(int money){
+        this.Money = this.Money + money;
+    }
 }

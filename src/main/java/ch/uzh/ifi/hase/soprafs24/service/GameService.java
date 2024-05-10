@@ -14,6 +14,7 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GameGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GamePutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPrivateGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPublicGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PotDTO.PotPublicGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,10 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
 
 import static ch.uzh.ifi.hase.soprafs24.constant.Moves.*;
@@ -39,6 +44,11 @@ public class GameService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final LobbyRepository lobbyRepository;
+
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private ScheduledFuture<?> currentFoldTask;
+
+
 
 
     @Autowired
@@ -90,6 +100,7 @@ public class GameService {
     }
 
     //method to make moves
+
     public int turn(GamePutDTO move, long game_id, String token) {
         String username = userRepository.findByToken(token).getUsername();
         Game game = gameRepository.findById(game_id);
@@ -109,6 +120,8 @@ public class GameService {
                 if (game.getRaisePlayer() == player) {
                     game.setRaisePlayer(null);
                 }
+                gameRepository.save(game);
+                gameRepository.flush();
                 //no bet was made
                 yield 0;
             }
@@ -204,10 +217,26 @@ public class GameService {
 
         }
         game.setsNextPlayerTurnIndex();
+        List<Player> players = game.getPlayers();
+        int turn = game.getPlayerTurnIndex();
+        startTimer(game_id, players.get(turn).getToken());
         return amount;
-
-
     }
+
+    public void startTimer(long game_id, String token) {
+        // Cancel the previous task if it exists
+        if (currentFoldTask != null && !currentFoldTask.isDone()) {
+            currentFoldTask.cancel(false);
+        }
+        GamePutDTO move = new GamePutDTO();
+        move.setMove(Moves.Fold);
+        Runnable foldTask = () -> {
+            int bet = turn(move, game_id, token);
+            updateGame(game_id, bet);
+        };
+        currentFoldTask = scheduler.schedule(foldTask, 200, TimeUnit.SECONDS);
+    }
+
 
 
     //updates game state (split from turn for easier testing)
@@ -237,10 +266,10 @@ public class GameService {
         //check if current betting round is finished
         if ((game.getRaisePlayer() != null && Objects.equals(game.getRaisePlayer().getUsername(), nextPlayerUsername))) {
             List<Player> allInPlayers = filterPlayersAllIn(players);
-            List<Player> notFoldedPlayers = filterPlayersNotFolded(players);
+            allInPlayers.sort(Comparator.comparing(Player::getTotalBettingInCurrentRound));
 
             if (!allInPlayers.isEmpty()) {
-                calculatePots(allInPlayers, notFoldedPlayers, table.getTotalTableBettingInCurrentRound());
+                calculatePots(game,allInPlayers);
             }
 
             //reset betting to 0 after a betting round
@@ -251,6 +280,7 @@ public class GameService {
                 player.setTotalBettingInCurrentRound(0);
             }
 
+            List<Player> notFoldedPlayers = filterPlayersNotFolded(players);
             //check if final round to end game
             if (table.getOpenCards().size() == 5 || playersAllIn(notFoldedPlayers)) {
                 endGame(game_id); //then game ends, call winning condition
@@ -310,6 +340,7 @@ public class GameService {
 
         return qualifiedPlayers;
     }
+
     public boolean playersAllIn (List<Player> notFoldedPlayers){
         int finishedPlayersCount = 0; // Initialize counter for folded players
 
@@ -321,12 +352,63 @@ public class GameService {
         return (finishedPlayersCount >= (notFoldedPlayers.size() - 1));
 
     }
-    public void calculatePots(List<Player> allInPlayersOrdered, List<Player> allNotFoldedPlayers, int totalBetting){
 
-        for (Player player : allInPlayersOrdered) {
-            System.out.println("Username: " + player.getUsername() + ", Total Betting: " + player.getTotalBettingInCurrentRound());
+    public void calculatePots(Game game, List<Player> allInPlayersOrdered){
+        int amountOfMinimumAllIn = 0;
+        int amountForPreviousPot = 0;
+        int totalMoneyInNewPots = 0;
+        int money = 0;
+        GameTable gameTable = game.getGameTable();
+        Pot mainPot = gameTable.getPotByName("mainPot");
+        int numberOfMainPotPlayers = mainPot.getEligiblePlayers().size();
+        int potNumber = gameTable.getPots().size();
+        List<Pot> newSidePots = new ArrayList<>();
+
+
+        //eligible players for sidepots
+        List<Player> eligiblePlayers = new ArrayList<>(mainPot.getEligiblePlayers());
+
+        for (Player player: allInPlayersOrdered){
+
+            if(amountOfMinimumAllIn == player.getTotalBettingInCurrentRound()){
+                numberOfMainPotPlayers -= 1;
+                continue;
+            }
+
+
+            amountOfMinimumAllIn = player.getTotalBettingInCurrentRound();
+            money = (amountOfMinimumAllIn - amountForPreviousPot) * numberOfMainPotPlayers ;
+            amountForPreviousPot = amountOfMinimumAllIn;
+            numberOfMainPotPlayers -= 1;
+            String name = "sidepot" + potNumber;
+            potNumber++;
+            Pot sidepot = new Pot(money, name);
+
+            sidepot.setGameTable(gameTable);
+            gameTable.addPot(sidepot);
+            newSidePots.add(sidepot);
+
+
+            //set eligible players
+            sidepot.setEligiblePlayers(new ArrayList<>(eligiblePlayers));
+            eligiblePlayers.remove(player);
+
         }
+        for (Pot pot : newSidePots){
+            totalMoneyInNewPots += pot.getMoney();
+        }
+        mainPot.setMoney(mainPot.getMoney()-totalMoneyInNewPots);
+
+
+        //set eligible players for main pot
+        List<Player> MainPotPlayers = new ArrayList<>(mainPot.getEligiblePlayers());
+        MainPotPlayers.removeAll(allInPlayersOrdered);
+        mainPot.setEligiblePlayers(new ArrayList<>(MainPotPlayers));
+
+
+
     }
+
     public boolean playersFolded(Game game) {
         List<Player> players = game.getPlayers();
         int finishedPlayersCount = 0; // Initialize counter for folded players
@@ -406,6 +488,9 @@ public class GameService {
         //return unused money
         for(Player player : game.getPlayers()) {
             user = userRepository.findByUsername(player.getUsername());
+
+            //set profit to send to frontend
+            player.setProfit(player.getMoney()-user.getMoney());
             user.setMoney(player.getMoney());
         }
 
@@ -421,6 +506,9 @@ public class GameService {
             for (PlayerHand winner : winners) {
                 user = userRepository.findByUsername(winner.getPlayer().getUsername());
                 int reward = (int) Math.ceil((double) pot.getMoney() / winners.size());
+
+                //add reward to profit
+                winner.getPlayer().setProfit(winner.getPlayer().getProfit() + reward);
                 user.setMoney(reward + user.getMoney());
             }
         }
@@ -572,5 +660,11 @@ public class GameService {
             gameToReturn.setNotFoldedPlayers(notFoldedPlayers);
         }
     }
+    public List<PotPublicGetDTO> settingPotsInGameTable(List<Pot> pots) {
+        List<PotPublicGetDTO> potPublicGetDTO = new ArrayList<>();
+        for(Pot pot : pots) {
+            potPublicGetDTO.add(DTOMapper.INSTANCE.convertEntityToPotPublicGetDTO(pot));
+        }
+        return potPublicGetDTO;
+    }
 }
-

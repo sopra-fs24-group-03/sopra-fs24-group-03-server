@@ -5,7 +5,9 @@ import ch.uzh.ifi.hase.soprafs24.constant.Hand;
 import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 import ch.uzh.ifi.hase.soprafs24.helpers.DeckOfCardsApi;
 import ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand;
+import ch.uzh.ifi.hase.soprafs24.service.GameService;
 import org.springframework.http.HttpStatus;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -43,7 +45,7 @@ public class Game implements Serializable {
 
     }
 
-    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "game", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     List<Player> players = new ArrayList<>();
 
     @Column(nullable = false)
@@ -102,6 +104,7 @@ public class Game implements Serializable {
     }
 
 
+    @Transactional
     public Player getPlayerByUsername(String username) {
         for (Player player : players) {
             if (Objects.equals(player.getUsername(), username)) {
@@ -215,6 +218,7 @@ public class Game implements Serializable {
 
         setsNextPlayerTurnIndex();
         setsNextPlayerTurnIndex();
+        //GameService.startTimer(this.id, this.players.get(this.playerTurnIndex).getToken());
 
     }
 }

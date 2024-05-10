@@ -192,7 +192,6 @@ public class GameControllerTest {
                 .andExpect(jsonPath("$.id").value(1L));
                 //.andExpect(jsonPath("$.players[0].username").value("PlayerOne"))
                 //.andExpect(jsonPath("$.currentBet").value(50));
-
     }
 
     @Test
