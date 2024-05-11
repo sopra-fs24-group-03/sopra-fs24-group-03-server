@@ -36,12 +36,20 @@ public class UserController {
         // fetch all users in the internal representation
         userService.authenticateUser(token);
         List<User> users = userService.getUsers();
-        List<UserGetDTO> userGetDTOs = new ArrayList<>();
 
         // convert each user to the API representation
+        List<UserGetDTO> userGetDTOs = new ArrayList<>();
         for (User user : users) {
-            userGetDTOs.add(DTOMapper.INSTANCE.convertEntityToUserGetDTO(user));
+            UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+            if (user.getLobby() != null) {
+                userGetDTO.setLobbyId(user.getLobby().getId());
+            }
+            else {
+                userGetDTO.setLobbyId(null);
+            }
+            userGetDTOs.add(userGetDTO);
         }
+
         return userGetDTOs;
     }
 
@@ -52,7 +60,14 @@ public class UserController {
     public UserGetDTO getByID(@PathVariable long id, @RequestHeader String token) {
         userService.authenticateUser(token);
         User user = userService.getUserById(id);
-        return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+        UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
+        if (user.getLobby() != null) {
+            userGetDTO.setLobbyId(user.getLobby().getId());
+        }
+        else {
+            userGetDTO.setLobbyId(null);
+        }
+        return userGetDTO;
     }
 
 
