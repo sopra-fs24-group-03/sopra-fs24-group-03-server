@@ -234,7 +234,7 @@ public class GameService {
             int bet = turn(move, game_id, token);
             updateGame(game_id, bet);
         };
-        currentFoldTask = scheduler.schedule(foldTask, 200, TimeUnit.SECONDS);
+        currentFoldTask = scheduler.schedule(foldTask, 30, TimeUnit.SECONDS);
     }
 
 
@@ -483,6 +483,10 @@ public class GameService {
         User user;
         List<PlayerHand> overallWinner = new ArrayList<>();
 
+        //Update open cards if there was an early finish
+        game.getGameTable().updateOpenCards();
+        game.getGameTable().updateOpenCards();
+        game.getGameTable().updateOpenCards();
 
 
         //return unused money

@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -55,7 +56,8 @@ public class UserControllerTest {
     user.setStatus(UserStatus.ONLINE);
     user.setMoney(2000);
 
-    List<User> allUsers = Collections.singletonList(user);
+    List<User> allUsers = new ArrayList<>();
+    allUsers.add(user);
 
     // this mocks the UserService -> we define above what the userService should
     // return when getUsers() is called

@@ -78,7 +78,7 @@ public class LobbyService {
         Lobby lobby = findLobby(id);
 
         if (user.getLobby() == null) {
-            if (lobby.getLobbyusers().size() < 8) {
+            if (lobby.getLobbyusers().size() < 7) {
                 user.setLobby(lobby);
                 lobby.addUserToLobby(user);
                 return lobby;

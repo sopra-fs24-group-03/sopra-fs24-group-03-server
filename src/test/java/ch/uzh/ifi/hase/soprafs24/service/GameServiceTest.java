@@ -917,4 +917,10 @@ public class GameServiceTest {
         assertEquals(500, gameTable.getPots().get(2).getMoney());
     }
 
+    void getUserByToken() {
+        User user = new User();
+        user.setId(1L);
+        
+    }
+
 }

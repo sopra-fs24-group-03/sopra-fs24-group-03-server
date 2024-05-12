@@ -11,6 +11,8 @@ public class UserGetDTO {
     private int tries;
     private int money;
 
+    private Long lobbyId;
+
     public Long getId() {
         return id;
     }
@@ -50,6 +52,16 @@ public class UserGetDTO {
     public void setTries(int tries) {
         this.tries = tries;
     }
+
+    public Long getLobbyId() {
+        return lobbyId;
+    }
+
+    public void setLobbyId(Long lobbyId) {
+        this.lobbyId = lobbyId;
+    }
+
+
 
 }
 
