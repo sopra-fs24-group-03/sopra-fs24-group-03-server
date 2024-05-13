@@ -36,11 +36,11 @@ public class LobbyController {
         Game game = lobbyService.startGame(token, id);
     }
 
-    @GetMapping("/lobbies/{id}")
+    @GetMapping("/lobbies")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public LobbyGetDTO getLobbyByID(@PathVariable long id, @RequestHeader String token) {
-        Lobby lobby = lobbyService.getLobbyById(id, token);
+    public LobbyGetDTO getLobbyByID(@RequestHeader String token) {
+        Lobby lobby = lobbyService.getLobbyById(token);
         return DTOMapper.INSTANCE.convertEntityToLobbyGetDTO(lobby);
     }
 

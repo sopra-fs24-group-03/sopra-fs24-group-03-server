@@ -128,7 +128,7 @@ public class LobbyServiceIntegrationTest {
 
 
         // Call the method under test
-        Lobby retrievedLobby = lobbyService.getLobbyById(lobby.getId(), "validToken");
+        Lobby retrievedLobby = lobbyService.getLobbyById("validToken");
 
         // Verify the outcome
         assertNotNull(retrievedLobby);
@@ -160,8 +160,8 @@ public class LobbyServiceIntegrationTest {
 
 
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
-                () -> lobbyService.getLobbyById(lobby.getId(), "validToken"));
-        assertEquals(HttpStatus.UNAUTHORIZED, exception.getStatus());
+                () -> lobbyService.getLobbyById("validToken"));
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
 
 
         //cleanup

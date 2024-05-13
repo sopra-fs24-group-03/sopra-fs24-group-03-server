@@ -57,18 +57,17 @@ public class LobbyService {
         }
     }
 
-    public Lobby getLobbyById(long id, String token) {
+    public Lobby getLobbyById(String token) {
         userService.authenticateUser(token);
         User user = userService.getUserByToken(token);
-        Lobby lobby = findLobby(id);
 
-        if (user.getLobby() != null && user.getLobby().getId() == id) {
+        if (user.getLobby() != null) {
             // Return the lobby if the user is in it
-            return lobby;
+            return user.getLobby();
         }
         else {
             // Throw an exception if the user is not in the lobby
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Only users that are in the specified lobby can access its information!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not in a lobby!");
         }
     }
 

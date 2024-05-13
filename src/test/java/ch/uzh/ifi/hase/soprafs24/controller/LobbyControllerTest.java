@@ -81,10 +81,10 @@ public class LobbyControllerTest {
         lobby.addUserToLobby(user);
 
 
-        Mockito.when(lobbyService.getLobbyById(Mockito.anyLong(), Mockito.anyString())).thenReturn(lobby);
+        Mockito.when(lobbyService.getLobbyById(Mockito.anyString())).thenReturn(lobby);
 
 
-        MockHttpServletRequestBuilder getRequest = get("/lobbies/{id}", lobby.getId())
+        MockHttpServletRequestBuilder getRequest = get("/lobbies")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("token", "token");
 
@@ -94,20 +94,21 @@ public class LobbyControllerTest {
                 .andExpect(jsonPath("$.id").value(lobby.getId()))
                 .andExpect(jsonPath("$.lobbyLeader.username").value(user.getUsername()))
                 .andExpect(jsonPath("$.lobbyUsers.size()").value(1));}
+
     @Test
     public void getLobbyByIdUnauthorized() throws Exception {
 
-        Mockito.when(lobbyService.getLobbyById(Mockito.anyLong(), Mockito.anyString()))
-                .thenThrow(new ResponseStatusException(HttpStatus.UNAUTHORIZED));
+        Mockito.when(lobbyService.getLobbyById(Mockito.anyString()))
+                .thenThrow(new ResponseStatusException(HttpStatus.NOT_FOUND));
 
 
-        MockHttpServletRequestBuilder getRequest = get("/lobbies/{id}", 1L)
+        MockHttpServletRequestBuilder getRequest = get("/lobbies")
                 .contentType(MediaType.APPLICATION_JSON)
                 .header("token", "token");
 
 
         mockMvc.perform(getRequest)
-                .andExpect(status().isUnauthorized());
+                .andExpect(status().isNotFound());
 
     }
     @Test
