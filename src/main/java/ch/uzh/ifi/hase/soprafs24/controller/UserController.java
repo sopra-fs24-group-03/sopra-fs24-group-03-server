@@ -4,7 +4,6 @@ import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPostResponseDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -97,14 +96,7 @@ public class UserController {
     }
 
 
-    @PutMapping("/users/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ResponseBody
-    public void updateUser(@RequestBody UserPutDTO userPutDTO, @PathVariable long id, @RequestHeader String token) {
-        userService.authenticateUser(token, id);
-        User userInput = DTOMapper.INSTANCE.convertUserPutDTOtoEntity(userPutDTO);
-        userService.updateUser(userInput, id);
-    }
+
 
 
     @PutMapping("/users/logout")

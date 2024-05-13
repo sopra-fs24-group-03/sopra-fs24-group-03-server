@@ -61,6 +61,11 @@ public class UserService {
     }
 
     public User createUser(User newUser) {
+        //username max 10 chars
+        if (newUser.getUsername().length() > 10){
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username has to be 10 or less Characters!");
+        }
+
         newUser.setToken(UUID.randomUUID().toString());
         setOnline(newUser);
         checkIfUserExists(newUser);
@@ -107,17 +112,6 @@ public class UserService {
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Password or Username incorrect!");
     }
 
-    //Update user profile
-    public void updateUser(User userInput, long id) {
-        User user = userRepository.findById(id);
-        //if new username is given make sure it's not already in use, if same username is given nothing changes
-        if (userInput.getUsername() != null && user != userRepository.findByUsername(userInput.getUsername())) {
-            if (userRepository.findByUsername(userInput.getUsername()) == null) {
-                user.setUsername(userInput.getUsername());
-            }
-            else throw new ResponseStatusException(HttpStatus.CONFLICT, "the provided Username is already in use!");
-        }
-    }
 
     public void logout(String token) {
         setOffline(userRepository.findByToken(token));

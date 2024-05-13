@@ -3,7 +3,6 @@ package ch.uzh.ifi.hase.soprafs24.controller;
 import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
 import ch.uzh.ifi.hase.soprafs24.entity.User;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPostDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPutDTO;
 import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +18,6 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
@@ -135,48 +133,7 @@ public class UserControllerTest {
   }
 
 
-  //Tests user editing put request
-  @Test
-  public void UpdateUser_validInput_returnsVoid() throws Exception {
 
-    UserPutDTO userPutDTO = new UserPutDTO();
-    userPutDTO.setUsername("testUsername");
-
-
-    doNothing().when(userService).authenticateUser(isA(String.class), isA(long.class));
-    doNothing().when(userService).updateUser(isA(User.class), isA(long.class));
-
-      //when
-    MockHttpServletRequestBuilder putRequest = put("/users/1")
-      .contentType(MediaType.APPLICATION_JSON)
-      .content(asJsonString(userPutDTO))
-      .header("token", "token");
-
-    // then
-    mockMvc.perform(putRequest)
-      .andExpect(status().isNoContent());
-    }
-
-  @Test
-  public void UpdateUser_invalidInput_throwsException() throws Exception {
-    long userid = 1L;
-
-    UserPutDTO userPutDTO = new UserPutDTO();
-    userPutDTO.setUsername("testUsername");
-
-      doNothing().when(userService).authenticateUser(isA(String.class), isA(long.class));
-      Mockito.doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND)).when(userService).updateUser(Mockito.any(), Mockito.anyLong());
-
-      //when
-      MockHttpServletRequestBuilder putRequest = put("/users/{userid}", userid)
-        .contentType(MediaType.APPLICATION_JSON)
-        .content(asJsonString(userPutDTO))
-        .header("token", "token");
-
-        // then
-      mockMvc.perform(putRequest)
-        .andExpect(status().isNotFound());
-    }
 
   @Test
   public void CreateUser_invalidInput_throwsException() throws Exception {

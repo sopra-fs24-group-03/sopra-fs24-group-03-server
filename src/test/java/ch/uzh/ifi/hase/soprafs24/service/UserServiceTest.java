@@ -32,7 +32,7 @@ public class UserServiceTest {
     testUser = new User();
     testUser.setId(1L);
     testUser.setPassword("testPassword");
-    testUser.setUsername("testUsername");
+    testUser.setUsername("test");
 
     // when -> any object is being save in the userRepository -> return the dummy
     // testUser
@@ -99,31 +99,6 @@ public class UserServiceTest {
       assertThrows(ResponseStatusException.class, () -> userService.login(input));
   }
 
-  @Test
-  public void updateUser_validInput_success(){
-      Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(testUser);
-
-      User input = new User();
-      input.setUsername("newUsername");
-
-      userService.updateUser(input, 1);
-
-      assertEquals(testUser.getUsername(), input.getUsername());
-  }
-
-  @Test
-  public void updateUser_invalidInput_throwsException(){
-      User existingUser = new User();
-
-      Mockito.when(userRepository.findById(Mockito.anyLong())).thenReturn(testUser);
-      Mockito.when(userRepository.findByUsername(Mockito.any())).thenReturn(existingUser);
-
-
-      User input = new User();
-      input.setUsername("newUsername");
-
-      assertThrows(ResponseStatusException.class, () -> userService.updateUser(input, 1));
-  }
 
 
 }

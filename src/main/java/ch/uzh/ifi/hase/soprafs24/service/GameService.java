@@ -234,7 +234,7 @@ public class GameService {
             int bet = turn(move, game_id, token);
             updateGame(game_id, bet);
         };
-        currentFoldTask = scheduler.schedule(foldTask, 30, TimeUnit.SECONDS);
+        currentFoldTask = scheduler.schedule(foldTask, 100, TimeUnit.SECONDS);
     }
 
 
