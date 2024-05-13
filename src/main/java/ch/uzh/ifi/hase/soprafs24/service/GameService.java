@@ -644,20 +644,39 @@ public class GameService {
     public void addFinishedGamePlayers(GameGetDTO gameToReturn, Game game, List<Player> players) {
 
         List<PlayerPrivateGetDTO> notFoldedPlayers = new ArrayList<>();
+        int notFoldedAmount = 0;
+
         if (game.getGameFinished()) {
-            for (Player winner : game.getWinner()) {
-                gameToReturn.addWinner(DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(winner));
-            }
             for (Player player : players) {
-                if (!player.isFolded()) {
+                //winner is added separately to prevent the cards being falsely revealed
+                if (!player.isFolded() && !game.getWinner().contains(player)) {
                     notFoldedPlayers.add(DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(player));
+                    notFoldedAmount++;
                 }
-                else {
+                else if (!game.getWinner().contains(player)) {
                     PlayerPrivateGetDTO playerWithoutCards = DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(player);
                     playerWithoutCards.deleteCardsImage();
                     notFoldedPlayers.add(playerWithoutCards);
                 }
             }
+
+            //if all player except winner folded, winners cards should not be returned
+            if(notFoldedAmount > 0) {
+                for (Player winner : game.getWinner()) {
+                    PlayerPrivateGetDTO entity = DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(winner);
+                    gameToReturn.addWinner(entity);
+                    notFoldedPlayers.add(entity);
+                }
+            }
+            else {
+                for (Player winner : game.getWinner()) {
+                    PlayerPrivateGetDTO playerWithoutCards = DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(winner);
+                    playerWithoutCards.deleteCardsImage();
+                    gameToReturn.addWinner(playerWithoutCards);
+                    notFoldedPlayers.add(playerWithoutCards);
+                }
+            }
+
             game.setGameFinished(true);
             gameToReturn.setNotFoldedPlayers(notFoldedPlayers);
         }

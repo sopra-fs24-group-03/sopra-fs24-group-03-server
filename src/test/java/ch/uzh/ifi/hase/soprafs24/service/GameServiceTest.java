@@ -600,7 +600,7 @@ public class GameServiceTest {
 
         List<Pot> pots = new ArrayList<>(){{
             add(new Pot(1000, "mainPot"));
-            add(new Pot(500, "sidePot")); //possible pot name change...
+            add(new Pot(500, "sidepot1"));
         }};
 
         User user = new User();
@@ -659,7 +659,7 @@ public class GameServiceTest {
         assertEquals(2, user3.getTries());
 
         //insure correct methods were called
-        Mockito.verify(game).setWinner(eq(winner1));
+        Mockito.verify(game).setWinner(eq(winner2));
         Mockito.verify(gameService).deleteGame(eq(game), Mockito.anyInt());
     }
 

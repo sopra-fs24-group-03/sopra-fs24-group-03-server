@@ -25,7 +25,6 @@ public class GameGetDTO {
     private List<PlayerPrivateGetDTO> notFoldedPlayers;
 
 
-
     public long getId() {
         return id;
     }
