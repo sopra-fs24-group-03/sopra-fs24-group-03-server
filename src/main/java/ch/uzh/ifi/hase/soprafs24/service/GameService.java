@@ -371,10 +371,7 @@ public class GameService {
                 continue;
             }
 
-
             amountOfMinimumAllIn = player.getTotalBettingInCurrentRound();
-
-
 
             for (Player eligiblePlayer: eligiblePlayers){
                 int playerTotalMoney = eligiblePlayer.getTotalBettingInCurrentRound();
@@ -387,10 +384,6 @@ public class GameService {
                     eligiblePlayer.setTotalBettingInCurrentRound(eligiblePlayer.getTotalBettingInCurrentRound() - (amountOfMinimumAllIn));
                 }
             }
-
-
-
-
 
             String name = "sidepot" + potNumber;
             potNumber++;
@@ -416,9 +409,6 @@ public class GameService {
         List<Player> MainPotPlayers = new ArrayList<>(mainPot.getEligiblePlayers());
         MainPotPlayers.removeAll(allInPlayersOrdered);
         mainPot.setEligiblePlayers(new ArrayList<>(MainPotPlayers));
-
-
-
     }
 
     public boolean playersFolded(Game game) {
@@ -515,7 +505,7 @@ public class GameService {
             List<PlayerHand> winners = winningCondition(pot);
 
             //this is to evaluate the best hand
-            if(Objects.equals(pot.getName(), "mainPot")){
+            if(Objects.equals(pot.getName(), "sidepot1") || table.getPots().size() == 1){
                 overallWinner = winners;
             }
 
