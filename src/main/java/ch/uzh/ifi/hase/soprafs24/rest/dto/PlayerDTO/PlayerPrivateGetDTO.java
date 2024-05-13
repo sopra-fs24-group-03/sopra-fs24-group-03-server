@@ -98,6 +98,4 @@ public class PlayerPrivateGetDTO {
     public void setLastRaiseAmount(int lastRaiseAmount) {
         this.lastRaiseAmount = lastRaiseAmount;
     }
-
-
 }
