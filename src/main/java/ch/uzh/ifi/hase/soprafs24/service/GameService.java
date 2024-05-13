@@ -120,8 +120,6 @@ public class GameService {
                 if (game.getRaisePlayer() == player) {
                     game.setRaisePlayer(null);
                 }
-                gameRepository.save(game);
-                gameRepository.flush();
                 //no bet was made
                 yield 0;
             }
@@ -234,7 +232,7 @@ public class GameService {
             int bet = turn(move, game_id, token);
             updateGame(game_id, bet);
         };
-        currentFoldTask = scheduler.schedule(foldTask, 100, TimeUnit.SECONDS);
+        currentFoldTask = scheduler.schedule(foldTask, 1000, TimeUnit.SECONDS);
     }
 
 
@@ -355,12 +353,9 @@ public class GameService {
 
     public void calculatePots(Game game, List<Player> allInPlayersOrdered){
         int amountOfMinimumAllIn = 0;
-        int amountForPreviousPot = 0;
         int totalMoneyInNewPots = 0;
-        int money = 0;
         GameTable gameTable = game.getGameTable();
         Pot mainPot = gameTable.getPotByName("mainPot");
-        int numberOfMainPotPlayers = mainPot.getEligiblePlayers().size();
         int potNumber = gameTable.getPots().size();
         List<Pot> newSidePots = new ArrayList<>();
 
@@ -369,17 +364,34 @@ public class GameService {
         List<Player> eligiblePlayers = new ArrayList<>(mainPot.getEligiblePlayers());
 
         for (Player player: allInPlayersOrdered){
+            int money = 0;
 
-            if(amountOfMinimumAllIn == player.getTotalBettingInCurrentRound()){
-                numberOfMainPotPlayers -= 1;
+            if(0 == player.getTotalBettingInCurrentRound()){
+                eligiblePlayers.remove(player);
                 continue;
             }
 
 
             amountOfMinimumAllIn = player.getTotalBettingInCurrentRound();
-            money = (amountOfMinimumAllIn - amountForPreviousPot) * numberOfMainPotPlayers ;
-            amountForPreviousPot = amountOfMinimumAllIn;
-            numberOfMainPotPlayers -= 1;
+
+
+
+            for (Player eligiblePlayer: eligiblePlayers){
+                int playerTotalMoney = eligiblePlayer.getTotalBettingInCurrentRound();
+                if ((amountOfMinimumAllIn) >= playerTotalMoney ){
+                    money+= playerTotalMoney;
+                    eligiblePlayer.setTotalBettingInCurrentRound(0);
+                }
+                else {
+                    money += (amountOfMinimumAllIn);
+                    eligiblePlayer.setTotalBettingInCurrentRound(eligiblePlayer.getTotalBettingInCurrentRound() - (amountOfMinimumAllIn));
+                }
+            }
+
+
+
+
+
             String name = "sidepot" + potNumber;
             potNumber++;
             Pot sidepot = new Pot(money, name);
