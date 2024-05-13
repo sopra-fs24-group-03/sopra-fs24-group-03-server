@@ -10,6 +10,7 @@ public class PlayerPublicGetDTO {
     private boolean turn;
 
     private boolean AllIn;
+    private int lastRaiseAmount;
 
     public long getId() {
         return id;
@@ -58,5 +59,14 @@ public class PlayerPublicGetDTO {
     public void setAllIn(boolean allIn) {
         AllIn = allIn;
     }
+
+    public int getLastRaiseAmount() {
+        return lastRaiseAmount;
+    }
+
+    public void setLastRaiseAmount(int lastRaiseAmount) {
+        this.lastRaiseAmount = lastRaiseAmount;
+    }
+
 }
 
