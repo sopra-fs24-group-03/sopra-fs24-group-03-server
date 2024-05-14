@@ -35,7 +35,7 @@
 ### Week 6.05-12.05
 - Joel Huber: Player automatically folds after a certain time. Sending multiple pots to frontend #208, #217
 - Cédric Huber: Calculate side pots and add eligible players #218, #219
-- Linus Lautenschlager:  
+- Linus Lautenschlager:  Display winner, All-In and Sidepots, #76, #87, #88, #89
 - Colin Bächtold: Correct money distribution for pot lists, profit is sent to frontend. #220 #221
 - Noah Ziegler: Setup for all in, Pot Class, All-In Attribute, Turn method corrected etc. #215, #216
 ### Week 13.03-19-05
