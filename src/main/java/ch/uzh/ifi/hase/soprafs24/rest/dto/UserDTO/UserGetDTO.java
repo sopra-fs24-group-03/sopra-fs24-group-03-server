@@ -47,5 +47,8 @@ public class UserGetDTO {
         this.tries = tries;
     }
 
+    public int getTries() {
+        return tries;
+    }
 }
 
