@@ -45,36 +45,6 @@ public class UserControllerTest {
   @MockBean
   private UserService userService;
 
-  @Test
-  public void givenUsers_whenGetUsers_thenReturnJsonArray() throws Exception {
-    // given
-    User user = new User();
-    user.setId(1L);
-    user.setUsername("testUsername");
-    user.setStatus(UserStatus.ONLINE);
-    user.setMoney(2000);
-
-    List<User> allUsers = new ArrayList<>();
-    allUsers.add(user);
-
-    // this mocks the UserService -> we define above what the userService should
-    // return when getUsers() is called
-    doNothing().when(userService).authenticateUser(Mockito.any());
-    given(userService.getUsers()).willReturn(allUsers);
-
-    // when
-    MockHttpServletRequestBuilder getRequest = get("/users")
-            .contentType(MediaType.APPLICATION_JSON)
-            .header("token", "token");
-
-    // then
-    mockMvc.perform(getRequest).andExpect(status().isOk())
-        .andExpect(jsonPath("$", hasSize(1)))
-        .andExpect(jsonPath("$[0].id", is(user.getId().intValue())))
-        .andExpect(jsonPath("$[0].username", is(user.getUsername())))
-        .andExpect(jsonPath("$[0].money", is(user.getMoney())))
-        .andExpect(jsonPath("$[0].status", is(user.getStatus().toString())));
-  }
 
   @Test
   public void getSpecificUser_validInput_userIsReturned() throws Exception {

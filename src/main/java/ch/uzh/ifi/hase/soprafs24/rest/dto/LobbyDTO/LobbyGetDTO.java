@@ -1,7 +1,6 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto.LobbyDTO;
 
 
-import ch.uzh.ifi.hase.soprafs24.entity.Game;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GameGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserGetDTO;
 

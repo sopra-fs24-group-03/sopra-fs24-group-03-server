@@ -9,8 +9,6 @@ import ch.uzh.ifi.hase.soprafs24.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * User Controller
@@ -28,45 +26,13 @@ public class UserController {
         this.userService = userService;
     }
 
-    @GetMapping("/users")
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public List<UserGetDTO> getAllUsers(@RequestHeader String token) {
-        // fetch all users in the internal representation
-        userService.authenticateUser(token);
-        List<User> users = userService.getUsers();
-
-        // convert each user to the API representation
-        List<UserGetDTO> userGetDTOs = new ArrayList<>();
-        for (User user : users) {
-            UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
-            if (user.getLobby() != null) {
-                userGetDTO.setLobbyId(user.getLobby().getId());
-            }
-            else {
-                userGetDTO.setLobbyId(null);
-            }
-            userGetDTOs.add(userGetDTO);
-        }
-
-        return userGetDTOs;
-    }
-
-
     @GetMapping("/users/{id}")
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public UserGetDTO getByID(@PathVariable long id, @RequestHeader String token) {
         userService.authenticateUser(token);
         User user = userService.getUserById(id);
-        UserGetDTO userGetDTO = DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
-        if (user.getLobby() != null) {
-            userGetDTO.setLobbyId(user.getLobby().getId());
-        }
-        else {
-            userGetDTO.setLobbyId(null);
-        }
-        return userGetDTO;
+        return DTOMapper.INSTANCE.convertEntityToUserGetDTO(user);
     }
 
 
@@ -94,10 +60,7 @@ public class UserController {
 
         return DTOMapper.INSTANCE.convertEntityToUserPostResponseDTO(user);
     }
-
-
-
-
+    
 
     @PutMapping("/users/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
