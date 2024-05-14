@@ -37,7 +37,7 @@
 - Cédric Huber: 
 - Linus Lautenschlager:  
 - Colin Bächtold: 
-- Noah Ziegler:
+- Noah Ziegler: Setup for all in, Pot Class, All-In Attribute, Turn method corrected etc. #215, #216
 ### Week 13.03-19-05
 - Joel Huber: 
 - Cédric Huber: 
