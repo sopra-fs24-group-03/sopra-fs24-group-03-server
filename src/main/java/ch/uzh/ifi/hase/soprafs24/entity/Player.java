@@ -56,7 +56,6 @@ public class Player {
         setUsername(username);
         setMoney(money);
         setToken(token);
-        System.out.println("Setting cards for player id " + id);
         cards.forEach(card -> card.setPlayer(this));
         setCards(cards);
         lastRaiseAmount = 0;

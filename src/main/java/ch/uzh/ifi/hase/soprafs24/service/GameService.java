@@ -1,12 +1,17 @@
 package ch.uzh.ifi.hase.soprafs24.service;
 
 
-import ch.uzh.ifi.hase.soprafs24.constant.Hand;
 import ch.uzh.ifi.hase.soprafs24.constant.Moves;
 import ch.uzh.ifi.hase.soprafs24.entity.*;
+import ch.uzh.ifi.hase.soprafs24.hand.CheckHand.*;
 import ch.uzh.ifi.hase.soprafs24.helpers.Card;
-import ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand;
+import ch.uzh.ifi.hase.soprafs24.hand.PlayerHand;
 import ch.uzh.ifi.hase.soprafs24.helpers.ScheduledGameDelete;
+import ch.uzh.ifi.hase.soprafs24.moves.Actions;
+import ch.uzh.ifi.hase.soprafs24.moves.Raise;
+import ch.uzh.ifi.hase.soprafs24.moves.Call;
+import ch.uzh.ifi.hase.soprafs24.moves.Fold;
+import ch.uzh.ifi.hase.soprafs24.moves.Check;
 import ch.uzh.ifi.hase.soprafs24.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.LobbyRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
@@ -33,7 +38,7 @@ import java.util.stream.Stream;
 
 import static ch.uzh.ifi.hase.soprafs24.constant.Moves.*;
 import static ch.uzh.ifi.hase.soprafs24.helpers.Card.getValue;
-import static ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand.*;
+import static ch.uzh.ifi.hase.soprafs24.hand.PlayerHand.*;
 
 
 @Service
@@ -88,131 +93,23 @@ public class GameService {
         return game;
     }
 
-
-
-    private void setMoveInGameTable(GameTable gameTable, Moves move,int amount, long playerId){
-        if(gameTable != null) {
-            gameTable.setLastMove(move);
-            gameTable.setLastMoveAmount(amount);
-            gameTable.setPlayerIdOfLastMove(playerId);
-        }
-    }
-
-    //method to make moves
-
     public int turn(GamePutDTO move, long game_id, String token) {
         String username = userRepository.findByToken(token).getUsername();
         Game game = gameRepository.findById(game_id);
-        GameTable gameTable = game.getGameTable();
         Player player = game.getPlayerByUsername(username);
 
-
         //call the correct method and return the amount bet, if nothing is bet return 0
-        int amount = switch (move.getMove()) {
-            case Fold -> {
-                if (move.getAmount() != 0) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Fold with an Amount");
-                }
-                //set folded attribute to true, but he "remains" in game
-                setMoveInGameTable(gameTable,Fold,0,player.getId());
-                player.setFolded(true);
-                game.setsNextPlayerTurnIndex();
-                if (game.getRaisePlayer() == player) {
-                    game.setRaisePlayer(null);
-                }
-                //no bet was made
-                yield 0;
-            }
-            case Raise -> {
-                if (player.getMoney() < move.getAmount() - player.getLastRaiseAmount()) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot bet more money than you have!");
-                }
-                //if raise is legal, update the order and current bet and call raise
-                if (move.getAmount() > game.getBet()) {
-                    game.setBet(move.getAmount()); //set the current highest bet in game
-                    int moneyLost = move.getAmount() - player.getLastRaiseAmount();
-                    player.setMoney((player.getMoney() - moneyLost)); //remove money from user
+        HashMap<Moves, Actions> Actions = new HashMap<>(){{
+            put(Raise, new Raise());
+            put(Check, new Check());
+            put(Call, new Call());
+            put(Fold, new Fold());
+        }};
+        int amount = Actions.get(move.getMove()).makeMove(player, move, game);
 
-                    player.setLastRaiseAmount(move.getAmount()); //save the last raised amount for call
-
-                    //set the raise player so that it can be check in update game mehtod
-                    game.setRaisePlayer(player);
-                    setMoveInGameTable(gameTable,Raise,move.getAmount(),player.getId());
-
-                    //set the amounts of current betting round
-                    gameTable.setTotalTableBettingInCurrentRound(gameTable.getTotalTableBettingInCurrentRound() + moneyLost);
-                    player.setTotalBettingInCurrentRound(player.getTotalBettingInCurrentRound()+moneyLost);
-
-                    //if he went all in
-                    if(player.getMoney() == 0){
-                        player.setAllIn(true);
-                        if (game.getRaisePlayer() == player) {
-                            game.setRaisePlayer(null);
-                        }
-                    }
-
-                    yield moneyLost; //return bet amount
-                }
-                else
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You need to bet higher than the current highest bet!");
-            }
-            case Check -> {
-                if (move.getAmount() != 0) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Check with an Amount");
-                }
-                //only check if there was no bet made this betting round
-                if (game.getBet()-player.getLastRaiseAmount() == 0) {
-                    setMoveInGameTable(gameTable,Check,0,player.getId());
-                    yield 0;
-                }
-                else {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only check if there has been no bet made in this betting round");
-                }
-
-            }
-            case Call -> {
-                if (game.getBet() - player.getLastRaiseAmount()== 0) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only call if a Bet was made before");
-                }
-                if (move.getAmount() != 0) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot Call with an Amount");
-                }
-                if (game.getBet() >= player.getMoney() + player.getLastRaiseAmount()) { //ALL IN
-                    player.setAllIn(true);
-                    int playerMoney = player.getMoney();
-                    player.setMoney(0);
-                    player.setLastRaiseAmount(playerMoney);
-                    setMoveInGameTable(gameTable,Call,0,player.getId());
-
-                    gameTable.setTotalTableBettingInCurrentRound(gameTable.getTotalTableBettingInCurrentRound() +playerMoney);
-                    player.setTotalBettingInCurrentRound(player.getTotalBettingInCurrentRound() + playerMoney);
-
-                    if (game.getRaisePlayer() == player) {
-                        game.setRaisePlayer(null);
-                    }
-                    yield playerMoney;
-
-
-                }
-                else { //if enough money, bet the current bet
-                    int loss = game.getBet() - player.getLastRaiseAmount();
-                    player.setMoney(player.getMoney() - loss); //p1 raises 100, p2 raises to 200, p1 calls --> only subtract (200-100 = 100) --> in total also 200
-                    player.setLastRaiseAmount(player.getLastRaiseAmount() + loss);
-                    setMoveInGameTable(gameTable,Call,0,player.getId());
-
-                    //set the amounts of current betting round
-                    gameTable.setTotalTableBettingInCurrentRound(gameTable.getTotalTableBettingInCurrentRound() + loss);
-                    player.setTotalBettingInCurrentRound(player.getTotalBettingInCurrentRound()+loss);
-                    //return amount to be updated in table
-                    yield loss;
-                }
-            }
-
-        };
         //For very first betting round, so that Bigblind can play again, it sets the raiseplayer to 1 in front of bigblind so that he can make another move and then new betting round starts
-        if(game.getGameTable().getOpenCards().size()==0 && game.getRaisePlayer()==null && move.getMove() != Fold && !player.isAllIn()){
+        if(game.getGameTable().getOpenCards().isEmpty() && game.getRaisePlayer()==null && move.getMove() != Fold && !player.isAllIn()){
             game.setRaisePlayer(game.getPlayers().get(game.getPlayerTurnIndex()));
-
         }
         game.setsNextPlayerTurnIndex();
         List<Player> players = game.getPlayers();
@@ -558,7 +455,6 @@ public class GameService {
 
                 //iterate over all cards to compare and resolve the draw
                 for (int i = 0; i < winner.get(0).getCards().size(); i++) {
-
                     //the winner has the better cards, break out of the loop
                     if (getValue(winner.get(0).getCards().get(i)) > getValue(curHand.getCards().get(i))) {
                         break;
@@ -595,31 +491,26 @@ public class GameService {
             }
         });
 
-
-        Hand[] hands = {Hand.ROYAL_FLUSH, Hand.STRAIGHT_FLUSH, Hand.FOUR_OF_A_KIND, Hand.FULL_HOUSE, Hand.FLUSH,
-                Hand.STRAIGHT, Hand.THREE_OF_A_KIND, Hand.TWO_PAIR, Hand.ONE_PAIR};
-
-        PlayerHand playerHand = null;
+        List<CheckHand> hands = new ArrayList<>(){{
+            add(new RoyaleFlush());
+            add(new StraightFlush());
+            add(new FourCards());
+            add(new FullHouse());
+            add(new Flush());
+            add(new Straight());
+            add(new ThreeOfKind());
+            add(new TwoPair());
+            add(new Pair());
+        }};
 
         //Iterate over the hands list and call the correct method
-        for (Hand hand : hands) {
-            playerHand = switch (hand) {
-                case ROYAL_FLUSH -> royalFlush(cards, player);
-                case STRAIGHT_FLUSH -> straightFlush(cards, player);
-                case FOUR_OF_A_KIND -> fourCards(cards, player);
-                case FULL_HOUSE -> fullHouse(cards, player);
-                case FLUSH -> flush(cards, player);
-                case STRAIGHT -> straight(cards, player);
-                case THREE_OF_A_KIND -> threeOfKind(cards, player);
-                case TWO_PAIR -> twoPair(cards, player);
-                case ONE_PAIR -> pair(cards, player);
-                default -> playerHand;
-            };
+        for (CheckHand hand : hands) {
+            PlayerHand playerHand = hand.checkHand(cards, player);
             if (playerHand != null) {
                 return playerHand;
             }
         }
-        return highCard(cards, player);
+        return new HighCard().checkHand(cards, player);
     }
 
     public List<PlayerPublicGetDTO> settingPlayerInGameGetDTO(Game game, List<Player> players, PlayerPrivateGetDTO privatePlayer) {
