@@ -14,7 +14,6 @@ import ch.uzh.ifi.hase.soprafs24.service.GameService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -32,7 +31,7 @@ public class GameController {
     public GameGetDTO getGameById(@PathVariable long id, @RequestHeader String token) {
         Game game = gameService.getGameById(id, token);
         GameGetDTO gameToReturn = DTOMapper.INSTANCE.convertEntityToGameGetDTO(game);
-       //getting ownPlayer and convert to privatPlayer and put in gametoreturn
+        //getting ownPlayer and convert to privatPlayer and put in gametoreturn
         List<Player> players = game.getPlayers();
         List<Pot> pots = game.getGameTable().getPots();
         Player ownPlayer = gameService.getPlayerByToken(players, token);
@@ -55,6 +54,5 @@ public class GameController {
         int bet = gameService.turn(move, gameId, token);
         gameService.updateGame(gameId, bet);
     }
-
 
 }

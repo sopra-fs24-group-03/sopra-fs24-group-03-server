@@ -25,7 +25,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -117,11 +116,10 @@ public class GameService {
                 //set folded attribute to true, but he "remains" in game
                 setMoveInGameTable(gameTable,Fold,0,player.getId());
                 player.setFolded(true);
+                game.setsNextPlayerTurnIndex();
                 if (game.getRaisePlayer() == player) {
                     game.setRaisePlayer(null);
                 }
-                gameRepository.save(game);
-                gameRepository.flush();
                 //no bet was made
                 yield 0;
             }
@@ -233,8 +231,9 @@ public class GameService {
         Runnable foldTask = () -> {
             int bet = turn(move, game_id, token);
             updateGame(game_id, bet);
+
         };
-        currentFoldTask = scheduler.schedule(foldTask, 30, TimeUnit.SECONDS);
+        currentFoldTask = scheduler.schedule(foldTask, 1000, TimeUnit.SECONDS);
     }
 
 
@@ -355,12 +354,9 @@ public class GameService {
 
     public void calculatePots(Game game, List<Player> allInPlayersOrdered){
         int amountOfMinimumAllIn = 0;
-        int amountForPreviousPot = 0;
         int totalMoneyInNewPots = 0;
-        int money = 0;
         GameTable gameTable = game.getGameTable();
         Pot mainPot = gameTable.getPotByName("mainPot");
-        int numberOfMainPotPlayers = mainPot.getEligiblePlayers().size();
         int potNumber = gameTable.getPots().size();
         List<Pot> newSidePots = new ArrayList<>();
 
@@ -369,17 +365,27 @@ public class GameService {
         List<Player> eligiblePlayers = new ArrayList<>(mainPot.getEligiblePlayers());
 
         for (Player player: allInPlayersOrdered){
+            int money = 0;
 
-            if(amountOfMinimumAllIn == player.getTotalBettingInCurrentRound()){
-                numberOfMainPotPlayers -= 1;
+            if(0 == player.getTotalBettingInCurrentRound()){
+                eligiblePlayers.remove(player);
                 continue;
             }
 
-
             amountOfMinimumAllIn = player.getTotalBettingInCurrentRound();
-            money = (amountOfMinimumAllIn - amountForPreviousPot) * numberOfMainPotPlayers ;
-            amountForPreviousPot = amountOfMinimumAllIn;
-            numberOfMainPotPlayers -= 1;
+
+            for (Player eligiblePlayer: eligiblePlayers){
+                int playerTotalMoney = eligiblePlayer.getTotalBettingInCurrentRound();
+                if ((amountOfMinimumAllIn) >= playerTotalMoney ){
+                    money+= playerTotalMoney;
+                    eligiblePlayer.setTotalBettingInCurrentRound(0);
+                }
+                else {
+                    money += (amountOfMinimumAllIn);
+                    eligiblePlayer.setTotalBettingInCurrentRound(eligiblePlayer.getTotalBettingInCurrentRound() - (amountOfMinimumAllIn));
+                }
+            }
+
             String name = "sidepot" + potNumber;
             potNumber++;
             Pot sidepot = new Pot(money, name);
@@ -404,9 +410,6 @@ public class GameService {
         List<Player> MainPotPlayers = new ArrayList<>(mainPot.getEligiblePlayers());
         MainPotPlayers.removeAll(allInPlayersOrdered);
         mainPot.setEligiblePlayers(new ArrayList<>(MainPotPlayers));
-
-
-
     }
 
     public boolean playersFolded(Game game) {
@@ -503,7 +506,7 @@ public class GameService {
             List<PlayerHand> winners = winningCondition(pot);
 
             //this is to evaluate the best hand
-            if(Objects.equals(pot.getName(), "mainPot")){
+            if(Objects.equals(pot.getName(), "sidepot1") || table.getPots().size() == 1){
                 overallWinner = winners;
             }
 
@@ -642,20 +645,39 @@ public class GameService {
     public void addFinishedGamePlayers(GameGetDTO gameToReturn, Game game, List<Player> players) {
 
         List<PlayerPrivateGetDTO> notFoldedPlayers = new ArrayList<>();
+        int notFoldedAmount = 0;
+
         if (game.getGameFinished()) {
-            for (Player winner : game.getWinner()) {
-                gameToReturn.addWinner(DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(winner));
-            }
             for (Player player : players) {
-                if (!player.isFolded()) {
+                //winner is added separately to prevent the cards being falsely revealed
+                if (!player.isFolded() && !game.getWinner().contains(player)) {
                     notFoldedPlayers.add(DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(player));
+                    notFoldedAmount++;
                 }
-                else {
+                else if (!game.getWinner().contains(player)) {
                     PlayerPrivateGetDTO playerWithoutCards = DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(player);
                     playerWithoutCards.deleteCardsImage();
                     notFoldedPlayers.add(playerWithoutCards);
                 }
             }
+
+            //if all player except winner folded, winners cards should not be returned
+            if(notFoldedAmount > 0) {
+                for (Player winner : game.getWinner()) {
+                    PlayerPrivateGetDTO entity = DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(winner);
+                    gameToReturn.addWinner(entity);
+                    notFoldedPlayers.add(entity);
+                }
+            }
+            else {
+                for (Player winner : game.getWinner()) {
+                    PlayerPrivateGetDTO playerWithoutCards = DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(winner);
+                    playerWithoutCards.deleteCardsImage();
+                    gameToReturn.addWinner(playerWithoutCards);
+                    notFoldedPlayers.add(playerWithoutCards);
+                }
+            }
+
             game.setGameFinished(true);
             gameToReturn.setNotFoldedPlayers(notFoldedPlayers);
         }

@@ -46,11 +46,11 @@ public class UserServiceIntegrationTest {
   @Test
   public void createUser_validInputs_success() {
     // given
-    assertNull(userRepository.findByUsername("testUsername"));
+    assertNull(userRepository.findByUsername("test"));
 
     User testUser = new User();
     testUser.setPassword("testPassword");
-    testUser.setUsername("testUsername");
+    testUser.setUsername("test");
 
     // when
     User createdUser = userService.createUser(testUser);
@@ -62,21 +62,38 @@ public class UserServiceIntegrationTest {
     assertNotNull(createdUser.getToken());
     assertEquals(UserStatus.ONLINE, createdUser.getStatus());
   }
+    @Test
+    public void createUser_longName_fail() {
+        // given
+        assertNull(userRepository.findByUsername("testUsername"));
+
+        User testUser = new User();
+        testUser.setPassword("testPassword");
+        testUser.setUsername("testUsername");
+
+        // when
+        ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {
+            userService.createUser(testUser);
+        });
+
+        //check correct status code is returned
+        assertEquals(HttpStatus.CONFLICT, exception.getStatus());
+    }
 
   @Test
   public void createUser_duplicateUsername_throwsException() {
-    assertNull(userRepository.findByUsername("testUsername"));
+    assertNull(userRepository.findByUsername("test"));
 
     User testUser = new User();
     testUser.setPassword("testPassword");
-    testUser.setUsername("testUsername");
+    testUser.setUsername("test");
     User createdUser = userService.createUser(testUser);
 
     // attempt to create second user with same username
     User testUser2 = new User();
 
     testUser2.setPassword("testPassword");
-    testUser2.setUsername("testUsername");
+    testUser2.setUsername("test");
 
     // check that an error is thrown
     ResponseStatusException exception = assertThrows(ResponseStatusException.class, () -> {

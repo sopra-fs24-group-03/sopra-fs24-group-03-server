@@ -1,9 +1,6 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto.PotDTO;
 
-import ch.uzh.ifi.hase.soprafs24.entity.GameTable;
-import ch.uzh.ifi.hase.soprafs24.entity.Player;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPublicGetDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.TableDTO.TablePublicGetDTO;
 
 import java.util.ArrayList;
 import java.util.List;

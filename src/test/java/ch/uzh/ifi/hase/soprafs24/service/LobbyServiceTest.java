@@ -34,6 +34,8 @@ public class LobbyServiceTest {
 
     @Mock
     private LobbyRepository lobbyRepository;
+    @Mock
+    private Game game;
 
     @InjectMocks
     private LobbyService lobbyService;
@@ -90,7 +92,7 @@ public class LobbyServiceTest {
         // Call the method under test
         ResponseStatusException exception = assertThrows(ResponseStatusException.class,
                 () -> lobbyService.joinLobbyById(2L, "validToken"));
-        assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
+        assertEquals(HttpStatus.CONFLICT, exception.getStatus());
         assertEquals("Lobby is full!", exception.getReason());
     }
     @Test
@@ -291,7 +293,7 @@ public class LobbyServiceTest {
 
         // Verify that the correct exception is thrown
         assertEquals(HttpStatus.BAD_REQUEST, exception.getStatus());
-        assertEquals("You can not kick yourself", exception.getReason());
+        assertEquals("You cannot kick yourself", exception.getReason());
     }
 
 }

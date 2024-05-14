@@ -33,11 +33,11 @@
 - Colin Bächtold: Adjusted endGame method to allow draws, fixed Money update of user at the end of a game: #173, #185, #186
 - Noah Ziegler: Big blind can play another move in first betting round, BB and SB rotate, fixed bug: #206, #207, #189
 ### Week 6.05-12.05
-- Joel Huber: 
-- Cédric Huber: 
+- Joel Huber: Player automatically folds after a certain time. Sending multiple pots to frontend #208, #217
+- Cédric Huber: Calculate side pots and add eligible players #218, #219
 - Linus Lautenschlager:  
-- Colin Bächtold: 
-- Noah Ziegler:
+- Colin Bächtold: Correct money distribution for pot lists, profit is sent to frontend. #220 #221
+- Noah Ziegler: Setup for all in, Pot Class, All-In Attribute, Turn method corrected etc. #215, #216
 ### Week 13.03-19-05
 - Joel Huber: 
 - Cédric Huber: 

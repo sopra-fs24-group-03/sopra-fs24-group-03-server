@@ -600,7 +600,7 @@ public class GameServiceTest {
 
         List<Pot> pots = new ArrayList<>(){{
             add(new Pot(1000, "mainPot"));
-            add(new Pot(500, "sidePot")); //possible pot name change...
+            add(new Pot(500, "sidepot1"));
         }};
 
         User user = new User();
@@ -659,7 +659,7 @@ public class GameServiceTest {
         assertEquals(2, user3.getTries());
 
         //insure correct methods were called
-        Mockito.verify(game).setWinner(eq(winner1));
+        Mockito.verify(game).setWinner(eq(winner2));
         Mockito.verify(gameService).deleteGame(eq(game), Mockito.anyInt());
     }
 
@@ -846,7 +846,7 @@ public class GameServiceTest {
         allNotFoldedPlayers.add(player4);
 
         List<Pot> pots = new ArrayList<>();
-        Pot mainPot = new Pot(0,"mainPot");
+        Pot mainPot = new Pot(280,"mainPot");
         mainPot.setEligiblePlayers(allNotFoldedPlayers);
         pots.add(mainPot);
         gameTable.setPots(pots);
@@ -854,7 +854,7 @@ public class GameServiceTest {
         gameService.calculatePots(game, allInPlayersOrdered);
 
         assertEquals(3, gameTable.getPots().size());
-        //assertEquals(100, gameTable.getPots().get(0).getMoney());
+        assertEquals(100, gameTable.getPots().get(0).getMoney());
         assertEquals(120, gameTable.getPots().get(1).getMoney());
         assertEquals(60, gameTable.getPots().get(2).getMoney());
     }
@@ -907,7 +907,7 @@ public class GameServiceTest {
         mainPot.setMoney(950);
         pots.add(mainPot);
         gameTable.setPots(pots);
-        
+
 
         gameService.calculatePots(game, allInPlayersOrdered);
 
@@ -920,7 +920,7 @@ public class GameServiceTest {
     void getUserByToken() {
         User user = new User();
         user.setId(1L);
-        
+
     }
 
 }

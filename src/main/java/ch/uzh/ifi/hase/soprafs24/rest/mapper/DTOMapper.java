@@ -11,7 +11,6 @@ import ch.uzh.ifi.hase.soprafs24.rest.dto.TableDTO.TablePublicGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPostDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPostResponseDTO;
-import ch.uzh.ifi.hase.soprafs24.rest.dto.UserDTO.UserPutDTO;
 import org.mapstruct.*;
 import org.mapstruct.factory.Mappers;
 
@@ -52,8 +51,6 @@ public interface DTOMapper {
     @Mapping(source = "token", target = "token")
     UserPostResponseDTO convertEntityToUserPostResponseDTO(User user);
 
-    @Mapping(source = "username", target = "username")
-    User convertUserPutDTOtoEntity(UserPutDTO userPutDTO);
 
 
     @Mapping(source = "id", target = "id")

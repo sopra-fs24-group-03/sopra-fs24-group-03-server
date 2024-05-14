@@ -57,18 +57,17 @@ public class LobbyService {
         }
     }
 
-    public Lobby getLobbyById(long id, String token) {
+    public Lobby getLobbyById(String token) {
         userService.authenticateUser(token);
         User user = userService.getUserByToken(token);
-        Lobby lobby = findLobby(id);
 
-        if (user.getLobby() != null && user.getLobby().getId() == id) {
+        if (user.getLobby() != null) {
             // Return the lobby if the user is in it
-            return lobby;
+            return user.getLobby();
         }
         else {
             // Throw an exception if the user is not in the lobby
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Only users that are in the specified lobby can access its information!");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User is not in a lobby!");
         }
     }
 
@@ -79,17 +78,20 @@ public class LobbyService {
 
         if (user.getLobby() == null) {
             if (lobby.getLobbyusers().size() < 7) {
-                user.setLobby(lobby);
-                lobby.addUserToLobby(user);
-                return lobby;
+                if(lobby.getGame() == null){
+                    user.setLobby(lobby);
+                    lobby.addUserToLobby(user);
+                    return lobby;
+                }else{throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only join a Lobby when there is no game running in it!");}
+
             }
             else {// Throw an exception if the lobby is full
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Lobby is full!");
+                throw new ResponseStatusException(HttpStatus.CONFLICT, "Lobby is full!");
             }
         }
         else {
             // Throw an exception if the user is already in a lobby
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is already in a lobby!");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "User is already in a lobby!");
         }
     }
 
@@ -99,6 +101,7 @@ public class LobbyService {
         Lobby lobby = user.getLobby();
 
         if (lobby != null) {
+            if(lobby.getGame() == null){
             // Remove the user from the lobby
             user.setLobby(null);
             lobby.removeUserFromLobby(user);
@@ -119,8 +122,11 @@ public class LobbyService {
                 lobby.setLobbyLeader(newLeader);
             }
             return;
+            }
+            else{
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only join a Lobby when there is no game running in it!");}
         }
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not in a Lobby!");
+        else {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not in a Lobby!");}
     }
 
 
@@ -179,9 +185,8 @@ public class LobbyService {
         // checks if the player who wants to delete someone is the Lobbyleader
         if(userService.getUserByToken(tokenOfDeleter).equals(lobby.getLobbyLeader())) {
             if(userService.getUserByToken(tokenOfDeleter) == userService.getUserById(kickedUserId)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can not kick yourself");
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot kick yourself");
             }
-            // not sure if this remove the user from jpa
             User userToKick = userService.getUserById(kickedUserId);
             userToKick.setLobby(null);
             lobby.removeUserFromLobby(userToKick);

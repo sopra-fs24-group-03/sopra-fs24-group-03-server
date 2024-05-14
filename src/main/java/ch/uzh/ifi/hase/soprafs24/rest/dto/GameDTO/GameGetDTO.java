@@ -1,6 +1,7 @@
 package ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO;
 
 
+import ch.uzh.ifi.hase.soprafs24.constant.Hand;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPrivateGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPublicGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.PotDTO.PotPublicGetDTO;
@@ -21,9 +22,10 @@ public class GameGetDTO {
 
     private boolean gameFinished;
 
+    private Hand handName;
+
     private List<PlayerPrivateGetDTO> winner;
     private List<PlayerPrivateGetDTO> notFoldedPlayers;
-
 
 
     public long getId() {
@@ -96,4 +98,13 @@ public class GameGetDTO {
     public void setNotFoldedPlayers(List<PlayerPrivateGetDTO> notFoldedPlayers) {
         this.notFoldedPlayers = notFoldedPlayers;
     }
+
+    public Hand getHandName() {
+        return handName;
+    }
+
+    public void setHandName(Hand handName) {
+        this.handName = handName;
+    }
+
 }
