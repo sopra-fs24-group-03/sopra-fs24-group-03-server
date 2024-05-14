@@ -117,6 +117,7 @@ public class GameService {
                 //set folded attribute to true, but he "remains" in game
                 setMoveInGameTable(gameTable,Fold,0,player.getId());
                 player.setFolded(true);
+                game.setsNextPlayerTurnIndex();
                 if (game.getRaisePlayer() == player) {
                     game.setRaisePlayer(null);
                 }
@@ -231,6 +232,7 @@ public class GameService {
         Runnable foldTask = () -> {
             int bet = turn(move, game_id, token);
             updateGame(game_id, bet);
+
         };
         currentFoldTask = scheduler.schedule(foldTask, 1000, TimeUnit.SECONDS);
     }
