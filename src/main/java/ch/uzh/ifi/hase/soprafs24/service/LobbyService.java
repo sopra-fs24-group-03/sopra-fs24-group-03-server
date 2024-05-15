@@ -154,6 +154,9 @@ public class LobbyService {
             log.info("created game {}", game);
             lobbyRepository.save(lobby);
             lobbyRepository.flush();
+            String curToken = game.getPlayers().get(game.getPlayerTurnIndex()).getToken();
+            gameService.startTimer(game.getId(), curToken);
+
             return game;
         }
         else throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not enough players");
