@@ -27,8 +27,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -39,6 +38,8 @@ public class GameServiceTest {
 
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private UserService userService;
 
     @Mock
     private GameRepository gameRepository;
@@ -57,9 +58,233 @@ public class GameServiceTest {
     @Mock
     private GamePutDTO move;
 
+
     @Spy
     @InjectMocks
     private GameService gameService;
+
+    @Test
+    void getGameById_Success() {
+        long gameId = 1L;
+        String validToken = "valid-token";
+        Mockito.doNothing().when(userService).authenticateUser(validToken);
+        when(gameRepository.findById(gameId)).thenReturn(game);
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        List<Player> players = Arrays.asList(new Player(game, "Player1", 100,  validToken, cards), new Player(game, "Player2", 100,  "other", cards));
+        when(game.getPlayers()).thenReturn(players);
+
+
+        Game retrievedGame = gameService.getGameById(gameId, validToken);
+        assertNotNull(retrievedGame);
+    }
+    @Test
+    void getGameById_Fail() {
+        long gameId = 1L;
+        String invalidToken = "invalid-token";
+        when(gameRepository.findById(gameId)).thenReturn(game);
+        ResponseStatusException e = assertThrows(ResponseStatusException.class,
+                ()->  gameService.getGameById(gameId, invalidToken)
+        );
+
+        assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
+
+    }
+    @Test
+    void getPlayerByToken_Success() {
+        String validToken = "valid-token";
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        List<Player> players = Arrays.asList(new Player(game, "Player1", 100,  validToken, cards), new Player(game, "Player2", 100,  "other", cards));
+
+        Player retrievedPlayer = gameService.getPlayerByToken(players, validToken);
+
+        assertNotNull(retrievedPlayer);
+        assertEquals("valid-token", retrievedPlayer.getToken());
+    }
+    @Test
+    void filterPlayersAllIn_Success() {
+        // Setup:
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        Player player1 = new Player(game, "Player1", 100,  "token", cards);
+        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        player1.setAllIn(true);
+        player1.setTotalBettingInCurrentRound(100);
+        player2.setAllIn(false);
+        player2.setTotalBettingInCurrentRound(100);
+
+
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+        players.add(player2);
+        // Call the method to filter players
+        List<Player> qualifiedPlayers = gameService.filterPlayersAllIn(players);
+
+        // Asserts: Check that only the correct players are included
+        assertNotNull(qualifiedPlayers);
+        assertEquals(1, qualifiedPlayers.size());
+        assertTrue(qualifiedPlayers.contains(players.get(0)));
+    }
+    @Test
+    void filterPlayersNotFolded_Success() {
+        // Setup:
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        Player player1 = new Player(game, "Player1", 100,  "token", cards);
+        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        player1.setFolded(false); // Player1 has not folded
+        player2.setFolded(true);  // Player2 has folded
+
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+        players.add(player2);
+
+        // Call the method to filter players
+        List<Player> qualifiedPlayers = gameService.filterPlayersNotFolded(players);
+
+        // Asserts: Check that only the correct players are included
+        assertNotNull(qualifiedPlayers);
+        assertEquals(1, qualifiedPlayers.size());
+        assertTrue(qualifiedPlayers.contains(players.get(0)));
+    }
+    @Test
+    void PlayersAllInBoolean_Success() {
+        // Setup:
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        Player player1 = new Player(game, "Player1", 100,  "token", cards);
+        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        player1.setAllIn(true);
+        player2.setAllIn(false);
+
+
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+        players.add(player2);
+
+        // Call the method
+        boolean result = gameService.playersAllIn(players);
+        // Asserts: Check that only the correct players are included
+        assertTrue(result);
+    }
+    @Test
+    void PlayersAllInOrFoldedBoolean_Success() {
+        // Setup:
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        Player player1 = new Player(game, "Player1", 100,  "token", cards);
+        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        player1.setAllIn(true);
+        player2.setFolded(true);
+
+
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+        players.add(player2);
+        when(game.getPlayers()).thenReturn(players);
+
+        // Call the method
+        boolean result = gameService.playersFoldedOrAllIn(game);
+        // Asserts:
+        assertTrue(result);
+    }
+    @Test
+    void setIndextoSBPlayer_Success() {
+        // Setup:
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        Player player1 = new Player(game, "Player1", 100,  "token", cards);
+        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        player1.setAllIn(false);
+        player1.setFolded(false);
+
+
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+        players.add(player2);
+        when(game.getSmallBlindPlayer()).thenReturn(player1);
+        when(game.getPlayers()).thenReturn(players);
+
+        // Call the method
+        gameService.setIndexToSBPlayer(game);
+        // Asserts:
+        verify(game).setPlayerTurnIndex(0);
+    }
+    @Test
+    void setRaisePlayerCorrectSB_Success() {
+        // Setup:
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        Player player1 = new Player(game, "Player1", 100,  "token", cards);
+        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        player1.setAllIn(false);
+        player1.setFolded(false);
+
+
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+        players.add(player2);
+        when(game.getSmallBlindPlayer()).thenReturn(player1);
+        when(game.getPlayers()).thenReturn(players);
+
+        // Call the method
+        Player raisePlayer = gameService.setRaisePlayerCorrect(game);
+        // Asserts:
+        assertEquals(player1, raisePlayer);
+    }
+    @Test
+    void setRaisePlayerCorrectOtherPlayer_Success() {
+        // Setup:
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        Player player1 = new Player(game, "Player1", 100,  "token", cards);
+        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        player1.setAllIn(true);
+        player1.setFolded(false);
+        player2.setAllIn(false);
+        player2.setFolded(false);
+
+
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+        players.add(player2);
+        when(game.getSmallBlindPlayer()).thenReturn(player1);
+        when(game.getPlayers()).thenReturn(players);
+
+        // Call the method
+        Player raisePlayer = gameService.setRaisePlayerCorrect(game);
+        // Asserts:
+        assertEquals(player2, raisePlayer);
+    }
+
 
 
     @Test
@@ -352,7 +577,7 @@ public class GameServiceTest {
 
         gameService.updateGame(gameId, betAmount);
 
-        Mockito.verify(table.getPotByName("mainPot"), Mockito.times(1)).updateMoney(betAmount); // Check if table.updateMoney was called with the correct amount
+        verify(table.getPotByName("mainPot"), Mockito.times(1)).updateMoney(betAmount); // Check if table.updateMoney was called with the correct amount
     }
 
 
@@ -583,8 +808,8 @@ public class GameServiceTest {
         assertEquals(0, user.getTries());
 
         //insure correct methods were called
-        Mockito.verify(game).setWinner(eq(winner));
-        Mockito.verify(gameService).deleteGame(eq(game), Mockito.anyInt());
+        verify(game).setWinner(eq(winner));
+        verify(gameService).deleteGame(eq(game), Mockito.anyInt());
     }
 
     @Test
@@ -664,8 +889,8 @@ public class GameServiceTest {
         assertEquals(2, user3.getTries());
 
         //insure correct methods were called
-        Mockito.verify(game).setWinner(eq(winner2));
-        Mockito.verify(gameService).deleteGame(eq(game), Mockito.anyInt());
+        verify(game).setWinner(eq(winner2));
+        verify(gameService).deleteGame(eq(game), Mockito.anyInt());
     }
 
     @Test
@@ -730,8 +955,8 @@ public class GameServiceTest {
         assertEquals(0, user.getTries());
 
         //insure correct methods were called
-        Mockito.verify(game).setWinner(eq(winner));
-        Mockito.verify(gameService).deleteGame(eq(game), Mockito.anyInt());
+        verify(game).setWinner(eq(winner));
+        verify(gameService).deleteGame(eq(game), Mockito.anyInt());
     }
 
     @Test
@@ -809,8 +1034,8 @@ public class GameServiceTest {
         assertEquals(2, user3.getTries());
 
         //insure correct methods were called
-        Mockito.verify(game).setWinner(eq(winner));
-        Mockito.verify(gameService).deleteGame(eq(game), Mockito.anyInt());
+        verify(game).setWinner(eq(winner));
+        verify(gameService).deleteGame(eq(game), Mockito.anyInt());
     }
 
     @Test
