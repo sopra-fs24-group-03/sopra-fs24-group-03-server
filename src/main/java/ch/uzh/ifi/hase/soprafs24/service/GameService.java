@@ -24,9 +24,13 @@ import ch.uzh.ifi.hase.soprafs24.rest.mapper.DTOMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
@@ -45,6 +49,8 @@ import static ch.uzh.ifi.hase.soprafs24.hand.PlayerHand.*;
 @Transactional
 public class GameService {
     private final GameRepository gameRepository;
+
+    private final RestTemplate restTemplate = new RestTemplate();
     private final UserRepository userRepository;
     private final UserService userService;
     private final LobbyRepository lobbyRepository;
@@ -126,11 +132,17 @@ public class GameService {
         GamePutDTO move = new GamePutDTO();
         move.setMove(Moves.Fold);
         Runnable foldTask = () -> {
-            int bet = turn(move, game_id, token);
-            updateGame(game_id, bet);
+            String url = "sopra-fs24-group-03-server.oa.r.appspot.com/games/{gameId}"; //Localhost:"http://localhost:8080/games/{gameId}"
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("token", token);
+            HttpEntity<GamePutDTO> request = new HttpEntity<>(move, headers);
+
+            restTemplate.put(url, request, game_id);
+
 
         };
-        currentFoldTask = scheduler.schedule(foldTask, 1000, TimeUnit.SECONDS);
+        currentFoldTask = scheduler.schedule(foldTask, 30, TimeUnit.SECONDS);
     }
 
 
