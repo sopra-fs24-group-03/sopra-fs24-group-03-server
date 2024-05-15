@@ -105,13 +105,13 @@ public class GameService {
         Player player = game.getPlayerByUsername(username);
 
         //call the correct method and return the amount bet, if nothing is bet return 0
-        HashMap<Moves, Actions> Actions = new HashMap<>(){{
-            put(Raise, new Raise());
-            put(Check, new Check());
-            put(Call, new Call());
-            put(Fold, new Fold());
-        }};
-        int amount = Actions.get(move.getMove()).makeMove(player, move, game);
+        HashMap<Moves, Actions> actions = new HashMap<>();
+        actions.put(Raise, new Raise());
+        actions.put(Check, new Check());
+        actions.put(Call, new Call());
+        actions.put(Fold, new Fold());
+
+        int amount = actions.get(move.getMove()).makeMove(player, move, game);
 
         //For very first betting round, so that Bigblind can play again, it sets the raiseplayer to 1 in front of bigblind so that he can make another move and then new betting round starts
         if(game.getGameTable().getOpenCards().isEmpty() && game.getRaisePlayer()==null && move.getMove() != Fold && !player.isAllIn()){
@@ -503,17 +503,17 @@ public class GameService {
             }
         });
 
-        List<CheckHand> hands = new ArrayList<>(){{
-            add(new RoyaleFlush());
-            add(new StraightFlush());
-            add(new FourCards());
-            add(new FullHouse());
-            add(new Flush());
-            add(new Straight());
-            add(new ThreeOfKind());
-            add(new TwoPair());
-            add(new Pair());
-        }};
+        List<CheckHand> hands = new ArrayList<>();
+        hands.add(new RoyaleFlush());
+        hands.add(new StraightFlush());
+        hands.add(new FourCards());
+        hands.add(new FullHouse());
+        hands.add(new Flush());
+        hands.add(new Straight());
+        hands.add(new ThreeOfKind());
+        hands.add(new TwoPair());
+        hands.add(new Pair());
+
 
         //Iterate over the hands list and call the correct method
         for (CheckHand hand : hands) {
