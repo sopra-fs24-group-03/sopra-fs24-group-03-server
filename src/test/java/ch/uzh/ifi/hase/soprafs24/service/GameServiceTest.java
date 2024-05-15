@@ -69,55 +69,58 @@ public class GameServiceTest {
         String validToken = "valid-token";
         Mockito.doNothing().when(userService).authenticateUser(validToken);
         when(gameRepository.findById(gameId)).thenReturn(game);
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("kS", "image"));
             add(new Card("KH", "image"));
         }};
 
-        List<Player> players = Arrays.asList(new Player(game, "Player1", 100,  validToken, cards), new Player(game, "Player2", 100,  "other", cards));
+        List<Player> players = Arrays.asList(new Player(game, "Player1", 100, validToken, cards), new Player(game, "Player2", 100, "other", cards));
         when(game.getPlayers()).thenReturn(players);
 
 
         Game retrievedGame = gameService.getGameById(gameId, validToken);
         assertNotNull(retrievedGame);
     }
+
     @Test
     void getGameById_Fail() {
         long gameId = 1L;
         String invalidToken = "invalid-token";
         when(gameRepository.findById(gameId)).thenReturn(game);
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
-                ()->  gameService.getGameById(gameId, invalidToken)
+                () -> gameService.getGameById(gameId, invalidToken)
         );
 
         assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
 
     }
+
     @Test
     void getPlayerByToken_Success() {
         String validToken = "valid-token";
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("kS", "image"));
             add(new Card("KH", "image"));
         }};
 
-        List<Player> players = Arrays.asList(new Player(game, "Player1", 100,  validToken, cards), new Player(game, "Player2", 100,  "other", cards));
+        List<Player> players = Arrays.asList(new Player(game, "Player1", 100, validToken, cards), new Player(game, "Player2", 100, "other", cards));
 
         Player retrievedPlayer = gameService.getPlayerByToken(players, validToken);
 
         assertNotNull(retrievedPlayer);
         assertEquals("valid-token", retrievedPlayer.getToken());
     }
+
     @Test
     void filterPlayersAllIn_Success() {
         // Setup:
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("kS", "image"));
             add(new Card("KH", "image"));
         }};
 
-        Player player1 = new Player(game, "Player1", 100,  "token", cards);
-        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        Player player1 = new Player(game, "Player1", 100, "token", cards);
+        Player player2 = new Player(game, "Player2", 100, "other", cards);
         player1.setAllIn(true);
         player1.setTotalBettingInCurrentRound(100);
         player2.setAllIn(false);
@@ -135,16 +138,17 @@ public class GameServiceTest {
         assertEquals(1, qualifiedPlayers.size());
         assertTrue(qualifiedPlayers.contains(players.get(0)));
     }
+
     @Test
     void filterPlayersNotFolded_Success() {
         // Setup:
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("kS", "image"));
             add(new Card("KH", "image"));
         }};
 
-        Player player1 = new Player(game, "Player1", 100,  "token", cards);
-        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        Player player1 = new Player(game, "Player1", 100, "token", cards);
+        Player player2 = new Player(game, "Player2", 100, "other", cards);
         player1.setFolded(false); // Player1 has not folded
         player2.setFolded(true);  // Player2 has folded
 
@@ -160,16 +164,17 @@ public class GameServiceTest {
         assertEquals(1, qualifiedPlayers.size());
         assertTrue(qualifiedPlayers.contains(players.get(0)));
     }
+
     @Test
     void PlayersAllInBoolean_Success() {
         // Setup:
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("kS", "image"));
             add(new Card("KH", "image"));
         }};
 
-        Player player1 = new Player(game, "Player1", 100,  "token", cards);
-        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        Player player1 = new Player(game, "Player1", 100, "token", cards);
+        Player player2 = new Player(game, "Player2", 100, "other", cards);
         player1.setAllIn(true);
         player2.setAllIn(false);
 
@@ -183,16 +188,17 @@ public class GameServiceTest {
         // Asserts: Check that only the correct players are included
         assertTrue(result);
     }
+
     @Test
     void PlayersAllInOrFoldedBoolean_Success() {
         // Setup:
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("kS", "image"));
             add(new Card("KH", "image"));
         }};
 
-        Player player1 = new Player(game, "Player1", 100,  "token", cards);
-        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        Player player1 = new Player(game, "Player1", 100, "token", cards);
+        Player player2 = new Player(game, "Player2", 100, "other", cards);
         player1.setAllIn(true);
         player2.setFolded(true);
 
@@ -207,16 +213,17 @@ public class GameServiceTest {
         // Asserts:
         assertTrue(result);
     }
+
     @Test
     void setIndextoSBPlayer_Success() {
         // Setup:
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("kS", "image"));
             add(new Card("KH", "image"));
         }};
 
-        Player player1 = new Player(game, "Player1", 100,  "token", cards);
-        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        Player player1 = new Player(game, "Player1", 100, "token", cards);
+        Player player2 = new Player(game, "Player2", 100, "other", cards);
         player1.setAllIn(false);
         player1.setFolded(false);
 
@@ -232,16 +239,17 @@ public class GameServiceTest {
         // Asserts:
         verify(game).setPlayerTurnIndex(0);
     }
+
     @Test
     void setRaisePlayerCorrectSB_Success() {
         // Setup:
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("kS", "image"));
             add(new Card("KH", "image"));
         }};
 
-        Player player1 = new Player(game, "Player1", 100,  "token", cards);
-        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        Player player1 = new Player(game, "Player1", 100, "token", cards);
+        Player player2 = new Player(game, "Player2", 100, "other", cards);
         player1.setAllIn(false);
         player1.setFolded(false);
 
@@ -257,16 +265,17 @@ public class GameServiceTest {
         // Asserts:
         assertEquals(player1, raisePlayer);
     }
+
     @Test
     void setRaisePlayerCorrectOtherPlayer_Success() {
         // Setup:
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("kS", "image"));
             add(new Card("KH", "image"));
         }};
 
-        Player player1 = new Player(game, "Player1", 100,  "token", cards);
-        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        Player player1 = new Player(game, "Player1", 100, "token", cards);
+        Player player2 = new Player(game, "Player2", 100, "other", cards);
         player1.setAllIn(true);
         player1.setFolded(false);
         player2.setAllIn(false);
@@ -286,13 +295,12 @@ public class GameServiceTest {
     }
 
 
-
     @Test
-    public void turn_foldSuccess(){
+    public void turn_foldSuccess() {
         User user = new User();
         //List<User> = new ArrayList<>()
         user.setUsername("username");
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("kS", "image"));
             add(new Card("KH", "image"));
             add(new Card("QS", "image"));
@@ -315,19 +323,17 @@ public class GameServiceTest {
         Mockito.doNothing().when(gameService).startTimer(Mockito.anyLong(), Mockito.anyString());
 
 
-
-
         int bet = gameService.turn(move, 1, "token");
 
         assertEquals(0, bet);
     }
 
     @Test
-    public void turn_raiseSuccess(){
+    public void turn_raiseSuccess() {
         User user = new User();
 
         user.setUsername("username");
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("kS", "image"));
             add(new Card("KH", "image"));
             add(new Card("QS", "image"));
@@ -338,7 +344,6 @@ public class GameServiceTest {
         player1.setLastRaiseAmount(1);
         List<Player> players = new ArrayList<>();
         players.add(player1);
-
 
 
         when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
@@ -357,12 +362,12 @@ public class GameServiceTest {
         int bet = gameService.turn(move, 1, "token");
         assertEquals(100, bet);
     }
+
     @Test
-    public void turn_raiseFailNotEnoughMoney(){
+    public void turn_raiseFailNotEnoughMoney() {
         User user = new User();
 
         user.setUsername("username");
-
 
 
         when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
@@ -374,18 +379,17 @@ public class GameServiceTest {
 
 
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
-                ()-> gameService.turn(move, 1, "token")
+                () -> gameService.turn(move, 1, "token")
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
     }
 
     @Test
-    public void turn_raiseToLittleRaise(){
+    public void turn_raiseToLittleRaise() {
         User user = new User();
 
         user.setUsername("username");
-
 
 
         when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
@@ -396,18 +400,18 @@ public class GameServiceTest {
         when(move.getMove()).thenReturn(Moves.Raise);
 
 
-
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
-                ()-> gameService.turn(move, 1, "token")
+                () -> gameService.turn(move, 1, "token")
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
     }
+
     @Test
-    public void turn_checkSuccess(){
+    public void turn_checkSuccess() {
         User user = new User();
         user.setUsername("username");
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("kS", "image"));
             add(new Card("KH", "image"));
             add(new Card("QS", "image"));
@@ -433,8 +437,9 @@ public class GameServiceTest {
         int bet = gameService.turn(move, 1, "token");
         assertEquals(0, bet);
     }
+
     @Test
-    public void turn_checkFail(){
+    public void turn_checkFail() {
         User user = new User();
         user.setUsername("username");
 
@@ -448,17 +453,18 @@ public class GameServiceTest {
 
 
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
-                ()-> gameService.turn(move, 1, "token")
+                () -> gameService.turn(move, 1, "token")
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
     }
+
     @Test
-    public void turn_callSuccess(){
+    public void turn_callSuccess() {
         User user = new User();
 
         user.setUsername("username");
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("kS", "image"));
             add(new Card("KH", "image"));
             add(new Card("QS", "image"));
@@ -486,8 +492,9 @@ public class GameServiceTest {
         int bet = gameService.turn(move, 1, "token");
         assertEquals(100, bet);
     }
+
     @Test
-    public void turn_callFail(){
+    public void turn_callFail() {
         User user = new User();
 
         user.setUsername("username");
@@ -501,13 +508,14 @@ public class GameServiceTest {
 
 
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
-                ()-> gameService.turn(move, 1, "token")
+                () -> gameService.turn(move, 1, "token")
         );
 
         assertEquals(HttpStatus.BAD_REQUEST, e.getStatus());
     }
+
     @Test
-    public void authorize_Success(){
+    public void authorize_Success() {
         User user = new User();
         user.setUsername("username");
         Player player = mock(Player.class);
@@ -524,8 +532,9 @@ public class GameServiceTest {
         gameService.authorize("token", 1);
 
     }
+
     @Test
-    public void authorize_Unauthorized(){
+    public void authorize_Unauthorized() {
         User user = new User();
         user.setUsername("username");
         Player player = mock(Player.class);
@@ -542,14 +551,13 @@ public class GameServiceTest {
 
         //throws  error
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
-                ()->  gameService.authorize("token", 1)
+                () -> gameService.authorize("token", 1)
         );
 
         assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
 
 
     }
-
 
 
     @Test
@@ -582,7 +590,7 @@ public class GameServiceTest {
 
 
     @Test
-    public void evaluateHand_flush(){
+    public void evaluateHand_flush() {
         List<Card> playerCards = Stream.of(
                 new Card("AH", "image"),
                 new Card("2H", "image")
@@ -608,7 +616,7 @@ public class GameServiceTest {
     }
 
     @Test
-    public void evaluateHand_highCard(){
+    public void evaluateHand_highCard() {
         List<Card> playerCards = Stream.of(
                 new Card("7H", "image"),
                 new Card("2H", "image")
@@ -635,9 +643,9 @@ public class GameServiceTest {
 
 
     @Test
-    public void winningCondition(){
+    public void winningCondition() {
         //Setup
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("3S", "image"));
             add(new Card("4D", "image"));
             add(new Card("KS", "image"));
@@ -670,9 +678,9 @@ public class GameServiceTest {
     }
 
     @Test
-    public void winningCondition_draw(){
+    public void winningCondition_draw() {
         //Setup
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("AS", "image"));
             add(new Card("KD", "image"));
             add(new Card("0S", "image"));
@@ -701,14 +709,14 @@ public class GameServiceTest {
 
 
         assertEquals(2, result.size());
-        assert(result.contains(playerHand2));
-        assert(result.contains(playerHand1));
+        assert (result.contains(playerHand2));
+        assert (result.contains(playerHand1));
     }
 
     @Test
-    public void winningCondition_sameHand(){
+    public void winningCondition_sameHand() {
         //Setup
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("AS", "image"));
             add(new Card("KD", "image"));
             add(new Card("0S", "image"));
@@ -716,7 +724,7 @@ public class GameServiceTest {
             add(new Card("3H", "image"));
         }};
 
-        List<Card> cards2 = new ArrayList<>(){{
+        List<Card> cards2 = new ArrayList<>() {{
             add(new Card("AS", "image"));
             add(new Card("KD", "image"));
             add(new Card("0S", "image"));
@@ -748,17 +756,17 @@ public class GameServiceTest {
     }
 
     @Test
-    public void endGame_noRetry(){
-        List<Player> players = new ArrayList<>(){{
+    public void endGame_noRetry() {
+        List<Player> players = new ArrayList<>() {{
             add(mock(Player.class));
             add(mock(Player.class));
         }};
 
-        List<PlayerHand> winner = new ArrayList<>(){{
+        List<PlayerHand> winner = new ArrayList<>() {{
             add(mock(PlayerHand.class));
         }};
 
-        List<Pot> pots = new ArrayList<>(){{
+        List<Pot> pots = new ArrayList<>() {{
             add(new Pot(1000, "mainPot"));
         }};
 
@@ -813,22 +821,22 @@ public class GameServiceTest {
     }
 
     @Test
-    public void endGame_multiplePots(){
-        List<Player> players = new ArrayList<>(){{
+    public void endGame_multiplePots() {
+        List<Player> players = new ArrayList<>() {{
             add(mock(Player.class));
             add(mock(Player.class));
             add(mock(Player.class));
         }};
 
-        List<PlayerHand> winner1 = new ArrayList<>(){{
+        List<PlayerHand> winner1 = new ArrayList<>() {{
             add(mock(PlayerHand.class));
         }};
 
-        List<PlayerHand> winner2 = new ArrayList<>(){{
+        List<PlayerHand> winner2 = new ArrayList<>() {{
             add(mock(PlayerHand.class));
         }};
 
-        List<Pot> pots = new ArrayList<>(){{
+        List<Pot> pots = new ArrayList<>() {{
             add(new Pot(1000, "mainPot"));
             add(new Pot(500, "sidepot1"));
         }};
@@ -894,17 +902,17 @@ public class GameServiceTest {
     }
 
     @Test
-    public void endGame_userRetry(){
-        List<Player> players = new ArrayList<>(){{
+    public void endGame_userRetry() {
+        List<Player> players = new ArrayList<>() {{
             add(mock(Player.class));
             add(mock(Player.class));
         }};
 
-        List<PlayerHand> winner = new ArrayList<>(){{
+        List<PlayerHand> winner = new ArrayList<>() {{
             add(mock(PlayerHand.class));
         }};
 
-        List<Pot> pots = new ArrayList<>(){{
+        List<Pot> pots = new ArrayList<>() {{
             add(new Pot(1000, "mainPot"));
         }};
 
@@ -960,19 +968,19 @@ public class GameServiceTest {
     }
 
     @Test
-    public void endGame_draw(){
-        List<Player> players = new ArrayList<>(){{
+    public void endGame_draw() {
+        List<Player> players = new ArrayList<>() {{
             add(mock(Player.class));
             add(mock(Player.class));
             add(mock(Player.class));
         }};
 
-        List<PlayerHand> winner = new ArrayList<>(){{
+        List<PlayerHand> winner = new ArrayList<>() {{
             add(mock(PlayerHand.class));
             add(mock(PlayerHand.class));
         }};
 
-        List<Pot> pots = new ArrayList<>(){{
+        List<Pot> pots = new ArrayList<>() {{
             add(new Pot(1000, "mainPot"));
         }};
 
@@ -1022,7 +1030,6 @@ public class GameServiceTest {
         when(gameService.winningCondition(pots.get(0))).thenReturn(winner);
 
 
-
         gameService.endGame(0L);
 
         //insure user money has been updated
@@ -1039,7 +1046,7 @@ public class GameServiceTest {
     }
 
     @Test
-    public void calculatePotsTwoAllIn(){
+    public void calculatePotsTwoAllIn() {
         Game game = mock(Game.class);
         Card card = mock(Card.class);
         List<Card> cards = new ArrayList<>();
@@ -1050,19 +1057,18 @@ public class GameServiceTest {
         when(game.getGameTable()).thenReturn(gameTable);
 
         // Create mock players
-        Player player1 = new Player(game,"player1",100,"token1",cards);
+        Player player1 = new Player(game, "player1", 100, "token1", cards);
         player1.setTotalBettingInCurrentRound(100);
         player1.setAllIn(false);
-        Player player2 = new Player(game,"player2",0,"token2",cards);
+        Player player2 = new Player(game, "player2", 0, "token2", cards);
         player2.setTotalBettingInCurrentRound(50);
         player2.setAllIn(true);
-        Player player3 = new Player(game,"player3",0,"token3",cards);
+        Player player3 = new Player(game, "player3", 0, "token3", cards);
         player3.setTotalBettingInCurrentRound(30);
         player3.setAllIn(true);
-        Player player4 = new Player(game,"player4",1000,"token4",cards);
+        Player player4 = new Player(game, "player4", 1000, "token4", cards);
         player4.setTotalBettingInCurrentRound(100);
         player4.setAllIn(false);
-
 
 
         List<Player> allInPlayersOrdered = new ArrayList<>();
@@ -1076,7 +1082,7 @@ public class GameServiceTest {
         allNotFoldedPlayers.add(player4);
 
         List<Pot> pots = new ArrayList<>();
-        Pot mainPot = new Pot(280,"mainPot");
+        Pot mainPot = new Pot(280, "mainPot");
         mainPot.setEligiblePlayers(allNotFoldedPlayers);
         pots.add(mainPot);
         gameTable.setPots(pots);
@@ -1090,7 +1096,7 @@ public class GameServiceTest {
     }
 
     @Test
-    public void calculatePotsSameAllIn(){
+    public void calculatePotsSameAllIn() {
         Game game = mock(Game.class);
         Card card = mock(Card.class);
         List<Card> cards = new ArrayList<>();
@@ -1099,22 +1105,22 @@ public class GameServiceTest {
         when(game.getGameTable()).thenReturn(gameTable);
 
         // Create mock players
-        Player player1 = new Player(game,"player1",0,"token1",cards);
+        Player player1 = new Player(game, "player1", 0, "token1", cards);
         player1.setTotalBettingInCurrentRound(150);
         player1.setAllIn(true);
-        Player player2 = new Player(game,"player2",0,"token2",cards);
+        Player player2 = new Player(game, "player2", 0, "token2", cards);
         player2.setTotalBettingInCurrentRound(50);
         player2.setAllIn(true);
-        Player player3 = new Player(game,"player3",20,"token3",cards);
+        Player player3 = new Player(game, "player3", 20, "token3", cards);
         player3.setTotalBettingInCurrentRound(200);
         player3.setAllIn(false);
-        Player player4 = new Player(game,"player4",1000,"token4",cards);
+        Player player4 = new Player(game, "player4", 1000, "token4", cards);
         player4.setTotalBettingInCurrentRound(200);
         player4.setAllIn(false);
-        Player player5 = new Player(game,"player5",0,"token5",cards);
+        Player player5 = new Player(game, "player5", 0, "token5", cards);
         player5.setTotalBettingInCurrentRound(150);
         player5.setAllIn(true);
-        Player player6 = new Player(game,"player6",1000,"token6",cards);
+        Player player6 = new Player(game, "player6", 1000, "token6", cards);
         player6.setTotalBettingInCurrentRound(200);
         player6.setAllIn(false);
 
@@ -1132,7 +1138,7 @@ public class GameServiceTest {
         allNotFoldedPlayers.add(player6);
 
         List<Pot> pots = new ArrayList<>();
-        Pot mainPot = new Pot(0,"mainPot");
+        Pot mainPot = new Pot(0, "mainPot");
         mainPot.setEligiblePlayers(allNotFoldedPlayers);
         mainPot.setMoney(950);
         pots.add(mainPot);
@@ -1198,13 +1204,13 @@ public class GameServiceTest {
         game.setPlayerTurnIndex(0);
         List<Player> players = new ArrayList<>();
         //players
-        List<Card> cards = new ArrayList<>(){{
+        List<Card> cards = new ArrayList<>() {{
             add(new Card("kS", "image"));
             add(new Card("KH", "image"));
         }};
-        Player player1 = new Player(game,"player1",0,"token1",cards);
+        Player player1 = new Player(game, "player1", 0, "token1", cards);
         player1.setId(1L);
-        Player player2 = new Player(game,"player2",0,"token2",cards);
+        Player player2 = new Player(game, "player2", 0, "token2", cards);
         player2.setId(2L);
         players.add(player1);
         players.add(player2);
@@ -1221,6 +1227,7 @@ public class GameServiceTest {
         assertTrue(result.get(0).isTurn());
 
     }
+
     @Test
     public void testGameNotFinished() {
         // Setup
@@ -1235,6 +1242,45 @@ public class GameServiceTest {
 
         assertNull(gameToReturn.getWinner());
         assertTrue(gameToReturn.getNotFoldedPlayers().isEmpty());
+    }
+
+    @Test
+    public void testGameFinished() {
+        User user = new User();
+        User user2 = new User();
+        List<User> users = new ArrayList<>();
+        users.add(user);
+        users.add(user2);
+        Game game = new Game(users);
+        game.setPlayerTurnIndex(0);
+        game.setGameFinished(true);
+        List<Player> players = new ArrayList<>();
+
+        List<Card> cards = new ArrayList<>() {{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+        Player player1 = new Player(game, "player1", 0, "token1", cards);
+        player1.setId(1L);
+        player1.setFolded(true);
+        Player player2 = new Player(game, "player2", 0, "token2", cards);
+        player2.setId(2L);
+        player2.setFolded(false);
+        players.add(player1);
+        players.add(player2);
+        List<Player> winners = new ArrayList<>();
+        winners.add(player2);
+        game.setWinnerTest(winners);
+
+
+        GameGetDTO gameToReturn = new GameGetDTO();
+        gameService.addFinishedGamePlayers(gameToReturn, game, players);
+
+        assertEquals(player1.getId(), gameToReturn.getNotFoldedPlayers().get(0).getId());
+        assertTrue(gameToReturn.getNotFoldedPlayers().get(0).getCardsImage().isEmpty());
+        assertEquals(player2.getId(), gameToReturn.getWinner().get(0).getId());
+        assertTrue(gameToReturn.getWinner().get(0).getCardsImage().isEmpty());
+
     }
 
 
