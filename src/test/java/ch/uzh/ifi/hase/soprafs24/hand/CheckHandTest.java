@@ -1,22 +1,19 @@
-package ch.uzh.ifi.hase.soprafs24.helpers;
+package ch.uzh.ifi.hase.soprafs24.hand;
 
 import ch.uzh.ifi.hase.soprafs24.constant.Hand;
-import ch.uzh.ifi.hase.soprafs24.constant.UserStatus;
-import ch.uzh.ifi.hase.soprafs24.entity.Game;
 import ch.uzh.ifi.hase.soprafs24.entity.Player;
-import ch.uzh.ifi.hase.soprafs24.entity.User;
+import ch.uzh.ifi.hase.soprafs24.hand.CheckHand.*;
+import ch.uzh.ifi.hase.soprafs24.helpers.Card;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static ch.uzh.ifi.hase.soprafs24.helpers.Card.getValue;
-import static ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 
-public class PlayerHandTest {
+public class CheckHandTest {
 
     @Test
     public void isStraight(){
@@ -35,7 +32,7 @@ public class PlayerHandTest {
         //Mock a player object
         Player player = mock(Player.class);
 
-        PlayerHand result = straight(cards,player);
+        PlayerHand result = new Straight().checkHand(cards, player);
         assertNotNull(result);
         assertEquals(5,result.getCards().size());
         assertEquals(result.getHand(), Hand.STRAIGHT);
@@ -64,7 +61,7 @@ public class PlayerHandTest {
         Player player = mock(Player.class);
 
 
-        PlayerHand result = straight(cards,player);
+        PlayerHand result = new Straight().checkHand(cards,player);
         assertNotNull(result);
         assertEquals(result.getCards().size(),5);
         assertEquals(Hand.STRAIGHT,result.getHand());
@@ -93,7 +90,7 @@ public class PlayerHandTest {
         Player player = mock(Player.class);
 
 
-        PlayerHand result = straight(cards,player);
+        PlayerHand result = new Straight().checkHand(cards,player);
         assertNull(result);
     }
 
@@ -115,7 +112,7 @@ public class PlayerHandTest {
         Player player = mock(Player.class);
 
         //execute the method
-        PlayerHand result = flush(cards, player);
+        PlayerHand result = new Flush().checkHand(cards, player);
 
         //check result
         assertNotNull(result);
@@ -147,7 +144,7 @@ public class PlayerHandTest {
         Player player = mock(Player.class);
 
         //execute the method
-        PlayerHand result = flush(cards, player);
+        PlayerHand result = new Flush().checkHand(cards, player);
 
         //check result
         assertNull(result);
@@ -172,7 +169,7 @@ public class PlayerHandTest {
         Player player = mock(Player.class);
 
         //execute the method
-        PlayerHand result = straightFlush(cards, player);
+        PlayerHand result = new StraightFlush().checkHand(cards, player);
 
         //check result
         assertNotNull(result);
@@ -204,7 +201,7 @@ public class PlayerHandTest {
         Player player = mock(Player.class);
 
         //execute the method
-        PlayerHand result = straightFlush(cards, player);
+        PlayerHand result = new StraightFlush().checkHand(cards, player);
 
         //check result
         assertNotNull(result);
@@ -236,7 +233,7 @@ public class PlayerHandTest {
         Player player = mock(Player.class);
 
         //execute the method
-        PlayerHand result = straightFlush(cards, player);
+        PlayerHand result = new StraightFlush().checkHand(cards, player);
 
         //check result
         assertNull(result);
@@ -260,7 +257,7 @@ public class PlayerHandTest {
         Player player = mock(Player.class);
 
         //execute the method
-        PlayerHand result = royalFlush(cards, player);
+        PlayerHand result = new RoyaleFlush().checkHand(cards, player);
 
         //check result
         assertNotNull(result);
@@ -291,7 +288,7 @@ public class PlayerHandTest {
         Player player = mock(Player.class);
 
         //execute the method
-        PlayerHand result = royalFlush(cards, player);
+        PlayerHand result = new RoyaleFlush().checkHand(cards, player);
 
         //check result
         assertNull(result);
@@ -315,7 +312,7 @@ public class PlayerHandTest {
         Player player = mock(Player.class);
 
         //execute the method
-        PlayerHand result = fullHouse(cards, player);
+        PlayerHand result = new FullHouse().checkHand(cards, player);
 
         //check result
         assertNotNull(result);
@@ -345,12 +342,227 @@ public class PlayerHandTest {
         Player player = mock(Player.class);
 
         //execute the method
-        PlayerHand result = fullHouse(cards, player);
+        PlayerHand result = new FullHouse().checkHand(cards, player);
+
+        //check result
+        assertNull(result);
+    }
+
+    @Test
+    public void FourCards_test(){
+
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("4S", "image"));
+            add(new Card("4H", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("2D", "image"));
+        }};
+
+        //Mock a player object
+        Player player = mock(Player.class);
+
+        //execute the method
+        PlayerHand result = new FourCards().checkHand(cards, player);
+
+        //check result
+        assertNotNull(result);
+        assertEquals(Hand.FOUR_OF_A_KIND, result.getHand());
+
+        //insure correct order, first comes the three of a kind, then the pair
+        assertEquals(4, getValue(result.getCards().get(0)));
+        assertEquals(14, getValue(result.getCards().get(4)));
+        assertEquals(player, result.getPlayer());
+    }
+
+    @Test
+    public void notFourCards_test(){
+
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("4S", "image"));
+            add(new Card("4H", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("3D", "image"));
+            add(new Card("2D", "image"));
+        }};
+
+        //Mock a player object
+        Player player = mock(Player.class);
+
+        //execute the method
+        PlayerHand result = new FourCards().checkHand(cards, player);
+
+        //check result
+        assertNull(result);
+    }
+
+    @Test
+    public void ThreeOfAKind_test(){
+
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("0S", "image"));
+            add(new Card("4H", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("2D", "image"));
+        }};
+
+        //Mock a player object
+        Player player = mock(Player.class);
+
+        //execute the method
+        PlayerHand result = new ThreeOfKind().checkHand(cards, player);
+
+        //check result
+        assertNotNull(result);
+        assertEquals(Hand.THREE_OF_A_KIND, result.getHand());
+
+        //insure correct order, first comes the three of a kind, then the pair
+        assertEquals(4, getValue(result.getCards().get(0)));
+        assertEquals(14, getValue(result.getCards().get(3)));
+        assertEquals(player, result.getPlayer());
+    }
+
+    @Test
+    public void notThreeOfAKind_test(){
+
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("0S", "image"));
+            add(new Card("9H", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("2D", "image"));
+        }};
+
+        //Mock a player object
+        Player player = mock(Player.class);
+
+        //execute the method
+        PlayerHand result = new ThreeOfKind().checkHand(cards, player);
+
+        //check result
+        assertNull(result);
+    }
+
+    @Test
+    public void TwoPair_test(){
+
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("0S", "image"));
+            add(new Card("0H", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("2D", "image"));
+        }};
+
+        //Mock a player object
+        Player player = mock(Player.class);
+
+        //execute the method
+        PlayerHand result = new TwoPair().checkHand(cards, player);
+
+        //check result
+        assertNotNull(result);
+        assertEquals(Hand.TWO_PAIR, result.getHand());
+
+        //insure correct order, first comes the three of a kind, then the pair
+        assertEquals(10, getValue(result.getCards().get(0)));
+        assertEquals(4, getValue(result.getCards().get(2)));
+        assertEquals(14, getValue(result.getCards().get(4)));
+        assertEquals(player, result.getPlayer());
+    }
+
+    @Test
+    public void notTwoPair_test(){
+
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("0S", "image"));
+            add(new Card("9H", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("2D", "image"));
+        }};
+
+        //Mock a player object
+        Player player = mock(Player.class);
+
+        //execute the method
+        PlayerHand result = new TwoPair().checkHand(cards, player);
 
         //check result
         assertNull(result);
     }
 
 
+    @Test
+    public void Pair_test(){
 
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("0S", "image"));
+            add(new Card("0H", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("3D", "image"));
+            add(new Card("2D", "image"));
+        }};
+
+        //Mock a player object
+        Player player = mock(Player.class);
+
+        //execute the method
+        PlayerHand result = new Pair().checkHand(cards, player);
+
+        //check result
+        assertNotNull(result);
+        assertEquals(Hand.ONE_PAIR, result.getHand());
+
+        //insure correct order, first comes the three of a kind, then the pair
+        assertEquals(10, getValue(result.getCards().get(0)));
+        assertEquals(14, getValue(result.getCards().get(2)));
+        assertEquals(player, result.getPlayer());
+    }
+
+    @Test
+    public void notPair_test(){
+
+        //create sorted List of cards
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("AS", "image"));
+            add(new Card("KH", "image"));
+            add(new Card("0S", "image"));
+            add(new Card("9H", "image"));
+            add(new Card("4D", "image"));
+            add(new Card("3D", "image"));
+            add(new Card("2D", "image"));
+        }};
+
+        //Mock a player object
+        Player player = mock(Player.class);
+
+        //execute the method
+        PlayerHand result = new Pair().checkHand(cards, player);
+
+        //check result
+        assertNull(result);
+    }
 }

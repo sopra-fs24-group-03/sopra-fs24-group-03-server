@@ -4,10 +4,13 @@ import ch.uzh.ifi.hase.soprafs24.constant.Hand;
 import ch.uzh.ifi.hase.soprafs24.constant.Moves;
 import ch.uzh.ifi.hase.soprafs24.entity.*;
 import ch.uzh.ifi.hase.soprafs24.helpers.Card;
-import ch.uzh.ifi.hase.soprafs24.helpers.PlayerHand;
+import ch.uzh.ifi.hase.soprafs24.hand.PlayerHand;
 import ch.uzh.ifi.hase.soprafs24.repository.GameRepository;
 import ch.uzh.ifi.hase.soprafs24.repository.UserRepository;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GameGetDTO;
 import ch.uzh.ifi.hase.soprafs24.rest.dto.GameDTO.GamePutDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPublicGetDTO;
+import ch.uzh.ifi.hase.soprafs24.rest.dto.PlayerDTO.PlayerPrivateGetDTO;
 import javassist.expr.NewArray;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,13 +20,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
@@ -34,6 +38,8 @@ public class GameServiceTest {
 
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private UserService userService;
 
     @Mock
     private GameRepository gameRepository;
@@ -52,9 +58,233 @@ public class GameServiceTest {
     @Mock
     private GamePutDTO move;
 
+
     @Spy
     @InjectMocks
     private GameService gameService;
+
+    @Test
+    void getGameById_Success() {
+        long gameId = 1L;
+        String validToken = "valid-token";
+        Mockito.doNothing().when(userService).authenticateUser(validToken);
+        when(gameRepository.findById(gameId)).thenReturn(game);
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        List<Player> players = Arrays.asList(new Player(game, "Player1", 100,  validToken, cards), new Player(game, "Player2", 100,  "other", cards));
+        when(game.getPlayers()).thenReturn(players);
+
+
+        Game retrievedGame = gameService.getGameById(gameId, validToken);
+        assertNotNull(retrievedGame);
+    }
+    @Test
+    void getGameById_Fail() {
+        long gameId = 1L;
+        String invalidToken = "invalid-token";
+        when(gameRepository.findById(gameId)).thenReturn(game);
+        ResponseStatusException e = assertThrows(ResponseStatusException.class,
+                ()->  gameService.getGameById(gameId, invalidToken)
+        );
+
+        assertEquals(HttpStatus.UNAUTHORIZED, e.getStatus());
+
+    }
+    @Test
+    void getPlayerByToken_Success() {
+        String validToken = "valid-token";
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        List<Player> players = Arrays.asList(new Player(game, "Player1", 100,  validToken, cards), new Player(game, "Player2", 100,  "other", cards));
+
+        Player retrievedPlayer = gameService.getPlayerByToken(players, validToken);
+
+        assertNotNull(retrievedPlayer);
+        assertEquals("valid-token", retrievedPlayer.getToken());
+    }
+    @Test
+    void filterPlayersAllIn_Success() {
+        // Setup:
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        Player player1 = new Player(game, "Player1", 100,  "token", cards);
+        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        player1.setAllIn(true);
+        player1.setTotalBettingInCurrentRound(100);
+        player2.setAllIn(false);
+        player2.setTotalBettingInCurrentRound(100);
+
+
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+        players.add(player2);
+        // Call the method to filter players
+        List<Player> qualifiedPlayers = gameService.filterPlayersAllIn(players);
+
+        // Asserts: Check that only the correct players are included
+        assertNotNull(qualifiedPlayers);
+        assertEquals(1, qualifiedPlayers.size());
+        assertTrue(qualifiedPlayers.contains(players.get(0)));
+    }
+    @Test
+    void filterPlayersNotFolded_Success() {
+        // Setup:
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        Player player1 = new Player(game, "Player1", 100,  "token", cards);
+        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        player1.setFolded(false); // Player1 has not folded
+        player2.setFolded(true);  // Player2 has folded
+
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+        players.add(player2);
+
+        // Call the method to filter players
+        List<Player> qualifiedPlayers = gameService.filterPlayersNotFolded(players);
+
+        // Asserts: Check that only the correct players are included
+        assertNotNull(qualifiedPlayers);
+        assertEquals(1, qualifiedPlayers.size());
+        assertTrue(qualifiedPlayers.contains(players.get(0)));
+    }
+    @Test
+    void PlayersAllInBoolean_Success() {
+        // Setup:
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        Player player1 = new Player(game, "Player1", 100,  "token", cards);
+        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        player1.setAllIn(true);
+        player2.setAllIn(false);
+
+
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+        players.add(player2);
+
+        // Call the method
+        boolean result = gameService.playersAllIn(players);
+        // Asserts: Check that only the correct players are included
+        assertTrue(result);
+    }
+    @Test
+    void PlayersAllInOrFoldedBoolean_Success() {
+        // Setup:
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        Player player1 = new Player(game, "Player1", 100,  "token", cards);
+        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        player1.setAllIn(true);
+        player2.setFolded(true);
+
+
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+        players.add(player2);
+        when(game.getPlayers()).thenReturn(players);
+
+        // Call the method
+        boolean result = gameService.playersFoldedOrAllIn(game);
+        // Asserts:
+        assertTrue(result);
+    }
+    @Test
+    void setIndextoSBPlayer_Success() {
+        // Setup:
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        Player player1 = new Player(game, "Player1", 100,  "token", cards);
+        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        player1.setAllIn(false);
+        player1.setFolded(false);
+
+
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+        players.add(player2);
+        when(game.getSmallBlindPlayer()).thenReturn(player1);
+        when(game.getPlayers()).thenReturn(players);
+
+        // Call the method
+        gameService.setIndexToSBPlayer(game);
+        // Asserts:
+        verify(game).setPlayerTurnIndex(0);
+    }
+    @Test
+    void setRaisePlayerCorrectSB_Success() {
+        // Setup:
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        Player player1 = new Player(game, "Player1", 100,  "token", cards);
+        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        player1.setAllIn(false);
+        player1.setFolded(false);
+
+
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+        players.add(player2);
+        when(game.getSmallBlindPlayer()).thenReturn(player1);
+        when(game.getPlayers()).thenReturn(players);
+
+        // Call the method
+        Player raisePlayer = gameService.setRaisePlayerCorrect(game);
+        // Asserts:
+        assertEquals(player1, raisePlayer);
+    }
+    @Test
+    void setRaisePlayerCorrectOtherPlayer_Success() {
+        // Setup:
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+
+        Player player1 = new Player(game, "Player1", 100,  "token", cards);
+        Player player2 = new Player(game, "Player2", 100,  "other", cards);
+        player1.setAllIn(true);
+        player1.setFolded(false);
+        player2.setAllIn(false);
+        player2.setFolded(false);
+
+
+        List<Player> players = new ArrayList<>();
+        players.add(player1);
+        players.add(player2);
+        when(game.getSmallBlindPlayer()).thenReturn(player1);
+        when(game.getPlayers()).thenReturn(players);
+
+        // Call the method
+        Player raisePlayer = gameService.setRaisePlayerCorrect(game);
+        // Asserts:
+        assertEquals(player2, raisePlayer);
+    }
+
 
 
     @Test
@@ -75,13 +305,13 @@ public class GameServiceTest {
         List<Player> players = new ArrayList<>();
         players.add(player);
 
-        Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
-        Mockito.when(move.getMove()).thenReturn(Moves.Fold);
-        Mockito.when(game.getGameTable()).thenReturn(table);
-        Mockito.when(table.getOpenCards()).thenReturn(cards);
-        Mockito.when(game.getPlayers()).thenReturn(players);
+        when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
+        when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        when(move.getMove()).thenReturn(Moves.Fold);
+        when(game.getGameTable()).thenReturn(table);
+        when(table.getOpenCards()).thenReturn(cards);
+        when(game.getPlayers()).thenReturn(players);
         Mockito.doNothing().when(gameService).startTimer(Mockito.anyLong(), Mockito.anyString());
 
 
@@ -111,17 +341,17 @@ public class GameServiceTest {
 
 
 
-        Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
-        Mockito.when(game.getBet()).thenReturn(0);
-        Mockito.when(player.getMoney()).thenReturn(2000);
-        Mockito.when(move.getAmount()).thenReturn(100);
-        Mockito.when(move.getMove()).thenReturn(Moves.Raise);
+        when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
+        when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        when(game.getBet()).thenReturn(0);
+        when(player.getMoney()).thenReturn(2000);
+        when(move.getAmount()).thenReturn(100);
+        when(move.getMove()).thenReturn(Moves.Raise);
         Mockito.doNothing().when(game).setBet(Mockito.anyInt());
-        Mockito.when(game.getGameTable()).thenReturn(table);
-        Mockito.when(table.getOpenCards()).thenReturn(cards);
-        Mockito.when(game.getPlayers()).thenReturn(players);
+        when(game.getGameTable()).thenReturn(table);
+        when(table.getOpenCards()).thenReturn(cards);
+        when(game.getPlayers()).thenReturn(players);
         Mockito.doNothing().when(gameService).startTimer(Mockito.anyLong(), Mockito.anyString());
 
         int bet = gameService.turn(move, 1, "token");
@@ -135,12 +365,12 @@ public class GameServiceTest {
 
 
 
-        Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
-        Mockito.when(player.getMoney()).thenReturn(50);
-        Mockito.when(move.getAmount()).thenReturn(100);
-        Mockito.when(move.getMove()).thenReturn(Moves.Raise);
+        when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
+        when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        when(player.getMoney()).thenReturn(50);
+        when(move.getAmount()).thenReturn(100);
+        when(move.getMove()).thenReturn(Moves.Raise);
 
 
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
@@ -158,12 +388,12 @@ public class GameServiceTest {
 
 
 
-        Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
-        Mockito.when(game.getBet()).thenReturn(100);
-        Mockito.when(move.getAmount()).thenReturn(0);
-        Mockito.when(move.getMove()).thenReturn(Moves.Raise);
+        when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
+        when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        when(game.getBet()).thenReturn(100);
+        when(move.getAmount()).thenReturn(0);
+        when(move.getMove()).thenReturn(Moves.Raise);
 
 
 
@@ -189,15 +419,15 @@ public class GameServiceTest {
         List<Player> players = new ArrayList<>();
         players.add(player1);
 
-        Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
-        Mockito.when(game.getBet()).thenReturn(0);
-        Mockito.when(move.getAmount()).thenReturn(0);
-        Mockito.when(move.getMove()).thenReturn(Moves.Check);
-        Mockito.when(game.getGameTable()).thenReturn(table);
-        Mockito.when(table.getOpenCards()).thenReturn(cards);
-        Mockito.when(game.getPlayers()).thenReturn(players);
+        when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
+        when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        when(game.getBet()).thenReturn(0);
+        when(move.getAmount()).thenReturn(0);
+        when(move.getMove()).thenReturn(Moves.Check);
+        when(game.getGameTable()).thenReturn(table);
+        when(table.getOpenCards()).thenReturn(cards);
+        when(game.getPlayers()).thenReturn(players);
         Mockito.doNothing().when(gameService).startTimer(Mockito.anyLong(), Mockito.anyString());
 
         int bet = gameService.turn(move, 1, "token");
@@ -209,12 +439,12 @@ public class GameServiceTest {
         user.setUsername("username");
 
 
-        Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
-        Mockito.when(game.getBet()).thenReturn(100);
-        Mockito.when(move.getAmount()).thenReturn(0);
-        Mockito.when(move.getMove()).thenReturn(Moves.Check);
+        when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
+        when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        when(game.getBet()).thenReturn(100);
+        when(move.getAmount()).thenReturn(0);
+        when(move.getMove()).thenReturn(Moves.Check);
 
 
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
@@ -240,17 +470,17 @@ public class GameServiceTest {
         List<Player> players = new ArrayList<>();
         players.add(player1);
 
-        Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
-        Mockito.when(game.getBet()).thenReturn(100);
-        Mockito.when(player.getMoney()).thenReturn(2000);
-        Mockito.when(move.getAmount()).thenReturn(0);
-        Mockito.when(player.getLastRaiseAmount()).thenReturn(0);
-        Mockito.when(move.getMove()).thenReturn(Moves.Call);
-        Mockito.when(game.getGameTable()).thenReturn(table);
-        Mockito.when(table.getOpenCards()).thenReturn(cards);
-        Mockito.when(game.getPlayers()).thenReturn(players);
+        when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
+        when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        when(game.getBet()).thenReturn(100);
+        when(player.getMoney()).thenReturn(2000);
+        when(move.getAmount()).thenReturn(0);
+        when(player.getLastRaiseAmount()).thenReturn(0);
+        when(move.getMove()).thenReturn(Moves.Call);
+        when(game.getGameTable()).thenReturn(table);
+        when(table.getOpenCards()).thenReturn(cards);
+        when(game.getPlayers()).thenReturn(players);
         Mockito.doNothing().when(gameService).startTimer(Mockito.anyLong(), Mockito.anyString());
 
         int bet = gameService.turn(move, 1, "token");
@@ -263,11 +493,11 @@ public class GameServiceTest {
         user.setUsername("username");
 
 
-        Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
-        Mockito.when(game.getBet()).thenReturn(0);
-        Mockito.when(move.getMove()).thenReturn(Moves.Call);
+        when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
+        when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        when(game.getBet()).thenReturn(0);
+        when(move.getMove()).thenReturn(Moves.Call);
 
 
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
@@ -284,11 +514,11 @@ public class GameServiceTest {
         List<Player> players = new ArrayList<>();
         players.add(player);
 
-        Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
-        Mockito.when(game.getPlayers()).thenReturn(players);
-        Mockito.when(game.getPlayerTurnIndex()).thenReturn(0);
+        when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
+        when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        when(game.getPlayers()).thenReturn(players);
+        when(game.getPlayerTurnIndex()).thenReturn(0);
 
         //throws no error
         gameService.authorize("token", 1);
@@ -304,11 +534,11 @@ public class GameServiceTest {
         players.add(player);
         players.add(anotherPlayer);
 
-        Mockito.when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
-        Mockito.when(game.getPlayers()).thenReturn(players);
-        Mockito.when(game.getPlayerTurnIndex()).thenReturn(1);
+        when(userRepository.findByToken(Mockito.anyString())).thenReturn(user);
+        when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        when(game.getPlayerByUsername(Mockito.anyString())).thenReturn(player);
+        when(game.getPlayers()).thenReturn(players);
+        when(game.getPlayerTurnIndex()).thenReturn(1);
 
         //throws  error
         ResponseStatusException e = assertThrows(ResponseStatusException.class,
@@ -333,13 +563,13 @@ public class GameServiceTest {
         List<Player> players = new ArrayList<>();
         players.add(currentPlayer);
 
-        Mockito.when(gameRepository.findById(gameId)).thenReturn(game);
-        Mockito.when(game.getGameTable()).thenReturn(table);
-        Mockito.when(game.getPlayers()).thenReturn(players);
-        Mockito.when(game.getPlayerTurnIndex()).thenReturn(0);
-        Mockito.when(currentPlayer.getUsername()).thenReturn("username");
-        Mockito.when(gameService.playersFolded(game)).thenReturn(false);
-        Mockito.when(table.getPotByName("mainPot")).thenReturn(pot);
+        when(gameRepository.findById(gameId)).thenReturn(game);
+        when(game.getGameTable()).thenReturn(table);
+        when(game.getPlayers()).thenReturn(players);
+        when(game.getPlayerTurnIndex()).thenReturn(0);
+        when(currentPlayer.getUsername()).thenReturn("username");
+        when(gameService.playersFolded(game)).thenReturn(false);
+        when(table.getPotByName("mainPot")).thenReturn(pot);
 
 
         // Explicitly block winningCondition from being called
@@ -347,7 +577,7 @@ public class GameServiceTest {
 
         gameService.updateGame(gameId, betAmount);
 
-        Mockito.verify(table.getPotByName("mainPot"), Mockito.times(1)).updateMoney(betAmount); // Check if table.updateMoney was called with the correct amount
+        verify(table.getPotByName("mainPot"), Mockito.times(1)).updateMoney(betAmount); // Check if table.updateMoney was called with the correct amount
     }
 
 
@@ -366,8 +596,8 @@ public class GameServiceTest {
                 new Card("AH", "image")
         ).collect(Collectors.toList());
 
-        Mockito.when(player.getCards()).thenReturn(playerCards);
-        Mockito.when(table.getCards()).thenReturn(tableCards);
+        when(player.getCards()).thenReturn(playerCards);
+        when(table.getCards()).thenReturn(tableCards);
 
         PlayerHand hand = gameService.evaluateHand(player, table);
 
@@ -392,8 +622,8 @@ public class GameServiceTest {
                 new Card("AH", "image")
         ).collect(Collectors.toList());
 
-        Mockito.when(player.getCards()).thenReturn(playerCards);
-        Mockito.when(table.getCards()).thenReturn(tableCards);
+        when(player.getCards()).thenReturn(playerCards);
+        when(table.getCards()).thenReturn(tableCards);
 
         PlayerHand hand = gameService.evaluateHand(player, table);
 
@@ -427,8 +657,8 @@ public class GameServiceTest {
 
         List<Player> players = Stream.of(player1, player2).toList();
 
-        Mockito.when(pot.getGameTable()).thenReturn(table);
-        Mockito.when(pot.getEligiblePlayers()).thenReturn(players);
+        when(pot.getGameTable()).thenReturn(table);
+        when(pot.getEligiblePlayers()).thenReturn(players);
         Mockito.doReturn(playerHand1).doReturn(playerHand2).when(gameService).evaluateHand(Mockito.any(), Mockito.any());
 
         //method call
@@ -462,8 +692,8 @@ public class GameServiceTest {
 
         List<Player> players = Stream.of(player1, player2).toList();
 
-        Mockito.when(pot.getGameTable()).thenReturn(table);
-        Mockito.when(pot.getEligiblePlayers()).thenReturn(players);
+        when(pot.getGameTable()).thenReturn(table);
+        when(pot.getEligiblePlayers()).thenReturn(players);
         Mockito.doReturn(playerHand1).doReturn(playerHand2).when(gameService).evaluateHand(Mockito.any(), Mockito.any());
 
         //method call
@@ -506,8 +736,8 @@ public class GameServiceTest {
 
         List<Player> players = Stream.of(player1, player2).toList();
 
-        Mockito.when(pot.getGameTable()).thenReturn(table);
-        Mockito.when(pot.getEligiblePlayers()).thenReturn(players);
+        when(pot.getGameTable()).thenReturn(table);
+        when(pot.getEligiblePlayers()).thenReturn(players);
         Mockito.doReturn(playerHand1).doReturn(playerHand2).when(gameService).evaluateHand(Mockito.any(), Mockito.any());
 
         //method call
@@ -543,30 +773,30 @@ public class GameServiceTest {
         user2.setTries(1);
 
         //repos
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(userRepository.findByUsername(eq(user.getUsername()))).thenReturn(user);
-        Mockito.when(userRepository.findByUsername(eq(user2.getUsername()))).thenReturn(user2);
+        when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        when(userRepository.findByUsername(eq(user.getUsername()))).thenReturn(user);
+        when(userRepository.findByUsername(eq(user2.getUsername()))).thenReturn(user2);
 
         //game
-        Mockito.when(game.getGameTable()).thenReturn(table);
-        Mockito.when(game.getPlayers()).thenReturn(players);
+        when(game.getGameTable()).thenReturn(table);
+        when(game.getPlayers()).thenReturn(players);
         Mockito.doNothing().when(game).setWinner(Mockito.any());
 
         //player
-        Mockito.when(players.get(0).getUsername()).thenReturn("user1");
-        Mockito.when(players.get(1).getUsername()).thenReturn("user2");
-        Mockito.when(players.get(0).getMoney()).thenReturn(1000);
-        Mockito.when(players.get(1).getMoney()).thenReturn(500);
+        when(players.get(0).getUsername()).thenReturn("user1");
+        when(players.get(1).getUsername()).thenReturn("user2");
+        when(players.get(0).getMoney()).thenReturn(1000);
+        when(players.get(1).getMoney()).thenReturn(500);
 
         //table
-        Mockito.when(table.getPots()).thenReturn(pots);
+        when(table.getPots()).thenReturn(pots);
 
         //PlayerHand
-        Mockito.when(winner.get(0).getPlayer()).thenReturn(players.get(0));
+        when(winner.get(0).getPlayer()).thenReturn(players.get(0));
 
         //gameService
         Mockito.doNothing().when(gameService).deleteGame(Mockito.any(), Mockito.anyInt());
-        Mockito.when(gameService.winningCondition(pots.get(0))).thenReturn(winner);
+        when(gameService.winningCondition(pots.get(0))).thenReturn(winner);
 
         //method call
         gameService.endGame(0L);
@@ -578,8 +808,8 @@ public class GameServiceTest {
         assertEquals(0, user.getTries());
 
         //insure correct methods were called
-        Mockito.verify(game).setWinner(eq(winner));
-        Mockito.verify(gameService).deleteGame(eq(game), Mockito.anyInt());
+        verify(game).setWinner(eq(winner));
+        verify(gameService).deleteGame(eq(game), Mockito.anyInt());
     }
 
     @Test
@@ -617,35 +847,35 @@ public class GameServiceTest {
         user3.setTries(2);
 
         //repos
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(userRepository.findByUsername(eq(user.getUsername()))).thenReturn(user);
-        Mockito.when(userRepository.findByUsername(eq(user2.getUsername()))).thenReturn(user2);
-        Mockito.when(userRepository.findByUsername(eq(user3.getUsername()))).thenReturn(user3);
+        when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        when(userRepository.findByUsername(eq(user.getUsername()))).thenReturn(user);
+        when(userRepository.findByUsername(eq(user2.getUsername()))).thenReturn(user2);
+        when(userRepository.findByUsername(eq(user3.getUsername()))).thenReturn(user3);
 
         //game
-        Mockito.when(game.getGameTable()).thenReturn(table);
-        Mockito.when(game.getPlayers()).thenReturn(players);
+        when(game.getGameTable()).thenReturn(table);
+        when(game.getPlayers()).thenReturn(players);
         Mockito.doNothing().when(game).setWinner(Mockito.any());
 
         //player
-        Mockito.when(players.get(0).getUsername()).thenReturn("user1");
-        Mockito.when(players.get(1).getUsername()).thenReturn("user2");
-        Mockito.when(players.get(2).getUsername()).thenReturn("user3");
-        Mockito.when(players.get(0).getMoney()).thenReturn(1000);
-        Mockito.when(players.get(1).getMoney()).thenReturn(50);
-        Mockito.when(players.get(2).getMoney()).thenReturn(1000);
+        when(players.get(0).getUsername()).thenReturn("user1");
+        when(players.get(1).getUsername()).thenReturn("user2");
+        when(players.get(2).getUsername()).thenReturn("user3");
+        when(players.get(0).getMoney()).thenReturn(1000);
+        when(players.get(1).getMoney()).thenReturn(50);
+        when(players.get(2).getMoney()).thenReturn(1000);
 
         //table
-        Mockito.when(table.getPots()).thenReturn(pots);
+        when(table.getPots()).thenReturn(pots);
 
         //PlayerHand
-        Mockito.when(winner1.get(0).getPlayer()).thenReturn(players.get(0));
-        Mockito.when(winner2.get(0).getPlayer()).thenReturn(players.get(1));
+        when(winner1.get(0).getPlayer()).thenReturn(players.get(0));
+        when(winner2.get(0).getPlayer()).thenReturn(players.get(1));
 
         //gameService
         Mockito.doNothing().when(gameService).deleteGame(Mockito.any(), Mockito.anyInt());
-        Mockito.when(gameService.winningCondition(pots.get(0))).thenReturn(winner1);
-        Mockito.when(gameService.winningCondition(pots.get(1))).thenReturn(winner2);
+        when(gameService.winningCondition(pots.get(0))).thenReturn(winner1);
+        when(gameService.winningCondition(pots.get(1))).thenReturn(winner2);
 
         //method call
         gameService.endGame(0L);
@@ -659,8 +889,8 @@ public class GameServiceTest {
         assertEquals(2, user3.getTries());
 
         //insure correct methods were called
-        Mockito.verify(game).setWinner(eq(winner2));
-        Mockito.verify(gameService).deleteGame(eq(game), Mockito.anyInt());
+        verify(game).setWinner(eq(winner2));
+        verify(gameService).deleteGame(eq(game), Mockito.anyInt());
     }
 
     @Test
@@ -690,30 +920,30 @@ public class GameServiceTest {
         user2.setTries(1);
 
         //repos
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(userRepository.findByUsername(eq(user.getUsername()))).thenReturn(user);
-        Mockito.when(userRepository.findByUsername(eq(user2.getUsername()))).thenReturn(user2);
+        when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        when(userRepository.findByUsername(eq(user.getUsername()))).thenReturn(user);
+        when(userRepository.findByUsername(eq(user2.getUsername()))).thenReturn(user2);
 
         //game
-        Mockito.when(game.getGameTable()).thenReturn(table);
-        Mockito.when(game.getPlayers()).thenReturn(players);
+        when(game.getGameTable()).thenReturn(table);
+        when(game.getPlayers()).thenReturn(players);
         Mockito.doNothing().when(game).setWinner(Mockito.any());
 
         //player
-        Mockito.when(players.get(0).getUsername()).thenReturn("user1");
-        Mockito.when(players.get(1).getUsername()).thenReturn("user2");
-        Mockito.when(players.get(0).getMoney()).thenReturn(1000);
-        Mockito.when(players.get(1).getMoney()).thenReturn(50);
+        when(players.get(0).getUsername()).thenReturn("user1");
+        when(players.get(1).getUsername()).thenReturn("user2");
+        when(players.get(0).getMoney()).thenReturn(1000);
+        when(players.get(1).getMoney()).thenReturn(50);
 
         //table
-        Mockito.when(table.getPots()).thenReturn(pots);
+        when(table.getPots()).thenReturn(pots);
 
         //PlayerHand
-        Mockito.when(winner.get(0).getPlayer()).thenReturn(players.get(0));
+        when(winner.get(0).getPlayer()).thenReturn(players.get(0));
 
         //gameService
         Mockito.doNothing().when(gameService).deleteGame(Mockito.any(), Mockito.anyInt());
-        Mockito.when(gameService.winningCondition(pots.get(0))).thenReturn(winner);
+        when(gameService.winningCondition(pots.get(0))).thenReturn(winner);
 
         //method call
         gameService.endGame(0L);
@@ -725,8 +955,8 @@ public class GameServiceTest {
         assertEquals(0, user.getTries());
 
         //insure correct methods were called
-        Mockito.verify(game).setWinner(eq(winner));
-        Mockito.verify(gameService).deleteGame(eq(game), Mockito.anyInt());
+        verify(game).setWinner(eq(winner));
+        verify(gameService).deleteGame(eq(game), Mockito.anyInt());
     }
 
     @Test
@@ -762,34 +992,34 @@ public class GameServiceTest {
         user3.setTries(2);
 
         //repos
-        Mockito.when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
-        Mockito.when(userRepository.findByUsername(eq(user.getUsername()))).thenReturn(user);
-        Mockito.when(userRepository.findByUsername(eq(user2.getUsername()))).thenReturn(user2);
-        Mockito.when(userRepository.findByUsername(eq(user3.getUsername()))).thenReturn(user3);
+        when(gameRepository.findById(Mockito.anyLong())).thenReturn(game);
+        when(userRepository.findByUsername(eq(user.getUsername()))).thenReturn(user);
+        when(userRepository.findByUsername(eq(user2.getUsername()))).thenReturn(user2);
+        when(userRepository.findByUsername(eq(user3.getUsername()))).thenReturn(user3);
 
         //game
-        Mockito.when(game.getGameTable()).thenReturn(table);
-        Mockito.when(game.getPlayers()).thenReturn(players);
+        when(game.getGameTable()).thenReturn(table);
+        when(game.getPlayers()).thenReturn(players);
         Mockito.doNothing().when(game).setWinner(Mockito.any());
 
         //player
-        Mockito.when(players.get(0).getUsername()).thenReturn("user1");
-        Mockito.when(players.get(1).getUsername()).thenReturn("user2");
-        Mockito.when(players.get(2).getUsername()).thenReturn("user3");
-        Mockito.when(players.get(0).getMoney()).thenReturn(1000);
-        Mockito.when(players.get(1).getMoney()).thenReturn(50);
-        Mockito.when(players.get(2).getMoney()).thenReturn(1000);
+        when(players.get(0).getUsername()).thenReturn("user1");
+        when(players.get(1).getUsername()).thenReturn("user2");
+        when(players.get(2).getUsername()).thenReturn("user3");
+        when(players.get(0).getMoney()).thenReturn(1000);
+        when(players.get(1).getMoney()).thenReturn(50);
+        when(players.get(2).getMoney()).thenReturn(1000);
 
         //table
-        Mockito.when(table.getPots()).thenReturn(pots);
+        when(table.getPots()).thenReturn(pots);
 
         //PlayerHand
-        Mockito.when(winner.get(0).getPlayer()).thenReturn(players.get(0));
-        Mockito.when(winner.get(1).getPlayer()).thenReturn(players.get(1));
+        when(winner.get(0).getPlayer()).thenReturn(players.get(0));
+        when(winner.get(1).getPlayer()).thenReturn(players.get(1));
 
         //gameService
         Mockito.doNothing().when(gameService).deleteGame(Mockito.any(), Mockito.anyInt());
-        Mockito.when(gameService.winningCondition(pots.get(0))).thenReturn(winner);
+        when(gameService.winningCondition(pots.get(0))).thenReturn(winner);
 
 
 
@@ -804,8 +1034,8 @@ public class GameServiceTest {
         assertEquals(2, user3.getTries());
 
         //insure correct methods were called
-        Mockito.verify(game).setWinner(eq(winner));
-        Mockito.verify(gameService).deleteGame(eq(game), Mockito.anyInt());
+        verify(game).setWinner(eq(winner));
+        verify(gameService).deleteGame(eq(game), Mockito.anyInt());
     }
 
     @Test
@@ -817,7 +1047,7 @@ public class GameServiceTest {
         GameTable gameTable = new GameTable(cards);
 
 
-        Mockito.when(game.getGameTable()).thenReturn(gameTable);
+        when(game.getGameTable()).thenReturn(gameTable);
 
         // Create mock players
         Player player1 = new Player(game,"player1",100,"token1",cards);
@@ -866,7 +1096,7 @@ public class GameServiceTest {
         List<Card> cards = new ArrayList<>();
         cards.add(card);
         GameTable gameTable = new GameTable(cards);
-        Mockito.when(game.getGameTable()).thenReturn(gameTable);
+        when(game.getGameTable()).thenReturn(gameTable);
 
         // Create mock players
         Player player1 = new Player(game,"player1",0,"token1",cards);
@@ -917,10 +1147,95 @@ public class GameServiceTest {
         assertEquals(500, gameTable.getPots().get(2).getMoney());
     }
 
-    void getUserByToken() {
+    @Test
+    public void testGetPlayerByToken_Found() {
+        // Setup
+        Player player1 = mock(Player.class);
+        Player player2 = mock(Player.class);
+        Mockito.lenient().when(player1.getToken()).thenReturn("token123");
+        Mockito.lenient().when(player2.getToken()).thenReturn("token456");
+
+
+        List<Player> players = Arrays.asList(player1, player2);
+
+        // Execution
+        Player result = gameService.getPlayerByToken(players, "token123");
+
+        // Verify
+        assertEquals(player1, result);
+    }
+
+    @Test
+    public void testGetPlayerByToken_NotFound() {
+        Player player1 = mock(Player.class);
+        Player player2 = mock(Player.class);
+        Mockito.lenient().when(player1.getToken()).thenReturn("token123");
+        Mockito.lenient().when(player2.getToken()).thenReturn("token456");
+
+        List<Player> players = Arrays.asList(player1, player2);
+
+        // Execution & Assertion
+        ResponseStatusException thrown = assertThrows(
+                ResponseStatusException.class,
+                () -> gameService.getPlayerByToken(players, "token789"),
+                "Expected getPlayerByToken() to throw, but it didn't"
+        );
+
+        // Additional assertions can be done on the exception if needed
+        assertEquals(HttpStatus.UNAUTHORIZED, thrown.getStatus());
+        assertEquals("You are not in this game", thrown.getReason());
+    }
+
+    @Test
+    public void testSettingPlayerInGameGetDTO() {
+        // game
         User user = new User();
-        user.setId(1L);
+        User user2 = new User();
+        List<User> users = new ArrayList<>();
+        users.add(user);
+        users.add(user2);
+        Game game = new Game(users);
+        game.setPlayerTurnIndex(0);
+        List<Player> players = new ArrayList<>();
+        //players
+        List<Card> cards = new ArrayList<>(){{
+            add(new Card("kS", "image"));
+            add(new Card("KH", "image"));
+        }};
+        Player player1 = new Player(game,"player1",0,"token1",cards);
+        player1.setId(1L);
+        Player player2 = new Player(game,"player2",0,"token2",cards);
+        player2.setId(2L);
+        players.add(player1);
+        players.add(player2);
+
+        PlayerPrivateGetDTO privatePlayer = new PlayerPrivateGetDTO();
+        privatePlayer.setId(1L);
+
+
+        List<PlayerPublicGetDTO> result = gameService.settingPlayerInGameGetDTO(game, players, privatePlayer);
+
+        assertEquals(players.size(), result.size());
+        assertEquals("player1", result.get(0).getUsername());
+        assertEquals(0, result.get(0).getMoney());
+        assertTrue(result.get(0).isTurn());
 
     }
+    @Test
+    public void testGameNotFinished() {
+        // Setup
+
+        Game game = mock(Game.class);
+        when(game.getGameFinished()).thenReturn(false);
+
+        GameGetDTO gameToReturn = new GameGetDTO();
+        List<Player> players = new ArrayList<>();
+
+        gameService.addFinishedGamePlayers(gameToReturn, game, players);
+
+        assertNull(gameToReturn.getWinner());
+        assertTrue(gameToReturn.getNotFoldedPlayers().isEmpty());
+    }
+
 
 }

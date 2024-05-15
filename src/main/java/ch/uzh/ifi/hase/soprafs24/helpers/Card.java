@@ -72,7 +72,7 @@ public class Card {
             case 'Q' -> 12;
             case 'K' -> 13;
             case 'A' -> 14;
-            default -> -1; // Invalid card, no error should be raised just an indication it is invalid
+            default -> -1;
         };
     }
 }
