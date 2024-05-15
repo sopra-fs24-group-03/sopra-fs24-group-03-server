@@ -76,6 +76,8 @@ public class Game implements Serializable {
     @JoinColumn(name = "smallBlindPlayer_id", referencedColumnName = "id")
     private Player smallBlindPlayer;
 
+
+
     @OneToMany(cascade = CascadeType.ALL)
     @JoinColumn(name = "winner_id", referencedColumnName = "id")
     private List<Player> winner = null;
@@ -219,4 +221,10 @@ public class Game implements Serializable {
         setsNextPlayerTurnIndex();
         //GameService.startTimer(this.id, this.players.get(this.playerTurnIndex).getToken());
     }
+
+    public void setWinnerTest(List<Player> winner) {
+        this.winner = winner;
+    }
+
+
 }
