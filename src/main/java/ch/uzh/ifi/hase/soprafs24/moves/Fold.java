@@ -20,7 +20,6 @@ public class Fold implements Actions {
         //set folded attribute to true, but he "remains" in game
         setMoveInGameTable(gameTable,Fold,0,player.getId());
         player.setFolded(true);
-        game.setsNextPlayerTurnIndex();
         if (game.getRaisePlayer() == player) {
             game.setRaisePlayer(null);
         }
