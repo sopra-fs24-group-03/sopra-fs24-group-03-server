@@ -576,6 +576,7 @@ public class GameService {
                 for (Player winner : game.getWinner()) {
                     PlayerPrivateGetDTO playerWithoutCards = DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(winner);
                     playerWithoutCards.deleteCardsImage();
+                    gameToReturn.setHandName(null); //without standoff hand is removed to not reveal info
                     gameToReturn.addWinner(playerWithoutCards);
                     notFoldedPlayers.add(playerWithoutCards);
                 }
