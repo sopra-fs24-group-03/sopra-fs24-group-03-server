@@ -132,7 +132,7 @@ public class GameService {
         GamePutDTO move = new GamePutDTO();
         move.setMove(Moves.Fold);
         Runnable foldTask = () -> {
-            String url = "sopra-fs24-group-03-server.oa.r.appspot.com/games/{gameId}"; //Localhost:"http://localhost:8080/games/{gameId}"
+            String url = "https://sopra-fs24-group-03-server.oa.r.appspot.com/games/{gameId}"; //Localhost:"http://localhost:8080/games/{gameId}"
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             headers.set("token", token);
