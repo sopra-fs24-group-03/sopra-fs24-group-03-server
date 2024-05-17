@@ -142,7 +142,7 @@ public class GameService {
 
 
         };
-        currentFoldTask = scheduler.schedule(foldTask, 30, TimeUnit.SECONDS);
+        currentFoldTask = scheduler.schedule(foldTask, 65, TimeUnit.SECONDS);
     }
 
 
@@ -276,22 +276,22 @@ public class GameService {
         for (Player player: allInPlayersOrdered){
             int money = 0;
 
-            if(0 == player.getTotalBettingInCurrentRound()){
+            if(0 == player.getTotalBettingOverall()){
                 eligiblePlayers.remove(player);
                 continue;
             }
 
-            amountOfMinimumAllIn = player.getTotalBettingInCurrentRound();
+            amountOfMinimumAllIn = player.getTotalBettingOverall();
 
             for (Player eligiblePlayer: eligiblePlayers){
-                int playerTotalMoney = eligiblePlayer.getTotalBettingInCurrentRound();
+                int playerTotalMoney = eligiblePlayer.getTotalBettingOverall();
                 if ((amountOfMinimumAllIn) >= playerTotalMoney ){
                     money+= playerTotalMoney;
-                    eligiblePlayer.setTotalBettingInCurrentRound(0);
+                    eligiblePlayer.setTotalBettingOverall(0);
                 }
                 else {
                     money += (amountOfMinimumAllIn);
-                    eligiblePlayer.setTotalBettingInCurrentRound(eligiblePlayer.getTotalBettingInCurrentRound() - (amountOfMinimumAllIn));
+                    eligiblePlayer.setTotalBettingOverall(eligiblePlayer.getTotalBettingOverall() - (amountOfMinimumAllIn));
                 }
             }
 

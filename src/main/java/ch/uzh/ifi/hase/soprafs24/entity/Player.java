@@ -37,6 +37,8 @@ public class Player {
     @Column
     private int totalBettingInCurrentRound;
     @Column
+    private int totalBettingOverall;
+    @Column
     private int profit;
 
 
@@ -160,5 +162,13 @@ public class Player {
 
     public boolean getFolded() {
         return folded;
+    }
+
+    public int getTotalBettingOverall() {
+        return totalBettingOverall;
+    }
+
+    public void setTotalBettingOverall(int totalBettingOverall) {
+        this.totalBettingOverall = totalBettingOverall;
     }
 }
