@@ -32,6 +32,7 @@ public class Raise implements Actions {
             //set the amounts of current betting round
             gameTable.setTotalTableBettingInCurrentRound(gameTable.getTotalTableBettingInCurrentRound() + moneyLost);
             player.setTotalBettingInCurrentRound(player.getTotalBettingInCurrentRound()+moneyLost);
+            player.setTotalBettingOverall(player.getTotalBettingOverall() + moneyLost);
 
             //if he went all in
             if(player.getMoney() == 0){

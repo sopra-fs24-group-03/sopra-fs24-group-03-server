@@ -30,6 +30,8 @@ public class Call implements Actions {
             gameTable.setTotalTableBettingInCurrentRound(gameTable.getTotalTableBettingInCurrentRound() + playerMoney);
             player.setTotalBettingInCurrentRound(player.getTotalBettingInCurrentRound() + playerMoney);
 
+            player.setTotalBettingOverall(player.getTotalBettingOverall() + playerMoney);
+
             if (game.getRaisePlayer() == player) {
                 game.setRaisePlayer(null);
             }
@@ -46,6 +48,8 @@ public class Call implements Actions {
             //set the amounts of current betting round
             gameTable.setTotalTableBettingInCurrentRound(gameTable.getTotalTableBettingInCurrentRound() + loss);
             player.setTotalBettingInCurrentRound(player.getTotalBettingInCurrentRound() + loss);
+            player.setTotalBettingOverall(player.getTotalBettingOverall() + loss);
+
             //return amount to be updated in table
             return loss;
         }

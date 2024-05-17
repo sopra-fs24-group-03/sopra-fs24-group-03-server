@@ -208,9 +208,12 @@ public class Game implements Serializable {
         smallBlindPlayer.setMoney(smallBlindPlayer.getMoney()-smallBlind);
         smallBlindPlayer.setLastRaiseAmount(smallBlind);
         smallBlindPlayer.setTotalBettingInCurrentRound(smallBlind);
+        smallBlindPlayer.setTotalBettingOverall(smallBlind);
+
         bigBlindPlayer.setMoney(bigBlindPlayer.getMoney()-bigBlind);
         bigBlindPlayer.setLastRaiseAmount(bigBlind);
         bigBlindPlayer.setTotalBettingInCurrentRound(bigBlind);
+        bigBlindPlayer.setTotalBettingOverall(bigBlind);
         this.setBet(bigBlind);
 
 
@@ -219,7 +222,6 @@ public class Game implements Serializable {
 
         setsNextPlayerTurnIndex();
         setsNextPlayerTurnIndex();
-        //GameService.startTimer(this.id, this.players.get(this.playerTurnIndex).getToken());
     }
 
     public void setWinnerTest(List<Player> winner) {

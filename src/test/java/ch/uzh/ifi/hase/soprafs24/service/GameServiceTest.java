@@ -1059,15 +1059,19 @@ public class GameServiceTest {
         // Create mock players
         Player player1 = new Player(game, "player1", 100, "token1", cards);
         player1.setTotalBettingInCurrentRound(100);
+        player1.setTotalBettingOverall(100);
         player1.setAllIn(false);
         Player player2 = new Player(game, "player2", 0, "token2", cards);
         player2.setTotalBettingInCurrentRound(50);
+        player2.setTotalBettingOverall(50);
         player2.setAllIn(true);
         Player player3 = new Player(game, "player3", 0, "token3", cards);
         player3.setTotalBettingInCurrentRound(30);
+        player3.setTotalBettingOverall(30);
         player3.setAllIn(true);
         Player player4 = new Player(game, "player4", 1000, "token4", cards);
         player4.setTotalBettingInCurrentRound(100);
+        player4.setTotalBettingOverall(100);
         player4.setAllIn(false);
 
 
@@ -1107,21 +1111,27 @@ public class GameServiceTest {
         // Create mock players
         Player player1 = new Player(game, "player1", 0, "token1", cards);
         player1.setTotalBettingInCurrentRound(150);
+        player1.setTotalBettingOverall(150);
         player1.setAllIn(true);
         Player player2 = new Player(game, "player2", 0, "token2", cards);
         player2.setTotalBettingInCurrentRound(50);
+        player2.setTotalBettingOverall(50);
         player2.setAllIn(true);
         Player player3 = new Player(game, "player3", 20, "token3", cards);
         player3.setTotalBettingInCurrentRound(200);
+        player3.setTotalBettingOverall(200);
         player3.setAllIn(false);
         Player player4 = new Player(game, "player4", 1000, "token4", cards);
         player4.setTotalBettingInCurrentRound(200);
+        player4.setTotalBettingOverall(200);
         player4.setAllIn(false);
         Player player5 = new Player(game, "player5", 0, "token5", cards);
         player5.setTotalBettingInCurrentRound(150);
+        player5.setTotalBettingOverall(150);
         player5.setAllIn(true);
         Player player6 = new Player(game, "player6", 1000, "token6", cards);
         player6.setTotalBettingInCurrentRound(200);
+        player6.setTotalBettingOverall(200);
         player6.setAllIn(false);
 
         List<Player> allInPlayersOrdered = new ArrayList<>();
