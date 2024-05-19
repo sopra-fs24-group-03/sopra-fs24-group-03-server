@@ -21,31 +21,37 @@ public class FullHouse implements CheckHand {
         boolean foundPair = false;
         boolean foundThree = false;
 
-        for (int i = 0; i <= length - 5; i++) {
+        for (int i = 0; i <= length - 3 ; i++) {
             //check if the next 3 cards are the same and a three of kind has not yet been found
-            if (getValue(cards.get(i)) == getValue(cards.get(i + 1)) && getValue(cards.get(i)) == getValue(cards.get(i + 2)) && !foundThree) {
+            if (getValue(cards.get(i)) == getValue(cards.get(i + 1)) && getValue(cards.get(i)) == getValue(cards.get(i + 2))) {
                 foundThree = true;
                 threeOfKind.add(cards.get(i));
                 threeOfKind.add(cards.get(i + 1));
                 threeOfKind.add(cards.get(i + 2));
+                break;
             }
+        }
+
+        for (int i = 0; i <= length - 2 ; i++) {
+            //check if the next 3 cards are the same and a three of kind has not yet been found
             //otherwise check for a pair
-            else if (getValue(cards.get(i)) == getValue(cards.get(i + 1))) {
+            if (getValue(cards.get(i)) == getValue(cards.get(i + 1)) && !threeOfKind.contains(cards.get(i))) {
                 foundPair = true;
                 pair.add(cards.get(i));
                 pair.add(cards.get(i + 1));
+                break;
             }
+        }
 
-            //return the results if a pair and three of kind have been found
-            if (foundPair && foundThree) {
-                PlayerHand result = new PlayerHand();
-                result.setPlayer(player);
+        //return the results if a pair and three of kind have been found
+        if (foundPair && foundThree) {
+            PlayerHand result = new PlayerHand();
+            result.setPlayer(player);
 
-                //concat the the found pair and three of kind, insure the TOK comes first
-                result.setCards(Stream.concat(threeOfKind.stream(), pair.stream()).toList());
-                result.setHand(Hand.FULL_HOUSE);
-                return result;
-            }
+            //concat the the found pair and three of kind, insure the TOK comes first
+            result.setCards(Stream.concat(threeOfKind.stream(), pair.stream()).toList());
+            result.setHand(Hand.FULL_HOUSE);
+            return result;
         }
 
         //return a null if nothing has been found

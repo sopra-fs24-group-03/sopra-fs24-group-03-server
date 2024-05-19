@@ -18,7 +18,15 @@ public class GameGetDTO {
     private PlayerPrivateGetDTO ownPlayer;
     // we should not send the whole gameTable we have to control, that the right amount of cards is sent to the frontend
     private TablePublicGetDTO gameTable;
+    private PlayerPublicGetDTO smallBlindPlayer;
 
+    public PlayerPublicGetDTO getSmallBlindPlayer() {
+        return smallBlindPlayer;
+    }
+
+    public void setSmallBlindPlayer(PlayerPublicGetDTO smallBlindPlayer) {
+        this.smallBlindPlayer = smallBlindPlayer;
+    }
 
     private boolean gameFinished;
 
