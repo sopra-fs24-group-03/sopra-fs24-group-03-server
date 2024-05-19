@@ -300,12 +300,12 @@ public class CheckHandTest {
         //create sorted List of cards
         List<Card> cards = new ArrayList<>(){{
             add(new Card("KS", "image"));
-            add(new Card("KH", "image"));
-            add(new Card("4S", "image"));
-            add(new Card("4H", "image"));
-            add(new Card("4D", "image"));
-            add(new Card("3D", "image"));
-            add(new Card("2D", "image"));
+            add(new Card("0H", "image"));
+            add(new Card("0S", "image"));
+            add(new Card("9H", "image"));
+            add(new Card("8D", "image"));
+            add(new Card("8H", "image"));
+            add(new Card("8S", "image"));
         }};
 
         //Mock a player object
@@ -319,8 +319,8 @@ public class CheckHandTest {
         assertEquals(Hand.FULL_HOUSE, result.getHand());
 
         //insure correct order, first comes the three of a kind, then the pair
-        assertEquals(4, getValue(result.getCards().get(2)));
-        assertEquals(13, getValue(result.getCards().get(3)));
+        assertEquals(8, getValue(result.getCards().get(2)));
+        assertEquals(10, getValue(result.getCards().get(3)));
         assertEquals(player, result.getPlayer());
     }
 
