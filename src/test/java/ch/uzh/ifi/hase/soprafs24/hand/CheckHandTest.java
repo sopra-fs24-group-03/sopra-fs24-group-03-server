@@ -318,10 +318,10 @@ public class CheckHandTest {
         assertNotNull(result);
         assertEquals(Hand.FULL_HOUSE, result.getHand());
 
-//        //insure correct order, first comes the three of a kind, then the pair
-//        assertEquals(4, getValue(result.getCards().get(2)));
-//        assertEquals(13, getValue(result.getCards().get(3)));
-//        assertEquals(player, result.getPlayer());
+        //insure correct order, first comes the three of a kind, then the pair
+        assertEquals(8, getValue(result.getCards().get(2)));
+        assertEquals(10, getValue(result.getCards().get(3)));
+        assertEquals(player, result.getPlayer());
     }
 
     @Test
