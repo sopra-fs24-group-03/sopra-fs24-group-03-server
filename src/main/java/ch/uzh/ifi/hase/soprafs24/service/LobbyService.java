@@ -124,7 +124,7 @@ public class LobbyService {
             return;
             }
             else{
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only join a Lobby when there is no game running in it!");}
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You can only leave a Lobby when there is no game running in it!");}
         }
         else {throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User is not in a Lobby!");}
     }

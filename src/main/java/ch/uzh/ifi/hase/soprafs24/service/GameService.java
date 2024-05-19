@@ -154,17 +154,27 @@ public class GameService {
         String nextPlayerUsername = game.getPlayers().get(game.getPlayerTurnIndex()).getUsername();
         List<Player> players = game.getPlayers();
 
+        List<Player> allInPlayers = filterPlayersAllIn(players);
+        allInPlayers.sort(Comparator.comparing(Player::getTotalBettingInCurrentRound));
+
         if (bet > 0) {
             table.getPotByName("mainPot").updateMoney(bet);
         }
 
+
         //check if all players except 1 folded
         if (playersFolded(game)) {
+            if (!allInPlayers.isEmpty()) {
+                calculatePots(game,allInPlayers);
+            }
             endGame(game_id); //then game ends, call winning condition
             return;
         }
         //checks if ALL players are folded OR all In --> end game
         if (playersFoldedOrAllIn(game)) {
+            if (!allInPlayers.isEmpty()) {
+                calculatePots(game,allInPlayers);
+            }
             endGame(game_id); //then game ends, call winning condition
             return;
         }
@@ -173,9 +183,6 @@ public class GameService {
 
         //check if current betting round is finished
         if ((game.getRaisePlayer() != null && Objects.equals(game.getRaisePlayer().getUsername(), nextPlayerUsername))) {
-            List<Player> allInPlayers = filterPlayersAllIn(players);
-            allInPlayers.sort(Comparator.comparing(Player::getTotalBettingInCurrentRound));
-
             if (!allInPlayers.isEmpty()) {
                 calculatePots(game,allInPlayers);
             }
