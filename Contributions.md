@@ -42,7 +42,7 @@
 - Joel Huber: 
 - Cédric Huber: 
 - Linus Lautenschlager:  
-- Colin Bächtold: 
+- Colin Bächtold: Cards are only revealed if there was a standoff between players. The winner sent to the frontend has been corrected. General Bug fixes and some refactoring. #232 #234
 - Noah Ziegler:
 ### Week 20.05-24.05
 - Joel Huber: 
