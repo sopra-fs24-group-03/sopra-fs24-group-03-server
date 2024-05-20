@@ -43,7 +43,7 @@
 - Cédric Huber: 
 - Linus Lautenschlager:  
 - Colin Bächtold: Cards are only revealed if there was a standoff between players. The winner sent to the frontend has been corrected. General Bug fixes and some refactoring. #232 #234
-- Noah Ziegler:
+- Noah Ziegler: Lobby only join/leave when no game is running. Fixed major bugs in calculate pots method #231, #233
 ### Week 20.05-24.05
 - Joel Huber: 
 - Cédric Huber: 
