@@ -572,7 +572,7 @@ public class GameService {
             }
 
             //if all player except winner folded, winners cards should not be returned
-            if(notFoldedAmount > 0) {
+            if(notFoldedAmount > 0 || game.getWinner().size() > 1) {
                 for (Player winner : game.getWinner()) {
                     PlayerPrivateGetDTO entity = DTOMapper.INSTANCE.convertEntityToPlayerPrivateDTO(winner);
                     gameToReturn.addWinner(entity);
