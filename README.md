@@ -95,7 +95,7 @@ Make sure to configure your GitHub Actions workflow to handle the deployment pro
 
 We would like to acknowledge the following for their contributions and support:
 
-- [**Spring Boot Team**](https://spring.io/team): **For providing the framework to send and receive API calls and the JPA to create in-memory databases.**
+- [**Spring Boot Team**](https://spring.io/team): For providing the framework to send and receive API calls and the JPA to create in-memory databases.
 - [**SoPra Team**](https://github.com/HASEL-UZH/sopra-fs24-template-server): For providing us with a template to build our server on.
 
 Special thanks to:
