@@ -7,6 +7,8 @@ Our whole team is a big fan of the game of poker. Therefore, it was clear we wan
 
 By eliminating ads and unnecessary costs, we ensure that our platform is accessible to everyone, making it easy to start a game of poker and practice some new strategies or just have fun with your friends.
 
+The Poker variation we implemented is Texas hold'em; the rules can be read [here](https://en.wikipedia.org/wiki/Texas_hold_'em#Rules), any implementation-specific alterations are documented on the frontpage of our website.
+
 ## Technologies used:
 
 The Server has been written in Java using the following technologies:
@@ -78,7 +80,11 @@ To launch and deploy the server, follow these steps:
 
 ## Roadmap
 
-**TODO**
+Following are some feature ideas that could be implemented:
+
+- **Retry Buy Back**: Allow users to buy back retries, giving them something to do with their money.
+- **Matchmaking**: A matchmaking system allowing users to join a lobby with random people. Additionally, allow users to set their lobby as private so that others can't join through matchmaking.
+- **Global Leaderboard**: Display a leaderboard of all users, sorted by how many retries a user needed and their money.
 
 ## Authors and Acknowledgements
 
