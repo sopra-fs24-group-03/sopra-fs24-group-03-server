@@ -22,7 +22,7 @@ The [`UserService`](src/main/java/ch/uzh/ifi/hase/soprafs24/service/UserService.
 - Logging in and logging out
 - Displaying user information
 
-Users are saved as entities in the JPA, ensuring their data is persistently managed.
+The [`User`](src/main/java/ch/uzh/ifi/hase/soprafs24/entity/User.java) entity is persisted using the JPA database.
 
 ### LobbyService
 The [`LobbyService`](src/main/java/ch/uzh/ifi/hase/soprafs24/service/LobbyService.java) class manages requests associated with lobby operations, such as:
@@ -34,7 +34,7 @@ The [`LobbyService`](src/main/java/ch/uzh/ifi/hase/soprafs24/service/LobbyServic
 
 Note that when a game is started, it is initialized not with the User entity directly, but with Player entities, where the relevant information is copied over from the user entity.
 
-The lobby is also saved as an entity inside the JPA database.
+The [`Lobby`](src/main/java/ch/uzh/ifi/hase/soprafs24/entity/Lobby.java) is also saved as an entity inside the JPA database.
 
 ### GameService
 The [`GameService`](src/main/java/ch/uzh/ifi/hase/soprafs24/service/GameService.java) class handles the core game logic, including:
@@ -75,7 +75,6 @@ To launch and deploy the server, follow these steps:
 
 4. **Deployment to Google Cloud with GitHub Actions**: The server is deployed to Google Cloud using GitHub Actions. Ensure your GitHub repository is set up with appropriate GitHub Actions workflows for deployment. Push your changes to the repository, and the deployment workflow will automatically build and deploy the server to Google Cloud.
 
-Make sure to configure your GitHub Actions workflow to handle the deployment process according to your project's requirements.
 
 ## Roadmap
 
