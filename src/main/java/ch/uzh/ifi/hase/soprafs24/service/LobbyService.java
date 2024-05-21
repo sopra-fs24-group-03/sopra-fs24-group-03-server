@@ -185,19 +185,22 @@ public class LobbyService {
 
     public void kickUserOutOfLobby(String tokenOfDeleter, long kickedUserId, long lobbyId) {
         Lobby lobby = findLobby(lobbyId);
+        Game game = lobby.getGame();
         // checks if the player who wants to delete someone is the Lobbyleader
-        if(userService.getUserByToken(tokenOfDeleter).equals(lobby.getLobbyLeader())) {
-            if(userService.getUserByToken(tokenOfDeleter) == userService.getUserById(kickedUserId)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot kick yourself");
+        if (game == null) {
+            if (userService.getUserByToken(tokenOfDeleter).equals(lobby.getLobbyLeader())) {
+                if (userService.getUserByToken(tokenOfDeleter) == userService.getUserById(kickedUserId)) {
+                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "You cannot kick yourself");
+                }
+                User userToKick = userService.getUserById(kickedUserId);
+                userToKick.setLobby(null);
+                lobby.removeUserFromLobby(userToKick);
             }
-            User userToKick = userService.getUserById(kickedUserId);
-            userToKick.setLobby(null);
-            lobby.removeUserFromLobby(userToKick);
-//            lobbyRepository.flush();
-        }
-        else {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the lobby leader can kick other players");
-        }
+            else {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only the lobby leader can kick other players");
+            }
+        }else{
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "You can only kick players when there is no game running");}
     }
 
 
