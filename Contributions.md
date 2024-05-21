@@ -41,7 +41,7 @@
 ### Week 13.03-19-05
 - Joel Huber: Add handname of Winner and add last raise amount to DTO Player #229, #230
 - Cédric Huber: worked ahead from previous weeks
-- Linus Lautenschlager:  
+- Linus Lautenschlager: worked ahead from previous weeks & several bugs/adjustments frontend without task 
 - Colin Bächtold: Cards are only revealed if there was a standoff between players. The winner sent to the frontend has been corrected. General Bug fixes and some refactoring. #232 #234
 - Noah Ziegler: Lobby only join/leave when no game is running. Fixed major bugs in calculate pots method #231, #233
 ### Week 20.05-24.05
