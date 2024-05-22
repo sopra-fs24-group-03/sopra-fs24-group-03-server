@@ -1,4 +1,4 @@
-# SoPra Group 5 Project: Poker
+# SoPra Group 3 Project: Poker
 
 ## Introduction
 Welcome to our project; A free, user-friendly online poker game. This game allows friends to connect, compete, and enjoy poker without the distractions and limitations of other online alternatives.
